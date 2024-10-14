@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.6.2
-Stable tag: 1.153
+Stable tag: 1.154
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -103,6 +103,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.154=
+* FIX. toocheke-latest-comic shortcode - comments and blog posts were not being displayed. Post conflict with chapter dropdown.
+
 = 1.153=
 * UPDATE. WhatsApp and LinkedIn social media share buttons
 

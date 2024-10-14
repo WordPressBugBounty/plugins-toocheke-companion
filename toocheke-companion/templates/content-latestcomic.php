@@ -29,7 +29,10 @@ $single_comic_query = new WP_Query($single_comics_args);
 ?>
 <?php
 /* Start the Loop */
+global $post;
+
 while ($single_comic_query->have_posts()): $single_comic_query->the_post();
+$comic_post = $post;
     ?>
 				<div id="comic" class="single-comic-wrapper">
 
@@ -42,6 +45,7 @@ while ($single_comic_query->have_posts()): $single_comic_query->the_post();
         }
         set_query_var('below_comic', 0);
         set_query_var('comic_order', $comic_order);
+
         $templates->get_template_part('content', 'traditionalcomicnavigation');
     }
     $comic_layout = get_option('toocheke-comic-layout-devices');
@@ -79,7 +83,7 @@ while ($single_comic_query->have_posts()): $single_comic_query->the_post();
     set_query_var('below_comic', 1);
     set_query_var('comic_order', $comic_order);
     $templates->get_template_part('content', 'traditionalcomicnavigation');
-
+    $post = $comic_post;
     ?>
 
 			</div>

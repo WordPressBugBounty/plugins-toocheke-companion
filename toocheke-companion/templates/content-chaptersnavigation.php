@@ -34,6 +34,7 @@ $display_navigation = $previous_chapter || $next_chapter;
 if ($display_chapters_navigation && $display_navigation):
 
         ?>
+        
 <div class="chapter-inline-nav">
 <a href="<?php echo esc_url($previous_chapter) ?>"
         class="float-left <?php echo empty($previous_chapter) ? 'd-none' : ''; ?>">

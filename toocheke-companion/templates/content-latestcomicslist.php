@@ -9,6 +9,7 @@ $comics_paged = isset($_GET['comics_paged']) ? (int) $_GET['comics_paged'] : 1;
 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
 $templates = new Toocheke_Companion_Template_Loader;
 $series_id = get_query_var('series_id');
+$limit = get_query_var('limit');
 if (post_type_exists('comic')):
 
     /**
@@ -24,7 +25,12 @@ if (post_type_exists('comic')):
         'orderby' => 'post_date',
         'order' => $comic_order,
     );
-
+if($limit){
+    $comics_args['posts_per_page']  = $limit;
+}
+else{
+    $comics_args['posts_per_page']  = get_option('posts_per_page');
+}
     $comics_query = new WP_Query($comics_args);
     ?>
 	<?php
@@ -68,7 +74,7 @@ $comic_links = paginate_links(array(
 
 ));
 
-if ($comic_links):
+if ($comic_links && !$limit):
 
 ?>
 

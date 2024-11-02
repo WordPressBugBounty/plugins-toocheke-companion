@@ -3,8 +3,8 @@ Author: LeeToo
 Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
-Tested up to: 6.6.2
-Stable tag: 1.155
+Tested up to: 6.7
+Stable tag: 1.156
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -81,6 +81,8 @@ Toocheke Companion comes with built in features that can transform just about an
 
 `[toocheke-latest-comics sid="####"]`
 
+`[toocheke-latest-comics limit="####"]`
+
 `[toocheke-top-ten-comics]`
 
 `[toocheke-scheduled-comics]`
@@ -103,6 +105,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.156=
+* UPDATE. Added "limit" option for the latest comics shortcode.
+
 = 1.155=
 * UPDATE. Replaced sharing button images with fontawesome icons.
 

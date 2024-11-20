@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.156
+ * Version:     1.157
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -235,6 +235,7 @@ class Toocheke_Companion_Comic_Features
             add_action('init', array($this, 'toocheke_random_add_rewrite'));
             add_action('template_redirect', array($this, 'toocheke_random_template'));
         }
+        add_filter( 'posts_search', array($this, 'toocheke_extend_search'), 10, 2 );
 
     }
     /* Rewrite Functions */
@@ -6625,6 +6626,25 @@ endif;
         }
         return $wp_query;
 
+    }
+    public function toocheke_extend_search($search, $query){
+        global $wpdb;
+ 
+
+        if ($query->is_main_query() && !empty($query->query['s'])) {
+            $sql    = "
+                or exists (
+                    select * from {$wpdb->postmeta} where post_id={$wpdb->posts}.ID
+                    and meta_key in ('desktop_comic_editor', 'comic_blog_post_editor', 'mobile_comic_2nd_language_editor', 'comic_2nd_language_blog_post_editor', 'desktop_comic_2nd_language_editor', 'transcript')
+                    and meta_value like %s
+                )
+            ";
+            $like   = '%' . $wpdb->esc_like($query->query['s']) . '%';
+            $search = preg_replace("#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
+                $wpdb->prepare($sql, $like , $like), $search);
+        }
+     
+        return $search;
     }
 
 }

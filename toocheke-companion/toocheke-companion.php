@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.158
+ * Version:     1.159
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -118,6 +118,7 @@ class Toocheke_Companion_Comic_Features
         /* Transcript  metabox */
         add_action('save_post', array($this, 'toocheke_comic_transcript_save_postdata'));
         add_action('admin_init', array($this, 'toocheke_comic_transcript_meta_box'));
+
         add_action('admin_init', array($this, 'toocheke_audio_meta_box'));
         add_action('admin_init', array($this, 'toocheke_add_comic_series_meta_box'));
         add_action('save_post', array($this, 'toocheke_comic_audio_save_postdata'));
@@ -166,7 +167,7 @@ class Toocheke_Companion_Comic_Features
         add_action('bulk_edit_custom_box', array($this, 'toocheke_quick_edit_fields'), 10, 2);
         add_action('wp_ajax_toocheke_companion_save_bulk', array($this, 'toocheke_save_bulk_edit_hook'));
         add_action('wp_footer', array($this, 'toocheke_verify_age_popup'));
-        add_action('init', array($this, 'toocheke_enqueue_age_verification_assets'));
+        add_action('template_redirect', array($this, 'toocheke_enqueue_age_verification_assets'));
         add_action('wp_ajax_toocheke_set_age_verification_cookie', array($this, 'toocheke_set_age_verification_cookie'));
         add_action('wp_ajax_nopriv_toocheke_set_age_verification_cookie', array($this, 'toocheke_set_age_verification_cookie'));
         add_action('admin_init', array($this, 'toocheke_remove_image_link'), 10);
@@ -213,6 +214,10 @@ class Toocheke_Companion_Comic_Features
         add_action('save_post', array($this, 'toocheke_2nd_language_comic_blog_post_editor_save_postdata'));
         add_action('admin_init', array($this, 'toocheke_2nd_language_comic_blog_post_editor_meta_box'));
 
+        /* Age metaboxes */
+        add_action('save_post', array($this, 'toocheke_age_verification_save_postdata'));
+        add_action('admin_init', array($this, 'toocheke_age_verification_meta_box'));
+
         /* Add bookmark nav */
         add_filter('wp_nav_menu_items', array($this, 'toocheke_add_bookmark_nav_item'), 10, 2);
         /* Universal shortcodes*/
@@ -235,7 +240,7 @@ class Toocheke_Companion_Comic_Features
             add_action('init', array($this, 'toocheke_random_add_rewrite'));
             add_action('template_redirect', array($this, 'toocheke_random_template'));
         }
-        add_filter( 'posts_search', array($this, 'toocheke_extend_search'), 10, 2 );
+        add_filter('posts_search', array($this, 'toocheke_extend_search'), 10, 2);
 
     }
     /* Rewrite Functions */
@@ -3582,25 +3587,24 @@ data-hidden="toocheke-bluesky-button" data-image="bluesky-image">
 <input type="hidden" id="toocheke-bluesky-button" name="toocheke-bluesky-button" value="<?php echo $bluesky_button ?>" />
 <?php
 }
-public function toocheke_whatsapp_button_upload()
-{
-    $whatsapp_button = esc_attr(get_option('toocheke-whatsapp-button'));
-    ?>
+    public function toocheke_whatsapp_button_upload()
+    {
+        $whatsapp_button = esc_attr(get_option('toocheke-whatsapp-button'));
+        ?>
 <input class="upload-custom-button" type="button" value="Choose an image" id="upload-whatsapp-button"
 data-hidden="toocheke-whatsapp-button" data-image="whatsapp-image">
 <input type="hidden" id="toocheke-whatsapp-button" name="toocheke-whatsapp-button" value="<?php echo $whatsapp_button ?>" />
 <?php
 }
-public function toocheke_linkedin_button_upload()
-{
-    $linkedin_button = esc_attr(get_option('toocheke-linkedin-button'));
-    ?>
+    public function toocheke_linkedin_button_upload()
+    {
+        $linkedin_button = esc_attr(get_option('toocheke-linkedin-button'));
+        ?>
 <input class="upload-custom-button" type="button" value="Choose an image" id="upload-linkedin-button"
 data-hidden="toocheke-linkedin-button" data-image="linkedin-image">
 <input type="hidden" id="toocheke-linkedin-button" name="toocheke-linkedin-button" value="<?php echo $linkedin_button ?>" />
 <?php
 }
-
 
     public function toocheke_copy_button_upload()
     {
@@ -3842,7 +3846,7 @@ data-hidden="toocheke-tipeee-button" data-image="tipeee-image">
 </div>
 <?php
 }
-public function toocheke_whatsapp_button_preview()
+    public function toocheke_whatsapp_button_preview()
     {
         $whatsapp_button = esc_attr(get_option('toocheke-whatsapp-button'));
         ?>
@@ -4446,6 +4450,76 @@ $content = get_post_meta($post->ID, 'transcript', true);
         if (isset($_POST['comic-transcript'])) {
             $data = $_POST['comic-transcript'];
             update_post_meta($post_id, 'transcript', $data);
+        }
+
+    }
+    /**
+     * Display Age verification metabox
+     */
+    public function toocheke_age_verification_meta_box()
+    {
+        add_meta_box(
+            'age-verification',
+            __('Age Verification', 'age-verification'),
+            array($this, 'toocheke_age_verification_display'),
+            array('comic', 'series'),
+            "side",
+            "core"
+        );
+
+    }
+//Displaying the meta box
+    public function toocheke_age_verification_display($post)
+    {?>
+
+<?php
+wp_nonce_field(plugin_basename(__FILE__), 'toocheke_age_verification_nonce');
+
+        $age_verification = get_post_meta($post->ID, 'age-verification', true);
+
+        ?>
+<h4 style='color: #2271b1;'>Enable this option if you want to verify the age for this <?php echo $post->post_type ?>.</h4>
+<p>
+<input value="on" type="checkbox" id="age-verification" name="age-verification" <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
+
+</p>
+<?php }
+    //This function saves the data you put in the meta box
+    public function toocheke_age_verification_save_postdata($post_id)
+    {
+        if (isset($_POST['toocheke_age_verification_nonce']) && (isset($_POST['comic']) || isset($_POST['series']))) {
+
+//Not save if the user hasn't submitted changes
+            if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                return;
+            }
+
+// Verifying whether input is coming from the proper form
+            if (!wp_verify_nonce($_POST['toocheke_age_verification_nonce'])) {
+                return;
+            }
+
+// Making sure the user has permission
+            if ('post' == $_POST['comic'] || 'post' == $_POST['series']) {
+                if (!current_user_can('edit_post', $post_id)) {
+                    return;
+                }
+            }
+        }
+
+        if (!empty($_POST['age-verification'])) {
+            /* Get the posted data and sanitize it for use as an HTML class. */
+            $data = sanitize_text_field(wp_unslash($_POST['age-verification']));
+            if ($_POST["age-verification"] == "on") {
+                $age_verification_checked = "on";
+            } else {
+                $age_verification_checked = "off";
+            }
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+            update_post_meta($post_id, 'age-verification', $age_verification_checked);
+        } else {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+            delete_post_meta($post_id, 'age-verification');
         }
 
     }
@@ -5299,7 +5373,51 @@ jQuery(document).ready(function($) {
 
     public function toocheke_enqueue_age_verification_assets()
     {
+
         $verify_age = get_option('toocheke-age-verification') && 1 == get_option('toocheke-age-verification');
+        $series_id = $comic_id = 0;
+        if (is_singular('comic') || get_post_type() === 'comic' || is_home()) {
+
+            if (is_singular('comic')) {
+                global $post;
+                $comic_id = get_the_ID();
+                if ($post->post_parent) {
+                    $series_id = $post->post_parent;
+                }
+
+            }
+            if (is_home()) {
+                $home_layout = get_theme_mod('home_layout_setting', 'default');
+                $webtoon_layouts = array("default", "alt-3", "alt-5");
+                if (!in_array($home_layout, $webtoon_layouts)) {
+                    $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
+                $single_comics_args = array(
+                    'post_type' => 'comic',
+                    'post_status' => 'publish',
+                    'posts_per_page' => 1,
+                    'orderby' => 'post_date',
+                    'order' => $comic_order,
+                );
+                $single_comic_query = new WP_Query($single_comics_args);
+                while ($single_comic_query->have_posts()): $single_comic_query->the_post();
+                    $comic_id = get_the_ID();
+                    $series_id = wp_get_post_parent_id($comic_id);
+                endwhile;
+                wp_reset_postdata();
+                }              
+
+
+            }
+
+        }
+        if ($comic_id) {
+            $verify_age = get_post_meta($comic_id, 'age-verification', true) ? 1 : $verify_age;
+        }
+        
+        if ($series_id) {
+            $verify_age = get_post_meta($series_id, 'age-verification', true) ? 1 : $verify_age;
+        }
+
         if ($verify_age) {
             wp_enqueue_script('toocheke-age-verify-script', plugins_url('toocheke-companion' . '/js/age-verify.js'), array('jquery'), TOOCHEKE_COMPANION_VERSION, true);
 
@@ -5565,6 +5683,49 @@ jQuery(document).ready(function($) {
     public function toocheke_verify_age_popup()
     {
         $verify_age = get_option('toocheke-age-verification') && 1 == get_option('toocheke-age-verification');
+
+        $series_id = $comic_id = 0;
+        if (is_singular('comic') || get_post_type() === 'comic' || is_home()) {
+            if (is_singular('comic')) {
+                global $post;
+                $comic_id = get_the_ID();
+                if ($post->post_parent) {
+                    $series_id = $post->post_parent;
+                }
+
+            }
+            if (is_home()) {
+                $home_layout = get_theme_mod('home_layout_setting', 'default');
+                $webtoon_layouts = array("default", "alt-3", "alt-5");
+                if (!in_array($home_layout, $webtoon_layouts)) {
+                    $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
+                $single_comics_args = array(
+                    'post_type' => 'comic',
+                    'post_status' => 'publish',
+                    'posts_per_page' => 1,
+                    'orderby' => 'post_date',
+                    'order' => $comic_order,
+                );
+                $single_comic_query = new WP_Query($single_comics_args);
+                while ($single_comic_query->have_posts()): $single_comic_query->the_post();
+                    $comic_id = get_the_ID();
+                    $series_id = wp_get_post_parent_id($comic_id);
+                endwhile;
+                wp_reset_postdata();
+                }              
+
+
+            }
+
+        }
+        if ($comic_id) {
+            $verify_age = get_post_meta($comic_id, 'age-verification', true) ? 1 : $verify_age;
+        }
+        if ($series_id) {
+            $verify_age = get_post_meta($series_id, 'age-verification', true) ? 1 : $verify_age;
+        }
+        echo $verify_age;
+
         if ($verify_age) {
             if (!isset($_COOKIE['toocheke_age_verification'])) {?>
 <div class="modal" id="age-verification-modal" data-backdrop="static">
@@ -5976,8 +6137,8 @@ $types = get_post_types(array('public' => true));
             <p>
                 <?php while ($like_query->have_posts()): $like_query->the_post();
             echo $sep;?><a href="<?php the_permalink();?>"
-																																																																																			                    title="<?php the_title_attribute();?>"><?php the_title();?></a>
-																																																																																			                <?php
+																																																																																				                    title="<?php the_title_attribute();?>"><?php the_title();?></a>
+																																																																																				                <?php
     $sep = ' &middot; ';
         endwhile;
         ?>
@@ -6627,23 +6788,23 @@ endif;
         return $wp_query;
 
     }
-    public function toocheke_extend_search($search, $query){
+    public function toocheke_extend_search($search, $query)
+    {
         global $wpdb;
- 
 
         if ($query->is_main_query() && !empty($query->query['s'])) {
-            $sql    = "
+            $sql = "
                 or exists (
                     select * from {$wpdb->postmeta} where post_id={$wpdb->posts}.ID
                     and meta_key in ('desktop_comic_editor', 'comic_blog_post_editor', 'mobile_comic_2nd_language_editor', 'comic_2nd_language_blog_post_editor', 'desktop_comic_2nd_language_editor', 'transcript')
                     and meta_value like %s
                 )
             ";
-            $like   = '%' . $wpdb->esc_like($query->query['s']) . '%';
+            $like = '%' . $wpdb->esc_like($query->query['s']) . '%';
             $search = preg_replace("#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
-                $wpdb->prepare($sql, $like , $like), $search);
+                $wpdb->prepare($sql, $like, $like), $search);
         }
-     
+
         return $search;
     }
 

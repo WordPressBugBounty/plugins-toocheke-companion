@@ -34,7 +34,7 @@ jQuery(function () {
     });
     jQuery('#btn-18-no').on('click', function (e) {
         e.preventDefault();
-        jQuery('.modal-body').html('<h3>Sorry!</h3><div class="alert alert-danger">You are not old enough to view this site...</div>');
+        jQuery('.modal-body').html('<h3>Sorry!</h3><div class="alert alert-danger">You are not old enough to view this.</div>');
 
     });
 });

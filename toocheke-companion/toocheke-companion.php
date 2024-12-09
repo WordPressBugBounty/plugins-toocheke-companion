@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.160
+ * Version:     1.161
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -225,7 +225,7 @@ class Toocheke_Companion_Comic_Features
         /*Universal template*/
         add_filter('single_template', array($this, 'toocheke_single_comic_template'));
         add_action('generate_rewrite_rules', array($this, 'toocheke_universal_rewrite_rules'));
-        add_filter('archive_template', array($this, 'toocheke_comic_archive_template'), 50);
+        add_filter('archive_template', array($this, 'toocheke_comic_archive_template'), 9999);
 
         /* Page View Count */
         // Remove issues with prefetching adding extra views
@@ -6527,57 +6527,27 @@ endif;
             update_post_meta($postID, $count_key, $count);
         }
     }
-    public function toocheke_comic_archive_templateV1($template)
-    {
-        $theme = wp_get_theme(); // gets the current theme
-        if ('Toocheke Premium' !== $theme->name && 'Toocheke Premium' !== $theme->parent_theme && 'Toocheke' !== $theme->name && 'Toocheke' !== $theme->parent_theme) {
-            global $post;
-
-            if (get_post_type($post) !== 'comic' && !is_single()) {
-                return $template;
-            }
-            add_filter('post_thumbnail_html', array($this, 'toocheke_disable_post_thumbnail'), 500, 2);
-            add_filter('the_content', array($this, 'toocheke_comic_archive_template_filter'));
-
-        }
-        return $template;
-
-    }
+   
     public function toocheke_comic_archive_template($template)
     {
-        global $wp_query;
         $theme = wp_get_theme(); // gets the current theme
         if ('Toocheke Premium' !== $theme->name && 'Toocheke Premium' !== $theme->parent_theme && 'Toocheke' !== $theme->name && 'Toocheke' !== $theme->parent_theme) {
             global $post;
-
-            if (get_post_type($post) !== 'comic' && !is_single()) {
+            $output = '';
+            $templates = new Toocheke_Companion_Template_Loader;
+            if (!is_post_type_archive('comic')) {
                 return $template;
             }
 
-            return TOOCHEKE_COMPANION_PLUGIN_DIR . 'templates/content-comicarchive.php';
+                $template = TOOCHEKE_COMPANION_PLUGIN_DIR . 'templates/content-comicarchive.php';
+
+           return $template;
 
         }
         return $template;
 
     }
-    public function toocheke_comic_archive_template_filter($content)
-    {
-        global $post;
-        $templates = new Toocheke_Companion_Template_Loader;
-        if (get_post_type($post) !== 'comic') {
-            return $content;
-        }
-
-        remove_filter('the_content', 'toocheke_comic_archive_template_filter');
-        remove_filter('post_thumbnail_html', 'toocheke_disable_post_thumbnail');
-        ob_start();
-        require TOOCHEKE_COMPANION_PLUGIN_DIR . 'templates/content-comicarchive.php';
-        $generated_content = ob_get_contents();
-        ob_end_clean();
-        $content = $generated_content;
-
-        return $content;
-    }
+    
     //Create original art page
     public function toocheke_companion_create_original_art_page_on_theme_activation()
     {

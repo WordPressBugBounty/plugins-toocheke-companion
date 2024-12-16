@@ -70,8 +70,12 @@ if ('ASC' === $comic_order) {
 ?>
     <div id="chapter-navigation">
         <?php
+        global $post;
+        $comic_post = $post;
 $templates->get_template_part('content', 'chaptersdropdown');
 $templates->get_template_part('content', 'chaptersnavigation');
+$post = $comic_post;
+
 ?>
     </div>
     <div id="comic-analytics">

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.7
-Stable tag: 1.162
+Stable tag: 1.163
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -105,6 +105,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.163=
+* FIX. Reset of comic post variable from traditional navigation buttons to prevent chapters navigation conflict
+
 = 1.162=
 * FIX. Layout issues for comic archive shortcode
 

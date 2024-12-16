@@ -82,4 +82,5 @@ if ($display_chapters_dropdown):
 	<?php
     }
 endif;
+
 ?>

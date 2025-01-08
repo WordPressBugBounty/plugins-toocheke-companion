@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.164
+ * Version:     1.165
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -2032,7 +2032,7 @@ jQuery(document).ready(function($) {
         $facebook_image_button_url = get_option('toocheke-facebook-button');
         $facebook_button = $display_default_button ? '<i class="fab fa-lg fa-facebook-f" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($facebook_image_button_url) . '" />';
         $twitter_image_button_url = get_option('toocheke-twitter-button');
-        $twitter_button = $display_default_button ? '<i class="fab fa-lg fa-twitter" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($twitter_image_button_url) . '" />';
+        $twitter_button = $display_default_button ? '<i class="fab fa-lg fa-x-twitter" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($twitter_image_button_url) . '" />';
         $tumblr_image_button_url = get_option('toocheke-tumblr-button');
         $tumblr_button = $display_default_button ? '<i class="fab fa-lg fa-tumblr" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($tumblr_image_button_url) . '" />';
         $reddit_image_button_url = get_option('toocheke-reddit-button');

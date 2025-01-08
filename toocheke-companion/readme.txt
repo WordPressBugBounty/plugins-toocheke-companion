@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.7
-Stable tag: 1.164
+Stable tag: 1.165
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -105,6 +105,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.165=
+* UPDATE. Replaced Twitter icon with X icon for the social sharing button.
+
 = 1.164=
 * FIX. Removed content display for age verification popup
 

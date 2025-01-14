@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.7
-Stable tag: 1.166
+Stable tag: 1.167
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -105,6 +105,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.167=
+* FIX. Security fix for saving editor meta fields for comics
+
 = 1.166=
 * UPDATE. Added option to scroll past header when navigating through comic posts
 * UPDATE. Added option to consolidate comic posts and regular blog posts into main feed.

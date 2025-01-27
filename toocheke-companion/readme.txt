@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.7
-Stable tag: 1.167
+Stable tag: 1.168
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -93,6 +93,16 @@ Toocheke Companion comes with built in features that can transform just about an
 
 `[toocheke-characters]`
 
+`[toocheke-collection-archive term="collection-slug"]`
+
+`[toocheke-chapter-archive term="chapter-slug"]`
+
+`[toocheke-tag-archive term="comic-tag-slug"]`
+
+`[toocheke-location-archive term="location-slug"]`
+
+`[toocheke-character-archive term="character-slug"]`
+
 
 == Frequently Asked Questions ==
 
@@ -105,6 +115,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.168=
+* UPDATE. Added shortcodes for displaying comic taxonomy archives.
+
 = 1.167=
 * FIX. Security fix for saving editor meta fields for comics
 

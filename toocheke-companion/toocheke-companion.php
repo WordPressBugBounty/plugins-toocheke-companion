@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
      * Plugin Name: Toocheke Companion
      * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
      * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
-     * Version:     1.167
+     * Version:     1.168
      * Author:      Leetoo
      * Author URI:  https://leetoo.net
      * License:     GPLv2 or later
@@ -263,7 +263,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             // You should *NEVER EVER* do this on every page load!!
             flush_rewrite_rules();
         }
-    /* Series CPT Functions */
+        /* Series CPT Functions */
         public function toocheke_companion_create_series_custom_post_type()
         {
 
@@ -384,7 +384,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
                 'back_to_items'     => __('← Back to genres'),
             ];
 
-    // Now register the taxonomy
+            // Now register the taxonomy
 
             register_taxonomy('genres', 'series', [
                 'hierarchical'      => true,
@@ -395,9 +395,9 @@ Description: Theme specific functions for the Toocheke WordPress theme.
                 'rewrite'           => ['slug' => 'genre'],
             ]);
 
-    // Register tag for series
+            // Register tag for series
 
-    //
+            //
             $series_tags_labels = [
                 'name'                       => _x('Tags', 'taxonomy general name'),
                 'singular_name'              => _x('Tag', 'taxonomy singular name'),
@@ -605,7 +605,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             }
             return $new_columns;
         }
-    /*
+        /*
  * Displaying the comic series column
  */
         public function toocheke_companion_add_comic_series_column($columns)
@@ -625,7 +625,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             }
             return $new_columns;
         }
-    /*
+        /*
  * Displaying the comic tag column
  */
 
@@ -805,7 +805,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             }
             return $new_columns;
         }
-    /* Adding content to columns */
+        /* Adding content to columns */
 
         public function toocheke_companion_add_series_column_content($column_name, $id)
         {
@@ -1229,7 +1229,7 @@ jQuery(document).ready(function($) {
             $columns['genre_image'] = __('Image', 'toocheke-companion');
             return $columns;
         }
-    /* Add content into column */
+        /* Add content into column */
         public function toocheke_companion_add_genre_image_column_content($content, $column_name, $term_id)
         {
 
@@ -1249,7 +1249,7 @@ jQuery(document).ready(function($) {
 
         }
 
-    /* Make column sortable */
+        /* Make column sortable */
 
         public function toocheke_companion_genre_add_image_column_sortable($sortable)
         {
@@ -1257,7 +1257,7 @@ jQuery(document).ready(function($) {
             return $sortable;
         }
 
-    //Genres page
+        //Genres page
         public function toocheke_companion_create_genre_page_on_theme_activation()
         {
 
@@ -1316,7 +1316,7 @@ jQuery(document).ready(function($) {
 
 </div><?php
           }
-          /*Save new Term*/
+              /*Save new Term*/
               public function toocheke_companion_chapter_save_order_meta($term_id, $tt_id)
               {
                   if (isset($_POST['chapter-order']) && ! empty($_POST['chapter-order'])) {
@@ -1326,7 +1326,7 @@ jQuery(document).ready(function($) {
                       add_term_meta($term_id, 'chapter-order', 1, true);
                   }
               }
-          /*Updating Term*/
+              /*Updating Term*/
               public function toocheke_companion_chapter_edit_order_field($term, $taxonomy)
               {
 
@@ -1342,7 +1342,7 @@ jQuery(document).ready(function($) {
     </td>
 </tr><?php
          }
-         /*Save Data*/
+             /*Save Data*/
              public function toocheke_companion_chapter_update_order_meta($term_id, $tt_id)
              {
 
@@ -1377,14 +1377,14 @@ jQuery(document).ready(function($) {
                  return $content;
              }
 
-         /* Make column sortable */
+             /* Make column sortable */
              public function toocheke_companion_chapter_add_order_column_sortable($sortable)
              {
                  $sortable['chapter_order'] = 'chapter_order';
                  return $sortable;
              }
 
-         /* Sort columns */
+             /* Sort columns */
              public function toocheke_companion_chapter_sort_by_chapter_order($term_query)
              {
                  global $pagenow;
@@ -1399,7 +1399,7 @@ jQuery(document).ready(function($) {
                      $term_query->query_vars['order']   = isset($_GET['order']) ? sanitize_title($_GET['order']) : "DESC";
                      // the OR relation and the NOT EXISTS clause allow for terms without a meta_value at all
                      $args = ['relation' => 'OR',
-                         'order_clause'           => [
+                         'order_clause'      => [
                              'key'  => 'chapter-order',
                              'type' => 'NUMERIC',
                          ],
@@ -1570,7 +1570,7 @@ jQuery(document).ready(function($) {
             $columns['chapter_image'] = __('Image', 'toocheke-companion');
             return $columns;
         }
-    /* Add content into column */
+        /* Add content into column */
         public function toocheke_companion_add_chapter_image_column_content($content, $column_name, $term_id)
         {
 
@@ -1590,7 +1590,7 @@ jQuery(document).ready(function($) {
 
         }
 
-    /* Make column sortable */
+        /* Make column sortable */
 
         public function toocheke_companion_chapter_add_image_column_sortable($sortable)
         {
@@ -1598,7 +1598,7 @@ jQuery(document).ready(function($) {
             return $sortable;
         }
 
-    //Chapters page
+        //Chapters page
         public function toocheke_companion_create_chapter_page_on_theme_activation()
         {
 
@@ -1645,7 +1645,7 @@ jQuery(document).ready(function($) {
                 }
             }
         }
-    /* Collection specific functions and terms */
+        /* Collection specific functions and terms */
         /*Add new Term*/
         public function toocheke_companion_collection_add_order_field($taxonomy)
     {
@@ -1657,7 +1657,7 @@ jQuery(document).ready(function($) {
 
 </div><?php
           }
-          /*Save new Term*/
+              /*Save new Term*/
               public function toocheke_companion_collection_save_order_meta($term_id, $tt_id)
               {
                   if (isset($_POST['collection-order']) && ! empty($_POST['collection-order'])) {
@@ -1667,7 +1667,7 @@ jQuery(document).ready(function($) {
                       add_term_meta($term_id, 'collection-order', 1, true);
                   }
               }
-          /*Updating Term*/
+              /*Updating Term*/
               public function toocheke_companion_collection_edit_order_field($term, $taxonomy)
               {
 
@@ -1684,7 +1684,7 @@ jQuery(document).ready(function($) {
     </td>
 </tr><?php
          }
-         /*Save Data*/
+             /*Save Data*/
              public function toocheke_companion_collection_update_order_meta($term_id, $tt_id)
              {
 
@@ -1693,7 +1693,7 @@ jQuery(document).ready(function($) {
                      update_term_meta($term_id, 'collection-order', $order);
                  }
              }
-         /*
+             /*
  * Displaying the order column
  */
              public function toocheke_companion_collection_add_order_column($columns)
@@ -1701,7 +1701,7 @@ jQuery(document).ready(function($) {
                  $columns['collection_order'] = __('Order', 'toocheke-companion');
                  return $columns;
              }
-         /* Add content into column */
+             /* Add content into column */
              public function toocheke_companion_add_collection_column_content($content, $column_name, $term_id)
              {
 
@@ -1719,21 +1719,21 @@ jQuery(document).ready(function($) {
                  return $content;
              }
 
-         /* Make column sortable */
+             /* Make column sortable */
              public function toocheke_companion_collection_add_order_column_sortable($sortable)
              {
                  $sortable['collection_order'] = 'collection_order';
                  return $sortable;
              }
 
-         /* Sort columns */
+             /* Sort columns */
              public function toocheke_companion_collection_sort_by_collection_order($term_query)
              {
                  global $pagenow;
                  if (! is_admin()) {
                      return $term_query;
                  }
-         // WP_Term_Query does not define a get() or a set() method so the query_vars member must
+                 // WP_Term_Query does not define a get() or a set() method so the query_vars member must
                  // be manipulated directly
                  if (is_admin() && $pagenow == 'edit-tags.php' && $term_query->query_vars['taxonomy'][0] == 'collections' && (! isset($_GET['orderby']) || $_GET['orderby'] == 'collection_order')) {
                      // set orderby to the named clause in the meta_query
@@ -1741,7 +1741,7 @@ jQuery(document).ready(function($) {
                      $term_query->query_vars['order']   = isset($_GET['order']) ? sanitize_title($_GET['order']) : "DESC";
                      // the OR relation and the NOT EXISTS clause allow for terms without a meta_value at all
                      $args = ['relation' => 'OR',
-                         'order_clause'           => [
+                         'order_clause'      => [
                              'key'  => 'collection-order',
                              'type' => 'NUMERIC',
                          ],
@@ -1914,7 +1914,7 @@ jQuery(document).ready(function($) {
             $columns['collection_image'] = __('Image', 'toocheke-companion');
             return $columns;
         }
-    /* Add content into column */
+        /* Add content into column */
         public function toocheke_companion_add_collection_image_column_content($content, $column_name, $term_id)
         {
 
@@ -1934,7 +1934,7 @@ jQuery(document).ready(function($) {
 
         }
 
-    /* Make column sortable */
+        /* Make column sortable */
 
         public function toocheke_companion_collection_add_image_column_sortable($sortable)
         {
@@ -1942,7 +1942,7 @@ jQuery(document).ready(function($) {
             return $sortable;
         }
 
-    //Collections page
+        //Collections page
         public function toocheke_companion_create_collection_page_on_theme_activation()
         {
 
@@ -1990,7 +1990,7 @@ jQuery(document).ready(function($) {
             }
         }
 
-    /* Add comics tags functionality */
+        /* Add comics tags functionality */
         public function toocheke_companion_add_comics_to_defalt_tax_archive($query)
         {
 
@@ -2003,7 +2003,7 @@ jQuery(document).ready(function($) {
             return $query;
         }
 
-    /* Social Sharing Functions */
+        /* Social Sharing Functions */
 
         public function toocheke_add_sharing_icons()
         {
@@ -2207,9 +2207,9 @@ jQuery(document).ready(function($) {
             echo $html;
 
         }
-    /**
-     * Toocheke Options
-     */
+        /**
+         * Toocheke Options
+         */
 
         public function toocheke_display_options_page()
         {
@@ -2222,21 +2222,21 @@ jQuery(document).ready(function($) {
             ?>
 
         <h2 class="nav-tab-wrapper">
-        <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                       <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
-        <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                  <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
-        <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                       <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
-        <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                    <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
-        <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
-        <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
-        <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                   <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
-        <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                        <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
-        <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
-        <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                          <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
-        <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                              <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
-        <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                             <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
-        <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                  <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
-        <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                      <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
-        <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                             <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
+        <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                                                                                                                                                                                                   <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
+        <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                                                                                                                                                                                    <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
+        <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                                                                                                                                                                                                   <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
+        <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                                                                                                                                                                                          <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
+        <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                                                                                                                                                                              <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
+        <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                                                                                                                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
+        <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                                                                                                                                                                                       <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
+        <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
+        <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                                                                                                                                                                              <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
+        <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
+        <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                                                                                                                                                                                        <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
+        <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                                                                                                                                                                                     <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
+        <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                                                                                                                                                                                    <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
+        <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                                                                                                                                                                                                <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
+        <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                                                                                                                                                                                     <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
         <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
         <a href="?page=toocheke-options-page&tab=buy_options" class="nav-tab<?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">Buy Comic</a>
         <?php endif; ?>
@@ -2396,7 +2396,7 @@ jQuery(document).ready(function($) {
                     if (! get_option('toocheke-tipeee-button')) {
                         add_option('toocheke-tipeee-button', plugins_url('toocheke-companion' . '/img/no-image.png'));
                     }
-    //Option for determining whether to display infinite scroll of comics on the home page.
+                    //Option for determining whether to display infinite scroll of comics on the home page.
                     add_settings_field("toocheke-infinite-scroll", "Do you want to display your comic archive as an infinite scroll(no previous/next buttons) on the homepage?", [$this, 'toocheke_infinite_scroll_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
                     register_setting("toocheke-settings", "toocheke-infinite-scroll");
 
@@ -2981,7 +2981,7 @@ jQuery(document).ready(function($) {
         }
         public function toocheke_display_comics_archive_message()
         {
-            echo 'This sets the layout for the comic archive page.';
+            echo 'This sets the layout for the comic archive page. <h4 style="color: #2271b1;">To change the number of items shown per page on the archive page, <a href="' . esc_url(admin_url('options-reading.php')) . '" style="font-weight: bold">click here</a> and update the number for the "Blog pages show at most" field.</h4>';
         }
         public function toocheke_display_top_10_comics_layout_message()
         {
@@ -3462,19 +3462,19 @@ jQuery(document).ready(function($) {
     </option>
     <option value="calendar"
         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "calendar"); ?>>Calendar</option>
-    <option value="gallery"                            <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
+    <option value="gallery"                                                                                  <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
         Gallery/Grid</option>
-    <option value="chapters-plain-text-list"                                             <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-plain-text-list"); ?>>
+    <option value="chapters-plain-text-list"                                                                                                                                     <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-plain-text-list"); ?>>
         Segmented By Chapters - Plain Text List</option>
-        <option value="chapters-gallery"                                         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
+        <option value="chapters-gallery"                                                                                                                         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
         Segmented By Chapters - Gallery/Grid</option>
-        <option value="series-plain-text-list"                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
+        <option value="series-plain-text-list"                                                                                                                                           <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
         Segmented By Series - Plain Text List</option>
-        <option value="series-gallery"                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
+        <option value="series-gallery"                                                                                                                   <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
         Segmented By Series - Gallery/Grid</option>
-        <option value="yearly-plain-text-list"                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
+        <option value="yearly-plain-text-list"                                                                                                                                           <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
         Segmented By Year - Plain Text List</option>
-        <option value="yearly-gallery"                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
+        <option value="yearly-gallery"                                                                                                                   <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
         Segmented By Year - Gallery/Grid</option>
 </select>
 <?php
@@ -3488,7 +3488,7 @@ jQuery(document).ready(function($) {
 <option value="thumbnail-list"
     <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "thumbnail-list"); ?>>Thumbnail
     List</option>
-<option value="gallery"                        <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
+<option value="gallery"                                                                      <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
     Gallery/Grid</option>
 </select>
 <?php
@@ -4014,9 +4014,9 @@ data-hidden="toocheke-tipeee-button" data-image="tipeee-image">
 <?php
     }
 
-    /**
-     * Implement default image link.
-     */
+        /**
+         * Implement default image link.
+         */
         public function toocheke_default_image_settings()
         {
             update_option('image_default_align', 'none');
@@ -4024,9 +4024,9 @@ data-hidden="toocheke-tipeee-button" data-image="tipeee-image">
             update_option('image_default_link_type', 'none');
         }
 
-    /**
-     * Post Number.
-     */
+        /**
+         * Post Number.
+         */
         public function toocheke_update_comic_post_numbers()
         {
             /* numbering the published posts, starting with 1 for oldest;
@@ -4034,7 +4034,7 @@ data-hidden="toocheke-tipeee-button" data-image="tipeee-image">
         / to show in post (within the loop) use <?php echo get_post_meta($post->ID,'incr_number',true); ?>
         / alchymyth 2010 */
             global $wpdb;
-    //$querystr = "SELECT $wpdb->posts.* FROM $wpdb->posts
+            //$querystr = "SELECT $wpdb->posts.* FROM $wpdb->posts
             //WHERE $wpdb->posts.post_status = 'publish'
             //AND $wpdb->posts.post_type = 'comic'
             //ORDER BY $wpdb->posts.post_date ASC";
@@ -4055,18 +4055,18 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             endif;
         }
 
-    /**
-     * Add Admin Menus.
-     */
-    //showing the import page
+        /**
+         * Add Admin Menus.
+         */
+        //showing the import page
         public function toocheke_include_import_page()
         {
             require_once 'inc/toocheke-companion-import.php';
         }
 
-    /**
-     * Custom Title
-     */
+        /**
+         * Custom Title
+         */
         public function toocheke_comic_title_2nd_language_meta_box()
         {
             add_meta_box(
@@ -4079,7 +4079,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             );
 
         }
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_comic_title_2nd_language_display($post)
     {?>
 
@@ -4097,17 +4097,17 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         {
             if (isset($_POST['toocheke_comic_title_2nd_language_display_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['toocheke_comic_title_2nd_language_display_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4122,10 +4122,10 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             }
 
         }
-    /**
-     * Extra WYSIWYG meta boxy editor for comics
-     */
-    //This function initializes the meta box.
+        /**
+         * Extra WYSIWYG meta boxy editor for comics
+         */
+        //This function initializes the meta box.
         public function toocheke_desktop_comic_editor_meta_box()
         {
             add_meta_box(
@@ -4139,13 +4139,13 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_desktop_comic_editor($post)
         {
             echo "<h4 style='color: #2271b1;'>Add your unsliced comic image for desktop users here</h4>";
             $content = get_post_meta($post->ID, 'desktop_comic_editor', true);
 
-    //This function adds the WYSIWYG Editor
+            //This function adds the WYSIWYG Editor
             wp_editor(
                 $content,
                 'desktop_comic_editor',
@@ -4154,23 +4154,23 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //This function saves the data you put in the meta box
+        //This function saves the data you put in the meta box
         public function toocheke_desktop_comic_editor_save_postdata($post_id)
         {
 
             if (isset($_POST['desktop_comic_editor_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['desktop_comic_editor_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4184,10 +4184,10 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    /**
-     * Extra WYSIWYG meta box editor for comic's blog post
-     */
-    //This function initializes the meta box.
+        /**
+         * Extra WYSIWYG meta box editor for comic's blog post
+         */
+        //This function initializes the meta box.
         public function toocheke_comic_blog_post_editor_meta_box()
         {
             add_meta_box(
@@ -4201,13 +4201,13 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_comic_blog_post_editor($post)
         {
             echo "<h4 style='color: #2271b1;'>Add the blog post for your comic here.</h4>";
             $content = get_post_meta($post->ID, 'comic_blog_post_editor', true);
 
-    //This function adds the WYSIWYG Editor
+            //This function adds the WYSIWYG Editor
             wp_editor(
                 $content,
                 'comic_blog_post_editor',
@@ -4216,23 +4216,23 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //This function saves the data you put in the meta box
+        //This function saves the data you put in the meta box
         public function toocheke_comic_blog_post_editor_save_postdata($post_id)
         {
 
             if (isset($_POST['comic_blog_post_editor_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['comic_blog_post_editor_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4248,7 +4248,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         /**
          * Extra WYSIWYG meta boxy editor for comics
          */
-    //This function initializes the meta box.
+        //This function initializes the meta box.
         public function toocheke_2nd_language_mobile_comic_editor_meta_box()
         {
             add_meta_box(
@@ -4262,13 +4262,13 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_2nd_language_mobile_comic_editor($post)
         {
             echo "<h4 style='color: #2271b1;'>If you have a bilingual comic, add your mobile-friendly, sliced comic, images for mobile users here.</h4>";
             $content = get_post_meta($post->ID, 'mobile_comic_2nd_language_editor', true);
 
-    //This function adds the WYSIWYG Editor
+            //This function adds the WYSIWYG Editor
             wp_editor(
                 $content,
                 'mobile_comic_2nd_language_editor',
@@ -4277,23 +4277,23 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //This function saves the data you put in the meta box
+        //This function saves the data you put in the meta box
         public function toocheke_2nd_language_mobile_comic_editor_save_postdata($post_id)
         {
 
             if (isset($_POST['mobile_comic_2nd_language_editor_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['mobile_comic_2nd_language_editor_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4310,7 +4310,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         /**
          * Extra WYSIWYG meta box editor for comic's blog post
          */
-    //This function initializes the meta box.
+        //This function initializes the meta box.
         public function toocheke_2nd_language_comic_blog_post_editor_meta_box()
         {
             add_meta_box(
@@ -4324,13 +4324,13 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_2nd_language_comic_blog_post_editor($post)
         {
             echo "<h4 style='color: #2271b1;'>If you have a bilingual comic, add the blog post for the comic in the 2nd language here.</h4>";
             $content = get_post_meta($post->ID, 'comic_2nd_language_blog_post_editor', true);
 
-    //This function adds the WYSIWYG Editor
+            //This function adds the WYSIWYG Editor
             wp_editor(
                 $content,
                 'comic_2nd_language_blog_post_editor',
@@ -4339,23 +4339,23 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //This function saves the data you put in the meta box
+        //This function saves the data you put in the meta box
         public function toocheke_2nd_language_comic_blog_post_editor_save_postdata($post_id)
         {
 
             if (isset($_POST['comic_2nd_language_blog_post_editor_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['comic_2nd_language_blog_post_editor_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4371,7 +4371,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         /**
          * Extra WYSIWYG meta boxy editor for comics
          */
-    //This function initializes the meta box.
+        //This function initializes the meta box.
         public function toocheke_2nd_language_desktop_comic_editor_meta_box()
         {
             add_meta_box(
@@ -4385,13 +4385,13 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_2nd_language_desktop_comic_editor($post)
         {
             echo "<h4 style='color: #2271b1;'>If you have a bilingual comic, add your unsliced comic image for desktop users here.</h4>";
             $content = get_post_meta($post->ID, 'desktop_comic_2nd_language_editor', true);
 
-    //This function adds the WYSIWYG Editor
+            //This function adds the WYSIWYG Editor
             wp_editor(
                 $content,
                 'desktop_comic_2nd_language_editor',
@@ -4400,23 +4400,23 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
 
-    //This function saves the data you put in the meta box
+        //This function saves the data you put in the meta box
         public function toocheke_2nd_language_desktop_comic_editor_save_postdata($post_id)
         {
 
             if (isset($_POST['desktop_comic_2nd_language_editor_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['desktop_comic_2nd_language_editor_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4444,7 +4444,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             );
 
         }
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_comic_transcript_display($post)
     {?>
 
@@ -4464,17 +4464,17 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         {
             if (isset($_POST['toocheke_comic_transcript_display_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['toocheke_comic_transcript_display_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4504,7 +4504,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             );
 
         }
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_age_verification_display($post)
     {?>
 
@@ -4516,7 +4516,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         ?>
 <h4 style='color: #2271b1;'>Enable this option if you want to verify the age for this<?php echo $post->post_type ?>.</h4>
 <p>
-<input value="on" type="checkbox" id="age-verification" name="age-verification"                                                                                <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
+<input value="on" type="checkbox" id="age-verification" name="age-verification"                                                                                                                                                                                                                                              <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
 
 </p>
 <?php }
@@ -4525,17 +4525,17 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         {
             if (isset($_POST['toocheke_age_verification_nonce']) && (isset($_POST['comic']) || isset($_POST['series']))) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['toocheke_age_verification_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic'] || 'post' == $_POST['series']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4559,9 +4559,9 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             }
 
         }
-    /**
-     * Audio meta box field for comic
-     */
+        /**
+         * Audio meta box field for comic
+         */
         public function toocheke_audio_meta_box()
         {
             $theme = wp_get_theme(); // gets the current theme
@@ -4576,7 +4576,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             }
         }
 
-    //Displaying the meta box
+        //Displaying the meta box
         public function toocheke_display_audio_meta_box($post)
         {
             wp_nonce_field(plugin_basename(__FILE__), 'comic_audio_metabox_nonce');
@@ -4597,23 +4597,23 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             echo $html;
 
         }
-    //Save the comic audio
+        //Save the comic audio
         public function toocheke_comic_audio_save_postdata($post_id)
         {
 
             if (isset($_POST['comic_audio_metabox_nonce']) && isset($_POST['comic'])) {
 
-    //Not save if the user hasn't submitted changes
+                //Not save if the user hasn't submitted changes
                 if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                     return;
                 }
 
-    // Verifying whether input is coming from the proper form
+                // Verifying whether input is coming from the proper form
                 if (! wp_verify_nonce($_POST['comic_audio_metabox_nonce'])) {
                     return;
                 }
 
-    // Making sure the user has permission
+                // Making sure the user has permission
                 if ('post' == $_POST['comic']) {
                     if (! current_user_can('edit_post', $post_id)) {
                         return;
@@ -4647,9 +4647,9 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             echo ' enctype="multipart/form-data"';
 
         }
-    /**
-     * Parent series meta box field for comic
-     */
+        /**
+         * Parent series meta box field for comic
+         */
         public function toocheke_add_comic_series_meta_box()
         {
             add_meta_box('comic-parent', 'Series', [$this, 'toocheke_display_series_meta_box'], 'comic', 'side', 'high');
@@ -4659,14 +4659,14 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         {
             $post_type_object = get_post_type_object($post->post_type);
             $pages            = wp_dropdown_pages(['post_type' => 'series', 'selected'             => $post->post_parent, 'name'       => 'parent_id',
-                'show_option_none'                                      => __('(No Series)'), 'sort_column' => 'menu_order, post_title', 'echo' => 0]);
+                'show_option_none'                                 => __('(No Series)'), 'sort_column' => 'menu_order, post_title', 'echo' => 0]);
             if (! empty($pages)) {
                 echo $pages;
             }
         }
-    /**
-     * Series Hero Metabox
-     */
+        /**
+         * Series Hero Metabox
+         */
         public function toocheke_series_hero_image_add_metabox()
         {
             add_meta_box('series-hero-metabox', __('Series Hero Image(Desktop)', 'toocheke-companion'), [$this,
@@ -4874,10 +4874,10 @@ value="' . esc_attr($image_id) . '" />';
                     $series_bg_color = (isset($_POST['series_bg_color']) && $_POST['series_bg_color'] != '') ? $_POST['series_bg_color'] : '';
                     update_post_meta($post_id, 'series_bg_color', $series_bg_color);
                 }
-            /**
-             * Extra WYSIWYG meta box editor for series' sidebar content
-             */
-            //This function initializes the meta box.
+                /**
+                 * Extra WYSIWYG meta box editor for series' sidebar content
+                 */
+                //This function initializes the meta box.
                 public function toocheke_series_sidebar_content_meta_box()
                 {
                     add_meta_box(
@@ -4891,13 +4891,13 @@ value="' . esc_attr($image_id) . '" />';
 
                 }
 
-            //Displaying the meta box
+                //Displaying the meta box
                 public function toocheke_series_sidebar_content($post)
                 {
                     echo "<h4 style='color: #2271b1;'>Override the global sidebar here.</h4>";
                     $content = get_post_meta($post->ID, 'series_sidebar_content', true);
 
-            //This function adds the WYSIWYG Editor
+                    //This function adds the WYSIWYG Editor
                     wp_editor(
                         $content,
                         'series_sidebar_content',
@@ -4906,23 +4906,23 @@ value="' . esc_attr($image_id) . '" />';
 
                 }
 
-            //This function saves the data you put in the meta box
+                //This function saves the data you put in the meta box
                 public function toocheke_series_sidebar_content_save_postdata($post_id)
                 {
 
                     if (isset($_POST['series_sidebar_content_nonce']) && isset($_POST['series'])) {
 
-            //Not save if the user hasn't submitted changes
+                        //Not save if the user hasn't submitted changes
                         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                             return;
                         }
 
-            // Verifying whether input is coming from the proper form
+                        // Verifying whether input is coming from the proper form
                         if (! wp_verify_nonce($_POST['series_sidebar_content_nonce'])) {
                             return;
                         }
 
-            // Making sure the user has permission
+                        // Making sure the user has permission
                         if ('post' == $_POST['series']) {
                             if (! current_user_can('edit_post', $post_id)) {
                                 return;
@@ -4935,7 +4935,7 @@ value="' . esc_attr($image_id) . '" />';
                     }
 
                 }
-            /*Replace description text field with WYSIWYG*/
+                /*Replace description text field with WYSIWYG*/
                 public function toocheke_description_wysiwyg($term, $taxonomy)
                 {
                 ?>
@@ -4986,7 +4986,7 @@ value="' . esc_attr($image_id) . '" />';
 <?php
     }
 
-    /* Character specific functions and terms */
+        /* Character specific functions and terms */
 
         /* Image Functions */
         public function toocheke_companion_character_load_media()
@@ -5152,7 +5152,7 @@ jQuery(document).ready(function($) {
 
 </div><?php
           }
-          /*Save new Term*/
+              /*Save new Term*/
               public function toocheke_companion_character_save_order_meta($term_id, $tt_id)
               {
                   if (isset($_POST['character-order']) && ! empty($_POST['character-order'])) {
@@ -5162,7 +5162,7 @@ jQuery(document).ready(function($) {
                       add_term_meta($term_id, 'character-order', 1, true);
                   }
               }
-          /*Updating Term*/
+              /*Updating Term*/
               public function toocheke_companion_character_edit_order_field($term, $taxonomy)
               {
 
@@ -5178,7 +5178,7 @@ jQuery(document).ready(function($) {
     </td>
 </tr><?php
          }
-         /*Save Data*/
+             /*Save Data*/
              public function toocheke_companion_character_update_order_meta($term_id, $tt_id)
              {
 
@@ -5213,14 +5213,14 @@ jQuery(document).ready(function($) {
                  return $content;
              }
 
-         /* Make column sortable */
+             /* Make column sortable */
              public function toocheke_companion_character_add_order_column_sortable($sortable)
              {
                  $sortable['character_order'] = 'character_order';
                  return $sortable;
              }
 
-         /* Sort columns */
+             /* Sort columns */
              public function toocheke_companion_character_sort_by_character_order($term_query)
              {
                  global $pagenow;
@@ -5235,7 +5235,7 @@ jQuery(document).ready(function($) {
                      $term_query->query_vars['order']   = isset($_GET['order']) ? sanitize_title($_GET['order']) : "DESC";
                      // the OR relation and the NOT EXISTS clause allow for terms without a meta_value at all
                      $args = ['relation' => 'OR',
-                         'order_clause'           => [
+                         'order_clause'      => [
                              'key'  => 'character-order',
                              'type' => 'NUMERIC',
                          ],
@@ -5255,7 +5255,7 @@ jQuery(document).ready(function($) {
                  $columns['character_image'] = __('Image', 'toocheke-companion');
                  return $columns;
              }
-         /* Add content into column */
+             /* Add content into column */
              public function toocheke_companion_add_character_image_column_content($content, $column_name, $term_id)
              {
 
@@ -5275,7 +5275,7 @@ jQuery(document).ready(function($) {
 
              }
 
-         /* Make column sortable */
+             /* Make column sortable */
 
              public function toocheke_companion_character_add_image_column_sortable($sortable)
              {
@@ -5331,17 +5331,17 @@ jQuery(document).ready(function($) {
                  }
              }
 
-         /**
-          * Move Featured Image Metabox on 'comic' post type
-          */
+             /**
+              * Move Featured Image Metabox on 'comic' post type
+              */
              public function toocheke_move_comic_featured_image_metabox()
              {
                  remove_meta_box('postimagediv', 'comic', 'side');
                  add_meta_box('postimagediv', __('Comic Thumbnail'), 'post_thumbnail_meta_box', 'comic', 'side', 'high');
              }
-         /**
-          * Move Featured Image Metabox on 'series' post type
-          */
+             /**
+              * Move Featured Image Metabox on 'series' post type
+              */
              public function toocheke_move_series_featured_image_metabox()
              {
                  remove_meta_box('postimagediv', 'series', 'side');
@@ -5360,7 +5360,7 @@ jQuery(document).ready(function($) {
                  wp_enqueue_script('toocheke-media-library-script');
 
                  $screen = get_current_screen();
-         // Check we're only on the edit-tags page in the plugin
+                 // Check we're only on the edit-tags page in the plugin
                  if ('edit-tags' === $screen->base && ('series' === $screen->post_type || 'comic' === $screen->post_type)) {
                      wp_enqueue_script('toocheke-tags-script', plugins_url('toocheke-companion' . '/js/handle-tags-menu.js'), ['jquery'], TOOCHEKE_COMPANION_VERSION, true);
                      wp_enqueue_script('toocheke-tags-script');
@@ -5464,9 +5464,9 @@ jQuery(document).ready(function($) {
                  }
 
              }
-         /**
-          * Delete all comics for a series
-          */
+             /**
+              * Delete all comics for a series
+              */
              public function toocheke_delete_series_comics($post_id)
              {
                  if ('series' != get_post_type($post_id)) {
@@ -5534,9 +5534,9 @@ jQuery(document).ready(function($) {
 
                  }
              }
-         /**
-          * Add Toocheke Menu
-          */
+             /**
+              * Add Toocheke Menu
+              */
              public function toocheke_add_plugin_main_menu()
              {
                  add_menu_page('Toocheke', 'Toocheke', 'edit_posts', 'toocheke-menu', [$this, 'toocheke_admin_page'], 'dashicons-toocheke-companion', 2);
@@ -5555,9 +5555,9 @@ jQuery(document).ready(function($) {
                  add_submenu_page('toocheke-menu', 'Options', 'Options', 'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page'], 14);
                  add_submenu_page('toocheke-menu', 'Import', 'Import', 'edit_posts', 'toocheke-import', [$this, 'toocheke_include_import_page'], 15);
              }
-         /**
-          * Admin dashboard page
-          */
+             /**
+              * Admin dashboard page
+              */
              public function toocheke_admin_page()
              {
              ?>
@@ -5579,16 +5579,16 @@ jQuery(document).ready(function($) {
 </div>
 <?php
     }
-    /**
-     * Modify excerpt length
-     */
+        /**
+         * Modify excerpt length
+         */
         public function toocheke_excerpt_length($length)
         {
             return 40;
         }
-    /**
-     * Remove paragraphs from  comic post types
-     */
+        /**
+         * Remove paragraphs from  comic post types
+         */
         public function toocheke_remove_autop_for_comic($content)
         {
             'comic' === get_post_type() && remove_filter('the_content', 'wpautop');
@@ -5681,9 +5681,9 @@ jQuery(document).ready(function($) {
             }
 
         }
-    /**
-     * Bulk Edit Save.
-     */
+        /**
+         * Bulk Edit Save.
+         */
         public function toocheke_save_bulk_edit_hook()
         {
             if (! wp_verify_nonce($_POST['nonce'], 'toocheke_companion_quick_edit_nonce')) {
@@ -5827,9 +5827,9 @@ jQuery(document).ready(function($) {
             return $content;
         }
 
-    /**
-     * Likes Functionality
-     */
+        /**
+         * Likes Functionality
+         */
         public function toocheke_process_like()
         {
             // Security
@@ -5955,9 +5955,9 @@ jQuery(document).ready(function($) {
             }
         }
 
-    /**
-     * Check if the post is already liked
-     */
+        /**
+         * Check if the post is already liked
+         */
         public function toocheke_check_if_liked($post_id, $is_comment)
         {
             $post_users = null;
@@ -5982,9 +5982,9 @@ jQuery(document).ready(function($) {
             }
         } // toocheke_check_if_liked()
 
-    /**
-     * Get like button
-     */
+        /**
+         * Get like button
+         */
         public function toocheke_get_like_button($post_id, $is_comment = null)
         {
             $is_comment = (null == $is_comment) ? 0 : 1;
@@ -6020,19 +6020,19 @@ jQuery(document).ready(function($) {
             return $output;
         } // toocheke_get_like_button()
 
-    /**
-     * Add button shortcode
-     */
+        /**
+         * Add button shortcode
+         */
 
         public function toocheke_like_short_code()
         {
             return $this->toocheke_get_like_button(get_the_ID(), 0);
         } // shortcode()
 
-    /**
-     * Gets post meta user likes (user id array),
-     * then adds new user id to retrieved array
-     */
+        /**
+         * Gets post meta user likes (user id array),
+         * then adds new user id to retrieved array
+         */
         public function toocheke_post_user_likes($user_id, $post_id, $is_comment)
         {
             $post_users      = '';
@@ -6049,10 +6049,10 @@ jQuery(document).ready(function($) {
             return $post_users;
         } // toocheke_post_user_likes()
 
-    /**
-     * Gets post meta ip likes (ip array),
-     * then adds new ip to retrieved array
-     */
+        /**
+         * Gets post meta ip likes (ip array),
+         * then adds new ip to retrieved array
+         */
         public function toocheke_post_ip_likes($user_ip, $post_id, $is_comment)
         {
             $post_users      = '';
@@ -6070,9 +6070,9 @@ jQuery(document).ready(function($) {
             return $post_users;
         } // toocheke_post_ip_likes()
 
-    /**
-     * Utility to retrieve IP address
-     */
+        /**
+         * Utility to retrieve IP address
+         */
         public function toocheke_get_ip()
         {
             if (isset($_SERVER['HTTP_CLIENT_IP']) && ! empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -6087,9 +6087,9 @@ jQuery(document).ready(function($) {
             return $ip;
         } // toocheke_get_ip()
 
-    /**
-     * Utility returns the button icon for "like" action
-     */
+        /**
+         * Utility returns the button icon for "like" action
+         */
         public function toocheke_get_liked_icon()
         {
             /* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart"></i> */
@@ -6097,9 +6097,9 @@ jQuery(document).ready(function($) {
             return $icon;
         } // toocheke_get_liked_icon()
 
-    /**
-     * Utility returns the button icon for "unlike" action
-     */
+        /**
+         * Utility returns the button icon for "unlike" action
+         */
         public function toocheke_get_unliked_icon()
         {
             /* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart-o"></i> */
@@ -6107,13 +6107,13 @@ jQuery(document).ready(function($) {
             return $icon;
         } // toocheke_get_unliked_icon()
 
-    /**
-     * Formatting like count
-     * appending "K" if one thousand or greater,
-     * "M" if one million or greater,
-     * and "B" if one billion or greater (unlikely).
-     * $precision = how many decimal points to display (1.25K)
-     */
+        /**
+         * Formatting like count
+         * appending "K" if one thousand or greater,
+         * "M" if one million or greater,
+         * and "B" if one billion or greater (unlikely).
+         * $precision = how many decimal points to display (1.25K)
+         */
         public function toocheke_format_count($number)
         {
             $precision = 2;
@@ -6130,9 +6130,9 @@ jQuery(document).ready(function($) {
             return $formatted;
         } // toocheke_format_count()
 
-    /**
-     * Get like count
-     */
+        /**
+         * Get like count
+         */
         public function toocheke_get_like_count($like_count)
         {
             $like_text = __('Like', 'toocheke-companion');
@@ -6145,7 +6145,7 @@ jQuery(document).ready(function($) {
             return $count;
         } // toocheke_get_like_count()
 
-    // User Profile List
+        // User Profile List
         public function toocheke_show_user_likes($user)
     {?>
 <table class="form-table">
@@ -6170,11 +6170,11 @@ jQuery(document).ready(function($) {
             <p>
                 <?php while ($like_query->have_posts()): $like_query->the_post();
                             echo $sep; ?><a href="<?php the_permalink(); ?>"
-																																																																																												                    title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
-																																																																																												                <?php
-                                                                                                                                                                                                                                                                                                                                                                                                        $sep = ' &middot; ';
-                                                                                                                                                                                                                                                                                                                                                                                                            endwhile;
-                                                                                                                                                                                                                                                                                                                                                                                                        ?>
+																																																																																														                    title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
+																																																																																														                <?php
+                                                                                                                                                                                                                                                                                                                                                                                                                $sep = ' &middot; ';
+                                                                                                                                                                                                                                                                                                                                                                                                                    endwhile;
+                                                                                                                                                                                                                                                                                                                                                                                                                ?>
             </p>
             <?php else: ?>
             <p><?php _e('You do not like anything yet.', 'toocheke-companion'); ?></p>
@@ -6205,7 +6205,7 @@ jQuery(document).ready(function($) {
         /**
          * Universal theme functions
          */
-    //Register shortcodes
+        //Register shortcodes
 
         public function toocheke_register_universal_shortcodes()
         {
@@ -6218,6 +6218,11 @@ jQuery(document).ready(function($) {
             add_shortcode('toocheke-top-ten-comics', [$this, 'toocheke_top_ten_comics_shortcode']);
             add_shortcode('toocheke-scheduled-comics', [$this, 'toocheke_scheduled_comics_shortcode']);
             add_shortcode('toocheke-comic-archive', [$this, 'toocheke_comic_archive_shortcode']);
+            add_shortcode('toocheke-collection-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
+            add_shortcode('toocheke-chapter-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
+            add_shortcode('toocheke-tag-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
+            add_shortcode('toocheke-location-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
+            add_shortcode('toocheke-character-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
             add_shortcode('toocheke-characters', [$this, 'toocheke_characters_shortcode']);
 
         }
@@ -6246,7 +6251,7 @@ jQuery(document).ready(function($) {
             // Output needs to be return
             return $output;
         }
-    //Display Latest Comics
+        //Display Latest Comics
         public function toocheke_latest_comics_shortcode($atts)
         {
             $default_atts = [
@@ -6271,7 +6276,7 @@ jQuery(document).ready(function($) {
             // Output needs to be return
             return $output;
         }
-    //Display Latest Chapters
+        //Display Latest Chapters
         public function toocheke_latest_chapters_shortcode($atts)
         {
             $default_atts = [
@@ -6407,6 +6412,49 @@ jQuery(document).ready(function($) {
             }
 
             $output = $output . $templates->get_template_part('content', 'comicarchive');
+
+            return ob_get_clean();
+
+            // Output needs to be return
+            return $output;
+        }
+        //Display Collection Archive
+        public function toocheke_taxonomy_archive_shortcode($atts, $content, $shortcode_tag)
+        {
+            $default_atts = [
+                "term" => null,
+            ];
+            $params   = shortcode_atts($default_atts, $atts);
+            $output   = '';
+            $taxonomy = null;
+            switch ($shortcode_tag) {
+                case 'toocheke-collection-archive':
+                    $taxonomy = 'collections';
+                    break;
+                case 'toocheke-chapter-archive':
+                    $taxonomy = 'chapters';
+                    break;
+                case 'toocheke-tag-archive':
+                    $taxonomy = 'comic_tags';
+                    break;
+                case 'toocheke-location-archive':
+                    $taxonomy = 'comic_locations';
+                    break;
+                case 'toocheke-character-archive':
+                    $taxonomy = 'comic_characters';
+                    break;
+                default:
+                    $taxonomy = null;
+            }
+            if (empty($params['term']) || ! $taxonomy) {
+                return $output;
+            }
+
+            $templates = new Toocheke_Companion_Template_Loader;
+            ob_start();
+            set_query_var('term', $params['term']);
+            set_query_var('taxonomy', $taxonomy);
+            $output = $output . $templates->get_template_part('content', 'taxonomyarchive');
 
             return ob_get_clean();
 

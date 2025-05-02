@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
      * Plugin Name: Toocheke Companion
      * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
      * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
-     * Version:     1.168
+     * Version:     1.169
      * Author:      Leetoo
      * Author URI:  https://leetoo.net
      * License:     GPLv2 or later
@@ -2222,23 +2222,24 @@ jQuery(document).ready(function($) {
             ?>
 
         <h2 class="nav-tab-wrapper">
-        <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                                                                                                                                                                                                   <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
-        <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                                                                                                                                                                                    <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
-        <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                                                                                                                                                                                                   <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
-        <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                                                                                                                                                                                          <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
-        <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                                                                                                                                                                              <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
-        <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                                                                                                                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
-        <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                                                                                                                                                                                       <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
-        <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
-        <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                                                                                                                                                                              <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
-        <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
-        <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                                                                                                                                                                                        <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
-        <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                                                                                                                                                                                     <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
-        <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                                                                                                                                                                                    <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
-        <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                                                                                                                                                                                                <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
-        <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                                                                                                                                                                                     <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
+        <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                               <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
+        <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
+        <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                               <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
+        <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
+        <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
+        <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
+        <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                           <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
+        <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                    <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
+        <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
+        <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
+        <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                  <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
+        <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
+        <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
+        <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                          <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
+        <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
         <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
-        <a href="?page=toocheke-options-page&tab=buy_options" class="nav-tab<?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">Buy Comic</a>
+        <a href="?page=toocheke-options-page&tab=buy_options" class="nav-tab <?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">Buy Comic</a>
+        <a href="?page=toocheke-options-page&tab=sponsor_options" class="nav-tab <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">Sponsor Comic</a>
         <?php endif; ?>
         </h2>
     <form method="post" action="<?php echo esc_url(add_query_arg('tab', $active_tab, admin_url('options.php'))); ?>">
@@ -2659,6 +2660,79 @@ jQuery(document).ready(function($) {
                     add_settings_field("toocheke-comics-to-main-rss", "Do you want to add comic posts to the main feed?", [$this, 'toocheke_comics_to_main_rss_checkbox'], "toocheke-options-page", "toocheke_comics_to_main_rss_section");
                     register_setting("toocheke-settings", "toocheke-comics-to-main-rss");
                     break;
+                //Options for sponsoring a comic
+                case 'sponsor_options':
+                    if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
+                        add_settings_section("toocheke_sponsor_comic_info_section", "Sponsor Comic", [$this, 'toocheke_sponsor_comic_display_message'], "toocheke-options-page");
+                        //PayPal Fields section
+                        add_settings_section("toocheke_sponsor_comic_paypal_settings_section", "PayPal Settings", [$this, 'toocheke_paypal_settings_display_message'], "toocheke-options-page");
+                        add_settings_field(
+                            'toocheke-paypal-client-id',
+                            'Client ID',
+                            [$this, 'toocheke_display_input_text'],
+                            "toocheke-options-page",
+                            'toocheke_sponsor_comic_paypal_settings_section',
+                            [
+                                'label_for' => 'toocheke-paypal-client-id',
+                                'class'     => 'toocheke-companion',        // for <tr> element
+                                'name'      => 'toocheke-paypal-client-id', // pass any custom parameters
+                            ]
+                        );
+
+                        add_settings_field(
+                            'toocheke-paypal-client-secret',
+                            'Client Secret',
+                            [$this, 'toocheke_display_input_text'],
+                            "toocheke-options-page",
+                            'toocheke_sponsor_comic_paypal_settings_section',
+                            [
+                                'label_for' => 'toocheke-paypal-client-secret',
+                                'class'     => 'toocheke-companion',            // for <tr> element
+                                'name'      => 'toocheke-paypal-client-secret', // pass any custom parameters
+                            ]
+                        );
+
+                        add_settings_field("toocheke-enable-paypal-sandbox", "Sandbox Mode?", [$this, 'toocheke_enable_paypal_sandbox_checkbox'], "toocheke-options-page", "toocheke_sponsor_comic_paypal_settings_section");
+
+                        register_setting("toocheke-settings", "toocheke-paypal-client-id");
+                        register_setting("toocheke-settings", "toocheke-paypal-client-secret");
+                        register_setting("toocheke-settings", "toocheke-enable-paypal-sandbox");
+
+                        add_settings_section("toocheke_comic_sponsor_pricing_section", "Pricing", [$this, 'toocheke_comic_sponsor_pricing_display_message'], "toocheke-options-page");
+                        //Currency field
+                        $currencies = $this->toocheke_get_paypal_currencies();
+                        foreach ($currencies as $currency_code => $currency_label) {
+                            $currency_list[$currency_code] = sprintf(
+                                '%s (%s)',
+                                $currency_label,
+                                $this->toocheke_get_currency_symbol($currency_code)
+                            );
+                        }
+                        $toocheke_paypal_currency_args = [
+                            'option'         => 'toocheke_paypal_currency',
+                            'label'          => 'Currency',
+                            'desc'           => null,
+                            'select_options' => $currency_list,
+                        ];
+                        add_settings_field("toocheke_paypal_currency", "Currency", [$this, 'toocheke_select_dropdown_generator'], 'toocheke-options-page', "toocheke_comic_sponsor_pricing_section", $toocheke_paypal_currency_args);
+                        register_setting("toocheke-settings", "toocheke_paypal_currency", ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field']);
+                         //Price field
+                        add_settings_field(
+                            'toocheke-comic-sponsorship-price',
+                            'Price per day',
+                            [$this, 'toocheke_display_input_number'],
+                            'toocheke-options-page',
+                            'toocheke_comic_sponsor_pricing_section',
+                            [
+                                'label_for' => 'toocheke-comic-sponsorship-price',
+                                'class'     => 'toocheke-companion',         // for <tr> element
+                                'name'      => 'toocheke-comic-sponsorship-price', // pass any custom parameters
+                            ]
+                        );
+						
+                        register_setting("toocheke-settings", 'toocheke-comic-sponsorship-price', 'absint');
+                    }
+                    break;
                 //Options for buying a comic
                 case 'buy_options':
 
@@ -2937,7 +3011,11 @@ jQuery(document).ready(function($) {
         }
         public function toocheke_buy_comic_display_message()
         {
-            echo '<p>To use the \'Buy Comic\' features, you will require a PayPal business account. Within your PayPal account, you will need to enter the <b>Instant Payment Notification(IPN)</b> setting. This is what PayPal uses to notify the website that a purchase has been made. Make sure to enter the <b style="color: #ff0000;">Notification URL</b>.</p><p> <a href="https://developer.paypal.com/api/nvp-soap/ipn/IPNSetup/" target="_blank">Here</a> is a tutorial on how to access the setting. <a href="https://www.paypal.com/merchantnotification/ipn/preference/edit" target="_blank">This link</a> should take you directly to where you need to update the URL(once you are logged in). Make sure to enter the following URL:<p><b style="color:#0000ff">' . get_site_url() . '/?action=IPN_Handler</b></p><hr/>';
+            echo '<div class="notice notice-info inline"><p>To use the \'Buy Comic\' features, you will require a PayPal business account. Within your PayPal account, you will need to enter the <b>Instant Payment Notification(IPN)</b> setting. This is what PayPal uses to notify the website that a purchase has been made. Make sure to enter the <b style="color: #ff0000;">Notification URL</b>.</p><p> <a href="https://developer.paypal.com/api/nvp-soap/ipn/IPNSetup/" target="_blank">Here</a> is a tutorial on how to access the setting. <a href="https://www.paypal.com/merchantnotification/ipn/preference/edit" target="_blank">This link</a> should take you directly to where you need to update the URL(once you are logged in). Make sure to enter the following URL:<p><b style="color:#0000ff">' . get_site_url() . '/?action=IPN_Handler</b></p></div><hr/>';
+        }
+        public function toocheke_sponsor_comic_display_message()
+        {
+            echo '<div class="notice notice-info inline"><p>To use the \'Sponsor Comic\' features, you will require a PayPal business account. You will also need to obtain a <b>CLIENT_ID</b> and <b>CLIENT_SECRET </b>, that you will copy and paste into the corresponding fields on this page. This is what PayPal uses to process your payments.</p><p><a href="https://developer.paypal.com/docs/api/overview/" target="_blank">Here is a detailed guide</a> showing you how to get the API credentials you will need</p><p>Only enable the <b>sandbox mode</b> if you are testing. Otherwise leave this option unchecked. <p><b style="color: #ff0000;">NOTE:</b> If you are going to enable sandbox mode, you will need to use a different <b>CLIENT_ID</b> and <b>CLIENT_SECRET</b> that you can get from your sandbox account.</p><a href="https://developer.paypal.com/tools/sandbox/" target="_blank">Here is a helpful guide</a> on using Sandbox accounts in PayPal</p><p><a href="https://developer.paypal.com/docs/multiparty/create-account/#create-your-sandbox-api-caller-account" target="_blank">Here is a helpful guide</a> for obtaining the <b>CLIENT_ID</b> and <b>CLIENT_SECRET</b> from your sandbox account</p></div><hr/>';
         }
         public function toocheke_buy_comic_options_display_message()
         {
@@ -2946,6 +3024,10 @@ jQuery(document).ready(function($) {
         public function toocheke_original_art_fields_display_message()
         {
             echo 'Enter the following fields for selling a comic\'s original.';
+        }
+        public function toocheke_comic_sponsor_pricing_display_message()
+        {
+            echo 'Enter the cost per day you wish to charge your sponsors.';
         }
         public function toocheke_print_fields_display_message()
         {
@@ -2994,6 +3076,99 @@ jQuery(document).ready(function($) {
         public function toocheke_display_support_links_message()
         {
             echo 'Enter what you would like displayed for your supporter/patron/donation links.';
+        }
+        public function toocheke_allowed_html()
+        {
+
+            $allowed_atts = [
+                'align'      => [],
+                'class'      => [],
+                'type'       => [],
+                'id'         => [],
+                'dir'        => [],
+                'lang'       => [],
+                'style'      => [],
+                'xml:lang'   => [],
+                'src'        => [],
+                'alt'        => [],
+                'href'       => [],
+                'rel'        => [],
+                'rev'        => [],
+                'target'     => [],
+                'novalidate' => [],
+                'type'       => [],
+                'value'      => [],
+                'name'       => [],
+                'tabindex'   => [],
+                'action'     => [],
+                'method'     => [],
+                'for'        => [],
+                'width'      => [],
+                'height'     => [],
+                'data'       => [],
+                'title'      => [],
+                'selected'   => [],
+                'disabled'   => [],
+                'checked'    => [],
+            ];
+            $allowed_tags['form']     = $allowed_atts;
+            $allowed_tags['label']    = $allowed_atts;
+            $allowed_tags['select']   = $allowed_atts;
+            $allowed_tags['option']   = $allowed_atts;
+            $allowed_tags['input']    = $allowed_atts;
+            $allowed_tags['textarea'] = $allowed_atts;
+            $allowed_tags['iframe']   = $allowed_atts;
+            $allowed_tags['script']   = $allowed_atts;
+            $allowed_tags['style']    = $allowed_atts;
+            $allowed_tags['strong']   = $allowed_atts;
+            $allowed_tags['small']    = $allowed_atts;
+            $allowed_tags['table']    = $allowed_atts;
+            $allowed_tags['span']     = $allowed_atts;
+            $allowed_tags['abbr']     = $allowed_atts;
+            $allowed_tags['code']     = $allowed_atts;
+            $allowed_tags['pre']      = $allowed_atts;
+            $allowed_tags['div']      = $allowed_atts;
+            $allowed_tags['img']      = $allowed_atts;
+            $allowed_tags['h1']       = $allowed_atts;
+            $allowed_tags['h2']       = $allowed_atts;
+            $allowed_tags['h3']       = $allowed_atts;
+            $allowed_tags['h4']       = $allowed_atts;
+            $allowed_tags['h5']       = $allowed_atts;
+            $allowed_tags['h6']       = $allowed_atts;
+            $allowed_tags['ol']       = $allowed_atts;
+            $allowed_tags['ul']       = $allowed_atts;
+            $allowed_tags['li']       = $allowed_atts;
+            $allowed_tags['em']       = $allowed_atts;
+            $allowed_tags['hr']       = $allowed_atts;
+            $allowed_tags['br']       = $allowed_atts;
+            $allowed_tags['tr']       = $allowed_atts;
+            $allowed_tags['td']       = $allowed_atts;
+            $allowed_tags['p']        = $allowed_atts;
+            $allowed_tags['a']        = $allowed_atts;
+            $allowed_tags['b']        = $allowed_atts;
+            $allowed_tags['i']        = $allowed_atts;
+
+            return $allowed_tags;
+        }
+        public function toocheke_select_dropdown_generator(array $args)
+        {
+            $html           = '';
+            $option         = $args['option'];
+            $desc           = $args['desc'];
+            $value          = get_option($option) ? get_option($option) : [];
+            $select_options = $args['select_options'];
+
+            $html .= '<select name="' . esc_attr($option) . '" id="' . esc_attr($option) . '">';
+            foreach ($select_options as $k => $v) {
+                $selected = false;
+                if ($k == $value) {
+                    $selected = true;
+                }
+                $html .= '<option ' . selected($selected, true, false) . ' value="' . esc_attr($k) . '">' . $v . '</option>';
+            }
+            $html .= '</select> ';
+            $html .= $desc ? ' <p><em>' . esc_html($desc) . '</em></p>' : '';
+            echo wp_kses($html, $this->toocheke_allowed_html());
         }
         public function toocheke_display_input_number($args)
         {
@@ -3128,6 +3303,13 @@ jQuery(document).ready(function($) {
         ?>
 <input type="checkbox" name="toocheke-bilingual-display" value="1"
     <?php checked(1, get_option('toocheke-bilingual-display'), true); ?> /> Check for Yes
+<?php
+    }
+        public function toocheke_enable_paypal_sandbox_checkbox()
+        {
+        ?>
+<input type="checkbox" name="toocheke-enable-paypal-sandbox" value="1"
+<?php checked(1, get_option('toocheke-enable-paypal-sandbox'), true); ?> /> Enable
 <?php
     }
         public function toocheke_buy_original_checkbox()
@@ -3462,19 +3644,19 @@ jQuery(document).ready(function($) {
     </option>
     <option value="calendar"
         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "calendar"); ?>>Calendar</option>
-    <option value="gallery"                                                                                  <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
+    <option value="gallery"                                                                                                                                        <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
         Gallery/Grid</option>
-    <option value="chapters-plain-text-list"                                                                                                                                     <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-plain-text-list"); ?>>
+    <option value="chapters-plain-text-list"                                                                                                                                                                                                                             <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-plain-text-list"); ?>>
         Segmented By Chapters - Plain Text List</option>
-        <option value="chapters-gallery"                                                                                                                         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
+        <option value="chapters-gallery"                                                                                                                                                                                                         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
         Segmented By Chapters - Gallery/Grid</option>
-        <option value="series-plain-text-list"                                                                                                                                           <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
+        <option value="series-plain-text-list"                                                                                                                                                                                                                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
         Segmented By Series - Plain Text List</option>
-        <option value="series-gallery"                                                                                                                   <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
+        <option value="series-gallery"                                                                                                                                                                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
         Segmented By Series - Gallery/Grid</option>
-        <option value="yearly-plain-text-list"                                                                                                                                           <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
+        <option value="yearly-plain-text-list"                                                                                                                                                                                                                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
         Segmented By Year - Plain Text List</option>
-        <option value="yearly-gallery"                                                                                                                   <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
+        <option value="yearly-gallery"                                                                                                                                                                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
         Segmented By Year - Gallery/Grid</option>
 </select>
 <?php
@@ -3488,7 +3670,7 @@ jQuery(document).ready(function($) {
 <option value="thumbnail-list"
     <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "thumbnail-list"); ?>>Thumbnail
     List</option>
-<option value="gallery"                                                                      <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
+<option value="gallery"                                                                                                                    <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
     Gallery/Grid</option>
 </select>
 <?php
@@ -4516,7 +4698,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         ?>
 <h4 style='color: #2271b1;'>Enable this option if you want to verify the age for this<?php echo $post->post_type ?>.</h4>
 <p>
-<input value="on" type="checkbox" id="age-verification" name="age-verification"                                                                                                                                                                                                                                              <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
+<input value="on" type="checkbox" id="age-verification" name="age-verification"                                                                                                                                                                                                                                                                                                                                                                                                            <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
 
 </p>
 <?php }
@@ -6170,11 +6352,11 @@ jQuery(document).ready(function($) {
             <p>
                 <?php while ($like_query->have_posts()): $like_query->the_post();
                             echo $sep; ?><a href="<?php the_permalink(); ?>"
-																																																																																														                    title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
-																																																																																														                <?php
-                                                                                                                                                                                                                                                                                                                                                                                                                $sep = ' &middot; ';
-                                                                                                                                                                                                                                                                                                                                                                                                                    endwhile;
-                                                                                                                                                                                                                                                                                                                                                                                                                ?>
+																																																																																																                    title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
+																																																																																																                <?php
+                                                                                                                                                                                                                                                                                                                                                                                                                        $sep = ' &middot; ';
+                                                                                                                                                                                                                                                                                                                                                                                                                            endwhile;
+                                                                                                                                                                                                                                                                                                                                                                                                                        ?>
             </p>
             <?php else: ?>
             <p><?php _e('You do not like anything yet.', 'toocheke-companion'); ?></p>
@@ -6894,6 +7076,203 @@ jQuery(document).ready(function($) {
 
             }
             return $content;
+        }
+
+        public function toocheke_get_paypal_currencies()
+        {
+            return [
+                'AUD' => esc_html__('Australian Dollar', 'toocheke-premium'),
+                'BRL' => esc_html__('Brazilian Real', 'toocheke-premium'),
+                'CAD' => esc_html__('Canadian Dollar', 'toocheke-premium'),
+                'CZK' => esc_html__('Czech Koruna', 'toocheke-premium'),
+                'DKK' => esc_html__('Danish Krone', 'toocheke-premium'),
+                'EUR' => esc_html__('Euro', 'toocheke-premium'),
+                'HKD' => esc_html__('Hong Kong Dollar', 'toocheke-premium'),
+                'HUF' => esc_html__('Hungarian Forint', 'toocheke-premium'),
+                'INR' => esc_html__('Indian Rupee', 'toocheke-premium'),
+                'ILS' => esc_html__('Israeli New Shekel', 'toocheke-premium'),
+                'JPY' => esc_html__('Japanese Yen', 'toocheke-premium'),
+                'MYR' => esc_html__('Malaysian Ringgit', 'toocheke-premium'),
+                'MXN' => esc_html__('Mexican Peso', 'toocheke-premium'),
+                'TWD' => esc_html__('New Taiwan Dollar', 'toocheke-premium'),
+                'NZD' => esc_html__('New Zealand Dollar', 'toocheke-premium'),
+                'NOK' => esc_html__('Norwegian Krone', 'toocheke-premium'),
+                'PHP' => esc_html__('Philippine Peso', 'toocheke-premium'),
+                'PLN' => esc_html__('Polish Zloty', 'toocheke-premium'),
+                'GBP' => esc_html__('British Pound', 'toocheke-premium'),
+                'RUB' => esc_html__('Russian Ruble', 'toocheke-premium'),
+                'SGD' => esc_html__('Singapore Dollar', 'toocheke-premium'),
+                'SEK' => esc_html__('Swedish Krona', 'toocheke-premium'),
+                'CHF' => esc_html__('Swiss Franc', 'toocheke-premium'),
+                'THB' => esc_html__('Thai Baht', 'toocheke-premium'),
+                'USD' => esc_html__('United States Dollar', 'toocheke-premium'),
+                'AED' => esc_html__('United Arab Emirates Dirham', 'toocheke-premium'),
+                'CNY' => esc_html__('Chinese Yuan Renminbi', 'toocheke-premium'),
+                'ZAR' => esc_html__('South African Rand', 'toocheke-premium'),
+            ];
+        }
+        public function toocheke_get_currencies()
+        {
+            $currencies = [
+                'AED' => '&#x62f;.&#x625;',
+                'AFN' => '&#x60b;',
+                'ALL' => 'L',
+                'AMD' => 'AMD',
+                'ANG' => '&fnof;',
+                'AOA' => 'Kz',
+                'ARS' => '&#36;',
+                'AUD' => '&#36;',
+                'AWG' => '&fnof;',
+                'AZN' => 'AZN',
+                'BAM' => 'KM',
+                'BBD' => '&#36;',
+                'BDT' => '&#2547;&nbsp;',
+                'BGN' => '&#1083;&#1074;.',
+                'BIF' => 'Fr',
+                'BMD' => '&#36;',
+                'BND' => '&#36;',
+                'BOB' => 'Bs.',
+                'BRL' => '&#82;&#36;',
+                'BSD' => '&#36;',
+                'BWP' => 'P',
+                'BYR' => 'Br',
+                'BZD' => '&#36;',
+                'CAD' => '&#36;',
+                'CDF' => 'Fr',
+                'CHF' => '&#67;&#72;&#70;',
+                'CLP' => '&#36;',
+                'CNY' => '&yen;',
+                'COP' => '&#36;',
+                'CRC' => '&#x20a1;',
+                'CVE' => '&#36;',
+                'CZK' => '&#75;&#269;',
+                'DJF' => 'Fr',
+                'DKK' => 'DKK',
+                'DOP' => 'RD&#36;',
+                'DZD' => '&#x62f;.&#x62c;',
+                'EGP' => 'EGP',
+                'ETB' => 'Br',
+                'EUR' => '&euro;',
+                'FJD' => '&#36;',
+                'FKP' => '&pound;',
+                'GBP' => '&pound;',
+                'GEL' => '&#x10da;',
+                'GIP' => '&pound;',
+                'GMD' => 'D',
+                'GNF' => 'Fr',
+                'GTQ' => 'Q',
+                'GYD' => '&#36;',
+                'HKD' => '&#36;',
+                'HNL' => 'L',
+                'HRK' => 'Kn',
+                'HTG' => 'G',
+                'HUF' => '&#70;&#116;',
+                'IDR' => 'Rp',
+                'ILS' => '&#8362;',
+                'INR' => '&#8377;',
+                'ISK' => 'Kr.',
+                'JMD' => '&#36;',
+                'JPY' => '&yen;',
+                'KES' => 'KSh',
+                'KGS' => '&#x43b;&#x432;',
+                'KHR' => '&#x17db;',
+                'KMF' => 'Fr',
+                'KRW' => '&#8361;',
+                'KYD' => '&#36;',
+                'KZT' => 'KZT',
+                'LAK' => '&#8365;',
+                'LBP' => '&#x644;.&#x644;',
+                'LKR' => '&#xdbb;&#xdd4;',
+                'LRD' => '&#36;',
+                'LSL' => 'L',
+                'MAD' => '&#x62f;. &#x645;.',
+                'MDL' => 'L',
+                'MGA' => 'Ar',
+                'MKD' => '&#x434;&#x435;&#x43d;',
+                'MMK' => 'Ks',
+                'MNT' => '&#x20ae;',
+                'MOP' => 'P',
+                'MRO' => 'UM',
+                'MUR' => '&#x20a8;',
+                'MVR' => '.&#x783;',
+                'MWK' => 'MK',
+                'MXN' => 'MXN',
+                'MYR' => '&#82;&#77;',
+                'MZN' => 'MT',
+                'NAD' => '&#36;',
+                'NGN' => '&#8358;',
+                'NIO' => 'C&#36;',
+                'NOK' => '&#107;&#114;',
+                'NPR' => '&#8360;',
+                'NZD' => '&#36;',
+                'PAB' => 'B/.',
+                'PEN' => 'S/.',
+                'PGK' => 'K',
+                'PHP' => '&#8369;',
+                'PKR' => '&#8360;',
+                'PLN' => '&#122;&#322;',
+                'PYG' => '&#8370;',
+                'QAR' => '&#x631;.&#x642;',
+                'RON' => 'lei',
+                'RSD' => '&#x434;&#x438;&#x43d;.',
+                'RUB' => '&#8381;',
+                'RWF' => 'Fr',
+                'SAR' => '&#x631;.&#x633;',
+                'SBD' => '&#36;',
+                'SCR' => '&#x20a8;',
+                'SEK' => '&#107;&#114;',
+                'SGD' => 'S&#36;',
+                'SHP' => '&pound;',
+                'SLL' => 'Le',
+                'SOS' => 'Sh',
+                'SRD' => '&#36;',
+                'STD' => 'Db',
+                'SZL' => 'L',
+                'THB' => '&#3647;',
+                'TJS' => '&#x405;&#x41c;',
+                'TOP' => 'T&#36;',
+                'TRY' => '&#8378;',
+                'TTD' => '&#36;',
+                'TWD' => '&#78;&#84;&#36;',
+                'TZS' => 'Sh',
+                'UAH' => '&#8372;',
+                'UGX' => 'UGX',
+                'USD' => '&#36;',
+                'UYU' => '&#36;',
+                'UZS' => 'UZS',
+                'VND' => '&#8363;',
+                'VUV' => 'Vt',
+                'WST' => 'T',
+                'XAF' => 'Fr',
+                'XCD' => '&#36;',
+                'XOF' => 'Fr',
+                'XPF' => 'Fr',
+                'YER' => '&#xfdfc;',
+                'ZAR' => '&#82;',
+                'ZMW' => 'ZK',
+            ];
+
+            $currencies = apply_filters('toocheke_get_currencies', $currencies);
+
+            return $currencies;
+        }
+        public function toocheke_get_currency_symbol($currency = '')
+        {
+
+            if (! $currency) {
+
+                // If no currency is passed then default it to USD.
+                $currency = 'USD';
+            }
+
+            $currency   = strtoupper($currency);
+            $currencies =  $this->toocheke_get_currencies();
+
+            $symbols = apply_filters('toocheke_currency_symbols', $currencies);
+
+            $currency_symbol = isset($symbols[$currency]) ? $symbols[$currency] : '';
+
+            return apply_filters('toocheke_currency_symbol', $currency_symbol, $currency);
         }
 
     }

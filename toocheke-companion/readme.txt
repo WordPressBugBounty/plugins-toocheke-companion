@@ -3,8 +3,8 @@ Author: LeeToo
 Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
-Tested up to: 6.7
-Stable tag: 1.168
+Tested up to: 6.8
+Stable tag: 1.169
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -115,6 +115,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.169=
+* UPDATE. Added support for sponsoring a comic.
+
 = 1.168=
 * UPDATE. Added shortcodes for displaying comic taxonomy archives.
 

@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
      * Plugin Name: Toocheke Companion
      * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
      * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
-     * Version:     1.169
+     * Version:     1.170
      * Author:      Leetoo
      * Author URI:  https://leetoo.net
      * License:     GPLv2 or later
@@ -115,6 +115,9 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             add_action('admin_init', [$this, 'toocheke_desktop_comic_editor_meta_box']);
             add_action('save_post', [$this, 'toocheke_comic_blog_post_editor_save_postdata']);
             add_action('admin_init', [$this, 'toocheke_comic_blog_post_editor_meta_box']);
+            /* Alt hover text  metabox */
+            add_action('save_post', [$this, 'toocheke_comic_alt_save_postdata']);
+            add_action('admin_init', [$this, 'toocheke_comic_alt_meta_box']);
             /* Transcript  metabox */
             add_action('save_post', [$this, 'toocheke_comic_transcript_save_postdata']);
             add_action('admin_init', [$this, 'toocheke_comic_transcript_meta_box']);
@@ -172,6 +175,8 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             add_action('wp_ajax_nopriv_toocheke_set_age_verification_cookie', [$this, 'toocheke_set_age_verification_cookie']);
             add_action('admin_init', [$this, 'toocheke_remove_image_link'], 10);
             add_filter('the_content', [$this, 'toocheke_attachment_image_link_remove_filter']);
+            add_filter('the_content', [$this, 'toocheke_add_comic_hovertext_to_content']);
+            add_filter('get_post_metadata', [$this, 'toocheke_add_hovertext_to_desktop_comic_editor_meta'], 10, 4);
 
             add_action('do_meta_boxes', [$this, 'toocheke_move_series_featured_image_metabox']);
             add_action('admin_init', [$this, 'toocheke_series_hero_image_add_metabox']);
@@ -2222,24 +2227,24 @@ jQuery(document).ready(function($) {
             ?>
 
         <h2 class="nav-tab-wrapper">
-        <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                               <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
-        <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
-        <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                               <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
-        <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
-        <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
-        <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
-        <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                           <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
-        <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                    <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
-        <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
-        <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
-        <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                  <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
-        <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
-        <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
-        <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                          <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
-        <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
+        <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
+        <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
+        <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
+        <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
+        <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
+        <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
+        <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
+        <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
+        <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
+        <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
+        <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
+        <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
+        <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
+        <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
+        <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
         <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
-        <a href="?page=toocheke-options-page&tab=buy_options" class="nav-tab <?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">Buy Comic</a>
-        <a href="?page=toocheke-options-page&tab=sponsor_options" class="nav-tab <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">Sponsor Comic</a>
+        <a href="?page=toocheke-options-page&tab=buy_options" class="nav-tab<?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">Buy Comic</a>
+        <a href="?page=toocheke-options-page&tab=sponsor_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                 <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">Sponsor Comic</a>
         <?php endif; ?>
         </h2>
     <form method="post" action="<?php echo esc_url(add_query_arg('tab', $active_tab, admin_url('options.php'))); ?>">
@@ -2716,7 +2721,7 @@ jQuery(document).ready(function($) {
                         ];
                         add_settings_field("toocheke_paypal_currency", "Currency", [$this, 'toocheke_select_dropdown_generator'], 'toocheke-options-page', "toocheke_comic_sponsor_pricing_section", $toocheke_paypal_currency_args);
                         register_setting("toocheke-settings", "toocheke_paypal_currency", ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field']);
-                         //Price field
+                        //Price field
                         add_settings_field(
                             'toocheke-comic-sponsorship-price',
                             'Price per day',
@@ -2725,11 +2730,11 @@ jQuery(document).ready(function($) {
                             'toocheke_comic_sponsor_pricing_section',
                             [
                                 'label_for' => 'toocheke-comic-sponsorship-price',
-                                'class'     => 'toocheke-companion',         // for <tr> element
+                                'class'     => 'toocheke-companion',               // for <tr> element
                                 'name'      => 'toocheke-comic-sponsorship-price', // pass any custom parameters
                             ]
                         );
-						
+
                         register_setting("toocheke-settings", 'toocheke-comic-sponsorship-price', 'absint');
                     }
                     break;
@@ -3644,19 +3649,19 @@ jQuery(document).ready(function($) {
     </option>
     <option value="calendar"
         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "calendar"); ?>>Calendar</option>
-    <option value="gallery"                                                                                                                                        <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
+    <option value="gallery"                                                                                                                                                                                                                                                    <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
         Gallery/Grid</option>
-    <option value="chapters-plain-text-list"                                                                                                                                                                                                                             <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-plain-text-list"); ?>>
+    <option value="chapters-plain-text-list"                                                                                                                                                                                                                                                                                                                                                                                                             <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-plain-text-list"); ?>>
         Segmented By Chapters - Plain Text List</option>
-        <option value="chapters-gallery"                                                                                                                                                                                                         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
+        <option value="chapters-gallery"                                                                                                                                                                                                                                                                                                                                                                         <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
         Segmented By Chapters - Gallery/Grid</option>
-        <option value="series-plain-text-list"                                                                                                                                                                                                                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
+        <option value="series-plain-text-list"                                                                                                                                                                                                                                                                                                                                                                                                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
         Segmented By Series - Plain Text List</option>
-        <option value="series-gallery"                                                                                                                                                                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
+        <option value="series-gallery"                                                                                                                                                                                                                                                                                                                                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
         Segmented By Series - Gallery/Grid</option>
-        <option value="yearly-plain-text-list"                                                                                                                                                                                                                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
+        <option value="yearly-plain-text-list"                                                                                                                                                                                                                                                                                                                                                                                                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
         Segmented By Year - Plain Text List</option>
-        <option value="yearly-gallery"                                                                                                                                                                                               <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
+        <option value="yearly-gallery"                                                                                                                                                                                                                                                                                                                                                       <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
         Segmented By Year - Gallery/Grid</option>
 </select>
 <?php
@@ -3670,7 +3675,7 @@ jQuery(document).ready(function($) {
 <option value="thumbnail-list"
     <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "thumbnail-list"); ?>>Thumbnail
     List</option>
-<option value="gallery"                                                                                                                    <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
+<option value="gallery"                                                                                                                                                                                                                <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "gallery"); ?>>
     Gallery/Grid</option>
 </select>
 <?php
@@ -4612,8 +4617,69 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
         }
         /**
+         * Alt hover text
+         */
+        public function toocheke_comic_alt_meta_box()
+        {
+            add_meta_box(
+                'comic-alt',
+                __('Alt (Hover) Text', 'comic-alt'),
+                [$this, 'toocheke_comic_alt_display'],
+                'comic',
+                "normal",
+                "core"
+            );
+
+        }
+        //Displaying the meta box
+        public function toocheke_comic_alt_display($post)
+    {?>
+
+<?php
+    $content = get_post_meta($post->ID, 'comic-hovertext', true);
+        ?>
+<h4 style='color: #2271b1;'>Enter the text that will appear will appear when you mouse over the comic here.</h4>
+<p>
+<textarea class="widefat" type="text" name="comic-hovertext" id="comic-hovertext" style="width:100%" >
+<?php echo esc_attr($content); ?>
+</textarea>
+
+</p>
+<?php }
+        //This function saves the data you put in the meta box
+        public function toocheke_comic_alt_save_postdata($post_id)
+        {
+            if (isset($_POST['toocheke_comic_alt_display_nonce']) && isset($_POST['comic'])) {
+
+                //Not save if the user hasn't submitted changes
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                    return;
+                }
+
+                // Verifying whether input is coming from the proper form
+                if (! wp_verify_nonce($_POST['toocheke_comic_alt_display_nonce'])) {
+                    return;
+                }
+
+                // Making sure the user has permission
+                if ('post' == $_POST['comic']) {
+                    if (! current_user_can('edit_post', $post_id)) {
+                        return;
+                    }
+                }
+            }
+
+            /* Get the posted data and sanitize it for use as an HTML class. */
+            if (isset($_POST['comic-hovertext'])) {
+                $data = $_POST['comic-hovertext'];
+                update_post_meta($post_id, 'comic-hovertext', $data);
+            }
+
+        }
+        /**
          * Display Transcript
          */
+
         public function toocheke_comic_transcript_meta_box()
         {
             add_meta_box(
@@ -4698,7 +4764,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         ?>
 <h4 style='color: #2271b1;'>Enable this option if you want to verify the age for this<?php echo $post->post_type ?>.</h4>
 <p>
-<input value="on" type="checkbox" id="age-verification" name="age-verification"                                                                                                                                                                                                                                                                                                                                                                                                            <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
+<input value="on" type="checkbox" id="age-verification" name="age-verification"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <?php if ($age_verification == "on"): echo " checked";endif?>>Verify age?<br />
 
 </p>
 <?php }
@@ -6352,11 +6418,11 @@ jQuery(document).ready(function($) {
             <p>
                 <?php while ($like_query->have_posts()): $like_query->the_post();
                             echo $sep; ?><a href="<?php the_permalink(); ?>"
-																																																																																																                    title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
-																																																																																																                <?php
-                                                                                                                                                                                                                                                                                                                                                                                                                        $sep = ' &middot; ';
-                                                                                                                                                                                                                                                                                                                                                                                                                            endwhile;
-                                                                                                                                                                                                                                                                                                                                                                                                                        ?>
+																																																																																																				                    title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
+																																																																																																				                <?php
+                                                                                                                                                                                                                                                                                                                                                                                                                                        $sep = ' &middot; ';
+                                                                                                                                                                                                                                                                                                                                                                                                                                            endwhile;
+                                                                                                                                                                                                                                                                                                                                                                                                                                        ?>
             </p>
             <?php else: ?>
             <p><?php _e('You do not like anything yet.', 'toocheke-companion'); ?></p>
@@ -7266,13 +7332,87 @@ jQuery(document).ready(function($) {
             }
 
             $currency   = strtoupper($currency);
-            $currencies =  $this->toocheke_get_currencies();
+            $currencies = $this->toocheke_get_currencies();
 
             $symbols = apply_filters('toocheke_currency_symbols', $currencies);
 
             $currency_symbol = isset($symbols[$currency]) ? $symbols[$currency] : '';
 
             return apply_filters('toocheke_currency_symbol', $currency_symbol, $currency);
+        }
+        /*
+        * Alt hover for images
+        */
+        // Shared logic to insert hovertext into image tags
+        public function toocheke_add_hovertext_to_images_in_html($html, $hovertext)
+        {
+            if (empty($html) || empty($hovertext)) {
+                return '';
+            }
+
+            libxml_use_internal_errors(true);
+            $dom      = new DOMDocument();
+            $encoding = '<?xml encoding="utf-8" ?>';
+            $dom->loadHTML($encoding . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+            $images = $dom->getElementsByTagName('img');
+            foreach ($images as $img) {
+                if (! $img->hasAttribute('title')) {
+                    $img->setAttribute('title', $hovertext);
+                }
+                // Always overwrite alt attribute
+                $img->setAttribute('alt', $hovertext);
+            }
+
+            $modified = $dom->saveHTML();
+            $modified = preg_replace('/^<\?xml.*?\?>/', '', $modified);
+
+            return $modified;
+        }
+
+        // Filter for the_content (only for 'comic' post type)
+        public function toocheke_add_comic_hovertext_to_content($content)
+        {
+            if (! is_singular('comic') || ! in_the_loop() || ! is_main_query()) {
+                return $content;
+            }
+
+            global $post;
+            $hovertext = get_post_meta($post->ID, 'comic-hovertext', true);
+
+            if (empty($hovertext)) {
+                return $content; // No hovertext, return nothing
+            }
+
+            return $this->toocheke_add_hovertext_to_images_in_html($content, $hovertext);
+        }
+
+        // Filter for get_post_metadata (only for 'comic' post type)
+        public function toocheke_add_hovertext_to_desktop_comic_editor_meta($value, $object_id, $meta_key, $single)
+        {
+            if ($meta_key !== 'desktop_comic_editor' || ! $single) {
+                return $value;
+            }
+
+            $post = get_post($object_id);
+            if (! $post || $post->post_type !== 'comic') {
+                return $value;
+            }
+
+            $hovertext = get_post_meta($object_id, 'comic-hovertext', true);
+            if (empty($hovertext)) {
+                return $value; // No hovertext, return nothing
+            }
+
+            // Prevent infinite recursion
+            remove_filter('get_post_metadata', [$this, 'toocheke_add_hovertext_to_desktop_comic_editor_meta'], 10);
+
+            $content = get_post_meta($object_id, 'desktop_comic_editor', true);
+
+            // Re-add the filter
+            add_filter('get_post_metadata', [$this, 'toocheke_add_hovertext_to_desktop_comic_editor_meta'], 10, 4);
+
+            return $this->toocheke_add_hovertext_to_images_in_html($content, $hovertext);
         }
 
     }

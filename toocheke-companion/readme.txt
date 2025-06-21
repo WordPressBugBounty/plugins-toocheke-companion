@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.171
+Stable tag: 1.172
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -115,6 +115,9 @@ Go to your settings -> permalinks and just click save, this will flush out your 
 https://leetoo.net/contact/
 
 == Changelog ==
+= 1.172=
+* UPDATE. Enhanced like feature with bot check
+
 = 1.171=
 * FIX. Authors could not add comic posts. Added capability support for authors.
 

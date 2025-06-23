@@ -11,7 +11,7 @@ $display_comic_nav_above_comic = get_option('toocheke-comic-nav-above-comic') &&
 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
 $series_id = get_query_var('series_id');
 $companion = new Toocheke_Companion_Comic_Features();
-$companion->toocheke_universal_set_post_views(get_the_ID());
+//$companion->toocheke_universal_set_post_views(get_the_ID());
 ?>
 
 <div id="comic" class="single-comic-wrapper">
@@ -55,11 +55,14 @@ echo '</span>';
 
 echo '</div>';
 echo '</div>';
-
+if ( is_singular('comic') ) {
 $templates->get_template_part('content', 'comicnavigation');
+}
 
 ?>
 </div>
 <?php
+if ( is_singular('comic') ) {
 $templates->get_template_part('content', 'comicblogpost');
+}
 ?>

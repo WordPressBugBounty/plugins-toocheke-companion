@@ -10,6 +10,7 @@ $series_order = get_option('toocheke-series-order') ? get_option('toocheke-serie
 
 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
 $comic_order = get_query_var('comics_order') ? get_query_var('comics_order') : $comic_order;
+
 $link_to_series = get_query_var('link_to') && get_query_var('link_to') == 'series';
 if (post_type_exists('series')):
     /**

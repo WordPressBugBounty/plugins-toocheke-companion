@@ -14,7 +14,7 @@ $display_no_views = get_option('toocheke-comic-no-of-views') && 1 == get_option(
 $rank = get_query_var('rank');
 $series_id = get_query_var('series_id');
 ?>
-<li id="post-<?php esc_attr(the_ID());?>" <?php wp_kses_data(post_class());?>>
+<li id="post-<?php esc_attr(the_ID());?>" <?php wp_kses_data((string) post_class()); ?>>
 <?php
 $comic_url = get_permalink($post);
 if ($series_id) {
@@ -33,7 +33,20 @@ if ($rank) {
                                             <?php
 }
 if (has_post_thumbnail()) {
-    the_post_thumbnail('thumbnail');
+    $post_thumbnail_id = get_post_thumbnail_id($post->ID);
+
+if ($post_thumbnail_id) {
+    $thumbnail_url = wp_get_attachment_image_url($post_thumbnail_id, 'thumbnail');
+
+    if (!$thumbnail_url) {
+        // fallback to full size
+        $thumbnail_url = wp_get_attachment_image_url($post_thumbnail_id, 'full');
+    }
+
+    if ($thumbnail_url) {
+        echo '<img src="' . esc_url($thumbnail_url) . '" alt="">';
+    }
+}
 } else {
     ?>
    <img src="<?php echo esc_attr(plugins_url('toocheke-companion' . '/img/default-thumbnail-image.png')); ?>" />

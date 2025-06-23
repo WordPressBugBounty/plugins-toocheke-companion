@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.172
+Stable tag: 1.174
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -15,106 +15,102 @@ Transform your WordPress theme into a platform for publishing your webcomics.
 
 == Description ==
 
-Toocheke Companion Website: [Toocheke Companion](https://leetoo.net/toocheke-companion/ "Toocheke Companion - Plugin for publishing your webcomic")
+**Toocheke Companion Website:** [Toocheke Companion](https://leetoo.net/toocheke-companion/ "Toocheke Companion - Plugin for publishing your webcomic")
 
-Looking to publish your comics on your WordPress website? Toocheke Companion adds to your WordPress theme, the ability to create and manage your comic posts. You can now add the ability to diplay comics to almost any WordPress theme. Works best with the Toocheke WordPress theme.
+Looking to publish your comics on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic posts. While it works best with the **Toocheke WordPress theme**, it is compatible with most modern WordPress themes.
 
-= Features =
-- Ability to display comics posts in any theme.
-- Easy customization with a variety of color schemes.
-- Different layout options for the comic page on desktops and other larger devices.
-- Mobile device-friendly(responsive) page layout
-- Responsive comic(display one version of the comic for desktops and another version for mobile devices)
-- Optimized for the webtoon/vertical scroll format comics
-- Thumbnail navigation of the comic archive
-- Segment your comics into chapters
-- Add character and location tags for each of your comics
-- Social share buttons
-- Publish multiple comic series
-- Age verification for NSFW comics.
-- Four comic archive layout options(Thumnail list, Text list, Calendar & Gallery)
-- Customizable comic navigation buttons.
-- Chapter navigation.
-- Supports like functionality for comics.
-- Supports bookmarking of comics.
-- Supports tracking of post views with a top ten feature.
-- Supports bilingual comics.
-- Can show comic archive as an infinite scroll(lazy load).
+### Key Features
+
+- Display comic posts in nearly any WordPress theme
+- Full support for the WordPress Block Editor (Gutenberg)
+- Includes 15 static blocks and matching shortcodes for flexible comic layouts
+- Easy customization with color schemes and layout options
+- Responsive layout optimized for mobile and desktop
+- Dual-version responsive comic support (desktop/mobile)
+- Webtoon-style vertical scrolling support
+- Thumbnail-based archive navigation
+- Organize comics into series, chapters, collections and character/location tags
+- Built-in social sharing, likes, bookmarks, and age verification
+- Top ten comics based on post views
+- Infinite scroll for archive display
+- Bilingual/multilingual comic support
 
 == Installation == 
 
-- In your admin panel, go to the Plugins > Add New page.
-- Just do a search for Toocheke Companion and the first result should be the one you're looking for.
-- Click Install Now.
-- Click Activate to use your new plugin right away.
+1. Go to **Plugins > Add New** in your WordPress admin dashboard.
+2. Search for **Toocheke Companion**.
+3. Click **Install Now** and then **Activate**.== Usage ==
 
-= Displaying Comics Posts on Any Theme =
-Toocheke Companion comes with built in features that can transform just about any WordPress theme into a webcomic publishing platform. All that is required is creating a page and adding your choice of comic related shortcodes. The following is a list features available with their corresponding shortcodes.
+Toocheke Companion enables you to display comics using either shortcodes or the WordPress Block Editor. Create a page or post and insert the desired block or shortcode.
 
-- Display a list of the comic "Series" in a grid layout with thumbnail images.
-- Display a list of the comic "Chapters" in a grid layout with thumbnail images.
-- Display a list of the latest six "Chapters" in a grid layout with thumbnail images.
-- Display the first comic post with comic navigation buttons.
-- Display the latest comic post with comic navigation buttons.
-- Display a list of the latest comics with pagination.
-- Display a list of top ten comics.
-- Display a list of upcoming scheduled comics.
-- Display a comic archive in a variety of formats(text list, thumbnail list, thumbnail gallery and calendar).
-- Display the comic's characters.
+### Available Blocks and Shortcodes
 
+1. **Toocheke All Series**  
+   `[toocheke-all-series comics_order="ASC/DESC" link_to="series/comic"]`
 
-`[toocheke-all-series comics_order="ASC/DESC" link_to="series/comic"]` 
+2. **Toocheke All Chapters**  
+   `[toocheke-all-chapters sid="####"]`
 
-`[toocheke-all-chapters sid="####"]`
+3. **Toocheke Latest Chapters**  
+   `[toocheke-latest-chapters sid="####"]`
 
-`[toocheke-latest-chapters sid="####"]`
+4. **Toocheke First Comic**  
+   `[toocheke-first-comic]` or `[toocheke-first-comic sid="####"]`
 
-`[toocheke-first-comic]`
+5. **Toocheke Latest Comic**  
+   `[toocheke-latest-comic]` or `[toocheke-latest-comic sid="####"]`
 
-`[toocheke-first-comic sid="####"]`
+6. **Toocheke Latest Comics**  
+   `[toocheke-latest-comics]`, `[toocheke-latest-comics sid="####"]`, `[toocheke-latest-comics limit="####"]`
 
-`[toocheke-latest-comic]`
+7. **Toocheke Top Ten Comics**  
+   `[toocheke-top-ten-comics]`
 
-`[toocheke-latest-comic sid="####"]`
+8. **Toocheke Scheduled Comics**  
+   `[toocheke-scheduled-comics]`
 
-`[toocheke-latest-comics]`
+9. **Toocheke Comic Archive**  
+   `[toocheke-comic-archive]` or `[toocheke-comic-archive sid="####"]`
 
-`[toocheke-latest-comics sid="####"]`
+10. **Toocheke Collection Archive**  
+    `[toocheke-collection-archive term="collection-slug"]`
 
-`[toocheke-latest-comics limit="####"]`
+11. **Toocheke Chapter Archive**  
+    `[toocheke-chapter-archive term="chapter-slug"]`
 
-`[toocheke-top-ten-comics]`
+12. **Toocheke Tag Archive**  
+    `[toocheke-tag-archive term="comic-tag-slug"]`
 
-`[toocheke-scheduled-comics]`
+13. **Toocheke Location Archive**  
+    `[toocheke-location-archive term="location-slug"]`
 
-`[toocheke-comic-archive]`
+14. **Toocheke Character Archive**  
+    `[toocheke-character-archive term="character-slug"]`
 
-`[toocheke-comic-archive sid="####"]`
+15. **Toocheke Characters**  
+    `[toocheke-characters]`
 
-`[toocheke-characters]`
-
-`[toocheke-collection-archive term="collection-slug"]`
-
-`[toocheke-chapter-archive term="chapter-slug"]`
-
-`[toocheke-tag-archive term="comic-tag-slug"]`
-
-`[toocheke-location-archive term="location-slug"]`
-
-`[toocheke-character-archive term="character-slug"]`
+All of the above are also available as static Gutenberg blocks under the widgets category in the WordPress Block Editor.
 
 
 == Frequently Asked Questions ==
 
-= The comic permalinks are not working. how do I get them to work? =
+= The comic permalinks are not working. How do I fix them? =
 
-Go to your settings -> permalinks and just click save, this will flush out your old permalinks settings.
+Go to **Settings > Permalinks** and click **Save**. This will refresh your permalink settings.
 
-= Where can I get help with Toocheke Companion? =
+= Where can I get support? =
 
-https://leetoo.net/contact/
+Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+= 1.174 =
+* ENHANCEMENT: Introduced full Gutenberg block editor support.
+* Added 15 custom static blocks for displaying series, chapters, comic posts, characters, archives, and more.
+
+= 1.173=
+* UPDATE. Added support for blocks
+
 = 1.172=
 * UPDATE. Enhanced like feature with bot check
 

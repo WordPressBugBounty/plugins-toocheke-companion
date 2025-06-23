@@ -87,7 +87,7 @@ if (!function_exists('toocheke_universal_get_comic_link')):
         $sorted_posts = get_posts($args);
         $permalink = esc_url(get_permalink($sorted_posts[0]->ID));
         if ($permalink == $current_permalink) {
-            return;
+            return "";
         }
 
         $permalink = esc_url($collection_id > 0 ? add_query_arg('col', $collection_id, get_permalink($sorted_posts[0]->ID)) : get_permalink($sorted_posts[0]->ID));

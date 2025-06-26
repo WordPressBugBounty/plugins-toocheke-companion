@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.174
+Stable tag: 1.175
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -23,7 +23,7 @@ Looking to publish your comics on your WordPress website? **Toocheke Companion**
 
 - Display comic posts in nearly any WordPress theme
 - Full support for the WordPress Block Editor (Gutenberg)
-- Includes 15 static blocks and matching shortcodes for flexible comic layouts
+- Includes 15 blocks and matching shortcodes for flexible comic layouts
 - Easy customization with color schemes and layout options
 - Responsive layout optimized for mobile and desktop
 - Dual-version responsive comic support (desktop/mobile)
@@ -39,7 +39,9 @@ Looking to publish your comics on your WordPress website? **Toocheke Companion**
 
 1. Go to **Plugins > Add New** in your WordPress admin dashboard.
 2. Search for **Toocheke Companion**.
-3. Click **Install Now** and then **Activate**.== Usage ==
+3. Click **Install Now** and then **Activate**.
+
+== Usage ==
 
 Toocheke Companion enables you to display comics using either shortcodes or the WordPress Block Editor. Create a page or post and insert the desired block or shortcode.
 
@@ -90,7 +92,7 @@ Toocheke Companion enables you to display comics using either shortcodes or the 
 15. **Toocheke Characters**  
     `[toocheke-characters]`
 
-All of the above are also available as static Gutenberg blocks under the widgets category in the WordPress Block Editor.
+All of the above are also available as Gutenberg blocks under the widgets category in the WordPress Block Editor.
 
 
 == Frequently Asked Questions ==
@@ -104,9 +106,13 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.175 =
+* FIX: Resolved alt hover issue not working on 3rd party themes.
+
 = 1.174 =
 * ENHANCEMENT: Introduced full Gutenberg block editor support.
-* Added 15 custom static blocks for displaying series, chapters, comic posts, characters, archives, and more.
+* Added 15 custom blocks for displaying series, chapters, comic posts, characters, archives, and more.
 
 = 1.173=
 * UPDATE. Added support for blocks

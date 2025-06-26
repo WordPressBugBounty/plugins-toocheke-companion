@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
      * Plugin Name: Toocheke Companion
      * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
      * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
-     * Version:     1.174
+     * Version:     1.175
      * Author:      Leetoo
      * Author URI:  https://leetoo.net
      * License:     GPLv2 or later
@@ -30,7 +30,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
     }
 
     if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-        define('TOOCHEKE_COMPANION_VERSION', '1.172');
+        define('TOOCHEKE_COMPANION_VERSION', '1.175');
     }
     class Toocheke_Companion_Comic_Features
     {
@@ -175,7 +175,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
             add_action('wp_ajax_nopriv_toocheke_set_age_verification_cookie', [$this, 'toocheke_set_age_verification_cookie']);
             add_action('admin_init', [$this, 'toocheke_remove_image_link'], 10);
             add_filter('the_content', [$this, 'toocheke_attachment_image_link_remove_filter']);
-            add_filter('the_content', [$this, 'toocheke_add_comic_hovertext_to_content']);
+            add_filter('the_content', [$this, 'toocheke_add_comic_hovertext_to_content'], 999);
             add_filter('get_post_metadata', [$this, 'toocheke_add_hovertext_to_desktop_comic_editor_meta'], 10, 4);
 
             add_action('do_meta_boxes', [$this, 'toocheke_move_series_featured_image_metabox']);

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.175
+Stable tag: 1.176
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -106,6 +106,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.176 =
+* FIX: Fixed an issue where the alt hover effect was not being applied correctly.
 
 = 1.175 =
 * FIX: Resolved alt hover issue not working on 3rd party themes.

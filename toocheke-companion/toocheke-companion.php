@@ -9,7 +9,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
      * Plugin Name: Toocheke Companion
      * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
      * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
-     * Version:     1.177
+     * Version:     1.178
      * Author:      Leetoo
      * Author URI:  https://leetoo.net
      * License:     GPLv2 or later
@@ -47,7 +47,9 @@ Description: Theme specific functions for the Toocheke WordPress theme.
         {
             $theme = wp_get_theme();
             // Actions and Filters
+            add_filter('use_block_editor_for_post_type', [$this, 'toocheke_companion_disable_block_editor_for_post_types'], 10, 2);
             add_action('init', [$this, 'toocheke_companion_create_series_custom_post_type'], 0);
+            
             add_action('init', [$this, 'toocheke_companion_create_comic_custom_post_type'], 0);
             register_activation_hook(__FILE__, [$this, 'toocheke_rewrite_flush']);
             add_action('admin_menu', [$this, 'toocheke_add_plugin_main_menu'], 0);
@@ -4251,10 +4253,15 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
         /**
          * Add Admin Menus.
          */
-        //showing the import page
-        public function toocheke_include_import_page()
+        //showing the import comic easel page
+        public function toocheke_include_import_comic_easel_page()
         {
-            require_once 'inc/toocheke-companion-import.php';
+            require_once 'inc/toocheke-companion-import-comic-easel.php';
+        }
+        //showing the import webcomic page
+        public function toocheke_include_import_webcomic_page()
+        {
+            require_once 'inc/toocheke-companion-import-webcomic.php';
         }
 
         /**
@@ -5807,7 +5814,8 @@ jQuery(document).ready(function($) {
                  add_submenu_page('toocheke-menu', 'Comic Locations', 'Comic Locations', 'edit_posts', 'edit-tags.php?taxonomy=comic_locations&post_type=comic', null, 12);
                  add_submenu_page('toocheke-menu', 'Comic Characters', 'Comic Characters', 'edit_posts', 'edit-tags.php?taxonomy=comic_characters&post_type=comic', null, 13);
                  add_submenu_page('toocheke-menu', 'Options', 'Options', 'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page'], 14);
-                 add_submenu_page('toocheke-menu', 'Import', 'Import', 'edit_posts', 'toocheke-import', [$this, 'toocheke_include_import_page'], 15);
+                 add_submenu_page('toocheke-menu', 'Import From Comic Easel', 'Import From Comic Easel', 'edit_posts', 'toocheke-import-comic-easel', [$this, 'toocheke_include_import_comic_easel_page'], 15);
+                 add_submenu_page('toocheke-menu', 'Import From Webcomic', 'Import From Webcomic', 'edit_posts', 'toocheke-import-webcomic', [$this, 'toocheke_include_import_webcomic_page'], 15);
              }
              /**
               * Admin dashboard page
@@ -7480,6 +7488,13 @@ jQuery(document).ready(function($) {
             add_filter('get_post_metadata', [$this, 'toocheke_add_hovertext_to_desktop_comic_editor_meta'], 10, 4);
 
             return $this->toocheke_add_hovertext_to_images_in_html($content, $hovertext);
+        }
+        public function toocheke_companion_disable_block_editor_for_post_types($use_block_editor, $post_type){
+            if ($post_type === 'series') {
+        return false; // Disable block editor for 'series'
+    }
+    return $use_block_editor;
+
         }
 
     }

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.177
+Stable tag: 1.178
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -106,6 +106,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.178 =
+* NEW: Added ability to import comics from the Webcomic plugin
 
 = 1.177 =
 * FIX: Alt hover effect for desktop version of comic

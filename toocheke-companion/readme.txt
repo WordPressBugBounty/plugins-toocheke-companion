@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.178
+Stable tag: 1.179
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -107,6 +107,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
 
+= 1.179 =
+* UPDATE: Enhanced the Webcomic plugin import process — comics are now only assigned to a series when multiple series/collections exist, preventing unnecessary series assignment for comics that may disrupt comic navigation.
+
 = 1.178 =
 * NEW: Added ability to import comics from the Webcomic plugin
 
@@ -123,281 +126,281 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 * ENHANCEMENT: Introduced full Gutenberg block editor support.
 * Added 15 custom blocks for displaying series, chapters, comic posts, characters, archives, and more.
 
-= 1.173=
+= 1.173 =
 * UPDATE. Added support for blocks
 
-= 1.172=
+= 1.172 =
 * UPDATE. Enhanced like feature with bot check
 
-= 1.171=
+= 1.171 =
 * FIX. Authors could not add comic posts. Added capability support for authors.
 
-= 1.170=
+= 1.170 =
 * UPDATE. Added support for hover text.
 
-= 1.169=
+= 1.169 =
 * UPDATE. Added support for sponsoring a comic.
 
-= 1.168=
+= 1.168 =
 * UPDATE. Added shortcodes for displaying comic taxonomy archives.
 
-= 1.167=
+= 1.167 =
 * FIX. Security fix for saving editor meta fields for comics
 
-= 1.166=
+= 1.166 =
 * UPDATE. Added option to scroll past header when navigating through comic posts
 * UPDATE. Added option to consolidate comic posts and regular blog posts into main feed.
 
-= 1.165=
+= 1.165 =
 * UPDATE. Replaced Twitter icon with X icon for the social sharing button.
 
-= 1.164=
+= 1.164 =
 * FIX. Removed content display for age verification popup
 
-= 1.163=
+= 1.163 =
 * FIX. Reset of comic post variable from traditional navigation buttons to prevent chapters navigation conflict
 
-= 1.162=
+= 1.162 =
 * FIX. Layout issues for comic archive shortcode
 
-= 1.161=
+= 1.161 =
 * FIX. Display of comic archive
 
-= 1.160=
+= 1.160 =
 * FIX. Formatting of paragraphs in comic blog post.
 
-= 1.159=
+= 1.159 =
 * UPDATE. Added age verification support for individual comics and series.
 
-= 1.158=
+= 1.158 =
 * FIX. Paragraph spacing for Rich text editors.
 
-= 1.157=
+= 1.157 =
 * UPDATE. Expanded the default search results to include comic posts.
 
-= 1.156=
+= 1.156 =
 * UPDATE. Added "limit" option for the latest comics shortcode.
 
-= 1.155=
+= 1.155 =
 * UPDATE. Replaced sharing button images with fontawesome icons.
 
-= 1.154=
+= 1.154 =
 * FIX. toocheke-latest-comic shortcode - comments and blog posts were not being displayed. Post conflict with chapter dropdown.
 
-= 1.153=
+= 1.153 =
 * UPDATE. WhatsApp and LinkedIn social media share buttons
 
-= 1.152=
+= 1.152 =
 * UPDATE. Bluesky and threads social media share buttons
 
-= 1.151=
+= 1.151 =
 * UPDATE. Add short code link parameter for "toocheke-all-series"
 
-= 1.150=
+= 1.150 =
 * FIX. Warning messages for sorting comics
 
-= 1.149=
+= 1.149 =
 * FIX. Kofi link for support links.
 
-= 1.148=
+= 1.148 =
 * UPDATE. Added sidebar override for series.
 
-= 1.147=
+= 1.147 =
 * FIX. Paging for all chapters shortcode.
 
-= 1.146=
+= 1.146 =
 * FIX. Bug in sort function for comics.
 
-= 1.145=
+= 1.145 =
 * FIX. Ordering of likes and views in comics admin.
 
-= 1.144=
+= 1.144 =
 * UPDATE. Added series filtering to chapters shortcode
 
-= 1.143=
+= 1.143 =
 * FIX. Chapters navigation
 
-= 1.142=
+= 1.142 =
 * UPDATE. Added comic archive navigation button
 
-= 1.141=
+= 1.141 =
 * FIX. Getting the correct URL for the comic page for social medial sharing
 
-= 1.140=
+= 1.140 =
 * UPDATE. Added support buttons
 
-= 1.139=
+= 1.139 =
 * UPDATE. Added yearly archive options
 
-= 1.138=
+= 1.138 =
 * FIX. Import error for comics
 
-= 1.137=
+= 1.137 =
 * FIX. Import error for comics
 
-= 1.136=
+= 1.136 =
 * UPDATE. Optimized import process for Comic Easel
 
-= 1.135=
+= 1.135 =
 * UPDATE. Transcript meta
 
-= 1.134=
+= 1.134 =
 * UPDATE. Added transcript field
 
-= 1.133=
+= 1.133 =
 * UPDATE. Add parameter for ordering comics for the "toocheke-all-series" shortcode
 
-= 1.132=
+= 1.132 =
 * UPDATE. Added locations/tags/characters to import process from Comic Easel. Optimized process for importing from Comic Easel
 
-= 1.131=
+= 1.131 =
 * FIX. Displaying comments on the latest comic shortcode.
 
-= 1.130=
+= 1.130 =
 * FIX. Adding option to delete audio file(for Premium only).
 
-= 1.129=
+= 1.129 =
 * UPDATE. Changed function for handling random comic navigation.
 
-= 1.128=
+= 1.128 =
 * FIX. Handling cacheing for random comic navigation.
 
-= 1.127=
+= 1.127 =
 * UPDATE. Added meta data for comic's blog post.
 
-= 1.126=
+= 1.126 =
 * UPDATE. Fixed layout for comic's blog post.
 
-= 1.125=
+= 1.125 =
 * UPDATE. Displaying comic's blog post irrespective of theme.
 
-= 1.124=
+= 1.124 =
 * UPDATE. Added display of analytics (views,comments,likes) irrespective of theme.
 
-= 1.123=
+= 1.123 =
 * FIX. Counting comic post views irrespective of theme.
 
-= 1.122=
+= 1.122 =
 * FIX. Added a workaround to handle age verification with caching enabled.
 
-= 1.121=
+= 1.121 =
 * UPDATE. Added option to setup commenting behind a paywall.
 
-= 1.120=
+= 1.120 =
 * FIX. Handling of age verification with cache plugin installed.
 
-= 1.119=
+= 1.119 =
 * ADDITION. Archive options for displaying archives segmented by series
 
-= 1.118=
+= 1.118 =
 * ADDITION. Archive options for displaying archives segmented by chapters
 
-= 1.117=
+= 1.117 =
 * UPDATE. Option to support navigation to future comic posts(Premium only).
 
-= 1.116=
+= 1.116 =
 * UPDATE. Option to choose which series is displayed on the home page of a traditional layout.
 
-= 1.115=
+= 1.115 =
 * UPDATE. Added option for buying original art and print copies of a comic(Premium only).
 
-= 1.114=
+= 1.114 =
 * FIX. Add check for posted custom fields.
 
-= 1.113=
+= 1.113 =
 * Fixed saving of empty comic custom fields
 
-= 1.112=
+= 1.112 =
 * Fixed ordering of comic characters
 
-= 1.111=
+= 1.111 =
 * Updated copy link url
 
-= 1.110=
+= 1.110 =
 * Updated code for copy link
 
-= 1.109=
+= 1.109 =
 * Added shortcode support for ordering characters
 
-= 1.108=
+= 1.108 =
 * Added ordering for characters.
 
-= 1.107=
+= 1.107 =
 * Added scheduled comics shortcode.
 
-= 1.106=
+= 1.106 =
 * Updated name of enqueued font awesome font to prevent conflict
 
-= 1.105=
+= 1.105 =
 * Removed deprecated get_page_by_title().
 
-= 1.104=
+= 1.104 =
 * Fixed chapter navigation
 
-= 1.103=
+= 1.103 =
 * Added missing files.
 
-= 1.102=
+= 1.102 =
 * Fixed chapter navigation error.
 
-= 1.101=
+= 1.101 =
 * Added option to disable keyboard navigation.
 
-= 1.100=
+= 1.100 =
 * Changed description on ordering option.
 
-= 1.99=
+= 1.99 =
 * Added support for chapter navigation
 
-= 1.98=
+= 1.98 =
 * Added option for displaying comic's blog post on webtoon layouts.
 
-= 1.97=
+= 1.97 =
 * Fixed bulk edit of Patreon level.
 
-= 1.96=
+= 1.96 =
 * Fixed shortcodes parameters.
 
-= 1.95=
+= 1.95 =
 * Thumbnail archive fix.
 
-= 1.94=
+= 1.94 =
 * Fix for comic navigation for latest comic shortcode.
 
-= 1.93=
+= 1.93 =
 * Added shortcode support for series navigation.
 
-= 1.92=
+= 1.92 =
 * Added shortcode for displaying first comic.
 
-= 1.91=
+= 1.91 =
 * WordPress update compatibility.
 
-= 1.90=
+= 1.90 =
 * Fixed call to function error.
 
-= 1.89=
+= 1.89 =
 * Added  mobile device image option for series posts
 
-= 1.88=
+= 1.88 =
 * Renaming of functions
 
-= 1.87=
+= 1.87 =
 * Added support for displaying comic posts in any theme.
 
-= 1.86=
+= 1.86 =
 * Added taxonomy cloud support for Comic tags, locations & characters.
 
-= 1.85=
+= 1.85 =
 * Added ordering option for Collections
 
-= 1.84=
+= 1.84 =
 * Handling empty string for audio metabox
 
-= 1.83=
+= 1.83 =
 * Added ordering option for the comic slider navigation.
 
-= 1.82=
+= 1.82 =
 * Infinite scroll of comic archive on home page.
 
 = 1.81 =

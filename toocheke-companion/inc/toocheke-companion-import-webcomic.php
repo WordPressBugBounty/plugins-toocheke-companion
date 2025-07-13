@@ -12,6 +12,8 @@
                 return;
             }
 
+            $collections_count = count($webcomic_data['collections']); // Count the collections
+
             //import collections
 
             foreach ($webcomic_data['collections'] as $collection_key) {
@@ -50,7 +52,7 @@
             //import characters and storylines
             toocheke_import_webcomic_taxonomies($webcomic_data);
             //import comic posts
-            toocheke_import_comic_posts($webcomic_data);
+            toocheke_import_comic_posts($webcomic_data, $collections_count);
 
             echo '<div class="notice notice-success is-dismissible"><p><b>Success!</b>  Comics have been successfully imported from <b>Webcomic</b>!</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
             $imported = 1;
@@ -128,13 +130,14 @@
 
     }
 
-    function toocheke_import_comic_posts($webcomic_data)
+    function toocheke_import_comic_posts($webcomic_data, $no_of_series = 1)
     {
         global $wpdb;
         //set to true for now. May get the value from user input later
         $update_content_and_blog = true;
-
+        $series_id               = null;
         foreach ($webcomic_data['collections'] as $collection_key) {
+
             $collection = get_option($collection_key);
             if (empty($collection)) {
                 continue;
@@ -143,14 +146,16 @@
             $collection_post_type = $collection['id'];   // e.g., 'webcomic1'
             $series_slug          = $collection['slug']; // e.g., 'comic-series-1'
 
-            // Get the series post
-            $series_post = get_page_by_path($series_slug, OBJECT, 'series');
-            if (! $series_post) {
-                error_log("Series not found for slug: $series_slug");
-                continue;
-            }
+            // Get the series post only if we have more than one series
+            if ($no_of_series > 1) {
+                $series_post = get_page_by_path($series_slug, OBJECT, 'series');
+                if (! $series_post) {
+                    error_log("Series not found for slug: $series_slug");
+                    continue;
+                }
 
-            $series_id = $series_post->ID;
+                $series_id = $series_post->ID;
+            }
 
             // Define original taxonomies
             $storyline_tax = $collection_post_type . '_storyline';

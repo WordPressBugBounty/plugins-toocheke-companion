@@ -583,3 +583,8 @@ Universal theme styles
 		line-height: 35px;
 	}
 }
+.single-comic-navigation a.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

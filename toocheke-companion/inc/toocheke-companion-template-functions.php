@@ -58,75 +58,79 @@ function toocheke_universal_get_first_image()
  * @param bool $echo Specifies whether to echo comic navigation or return it as a string
  * @return string Returns navigation string if $echo is set to false.
  */
-if (!function_exists('toocheke_universal_get_comic_link')):
+if (! function_exists('toocheke_universal_get_comic_link')):
     function toocheke_universal_get_comic_link($order, $font, $collection_id = 0, $display_default_button = null, $image_button = null, $series_id = null)
 {
         //global $post;
         $current_permalink = esc_url(get_permalink());
-        $placeholder = $GLOBALS['post'];
-        $image_button_url = null !== $image_button && strlen($image_button) > 0 ? get_option('toocheke-' . $image_button . '-button') : "";
-        $button = $display_default_button ? '<i class="fas fa-lg fa-step-' . $font . '"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
-        $args = array(
+        $placeholder       = $GLOBALS['post'];
+        $image_button_url  = null !== $image_button && strlen($image_button) > 0 ? get_option('toocheke-' . $image_button . '-button') : "";
+        $button            = $display_default_button ? '<i class="fas fa-lg fa-step-' . $font . '"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
+        $args              = [
             'post_parent' => $series_id,
-            'post_type' => 'comic',
+            'post_type'   => 'comic',
             'numberposts' => 1,
-            'offset' => 0,
-            'orderby' => 'post_date',
-            'order' => $order,
-            'post_status' => 'publish');
+            'offset'      => 0,
+            'orderby'     => 'post_date',
+            'order'       => $order,
+            'post_status' => 'publish'];
         if ($collection_id > 0) {
-            $args['tax_query'] = array(
-                array(
+            $args['tax_query'] = [
+                [
                     'taxonomy' => 'collections',
-                    'field' => 'term_id',
-                    'terms' => $collection_id,
-                ),
-            );
+                    'field'    => 'term_id',
+                    'terms'    => $collection_id,
+                ],
+            ];
         }
 
         $sorted_posts = get_posts($args);
-        $permalink = esc_url(get_permalink($sorted_posts[0]->ID));
+        $permalink    = esc_url(get_permalink($sorted_posts[0]->ID));
         if ($permalink == $current_permalink) {
-            return "";
+            if (get_option('toocheke-always-show-nav-buttons') && 1 == get_option('toocheke-always-show-nav-buttons')) {
+                return '<a  href="javascript:;" class="disabled" tabindex="-1" aria-disabled="true" onclick="return false;">' . $button . '</a>';
+            } else {
+                return "";
+            }
         }
 
         $permalink = esc_url($collection_id > 0 ? add_query_arg('col', $collection_id, get_permalink($sorted_posts[0]->ID)) : get_permalink($sorted_posts[0]->ID));
         //add series id parameter
-        $permalink = add_query_arg('sid', $series_id, $permalink);
-        $title = esc_attr($sorted_posts[0]->post_title);
-        $post = $placeholder;
-        $font = esc_attr($font);
+        $permalink        = add_query_arg('sid', $series_id, $permalink);
+        $title            = esc_attr($sorted_posts[0]->post_title);
+        $post             = $placeholder;
+        $font             = esc_attr($font);
         $latest_link_html = '<a href="' . $permalink . '" title="' . $title . '" >' . $button . '</a>';
         return $latest_link_html;
     }
 endif;
-if (!function_exists('toocheke_universal_adjacent_comic_link')):
+if (! function_exists('toocheke_universal_adjacent_comic_link')):
     function toocheke_universal_adjacent_comic_link($current_post_id, $collection_id, $direction, $display_default_button = null, $series_id = null)
 {
 
         // Info
-        $postIDs = array();
+        $postIDs = [];
 
-        $args = array(
+        $args = [
             'post_parent' => $series_id,
-            'post_type' => 'comic',
-            'nopaging' => true,
-            'offset' => 0,
-            'orderby' => 'post_date',
-            'order' => 'ASC',
-            'post_status' => 'publish');
+            'post_type'   => 'comic',
+            'nopaging'    => true,
+            'offset'      => 0,
+            'orderby'     => 'post_date',
+            'order'       => 'ASC',
+            'post_status' => 'publish'];
 
         if ($collection_id > 0) {
-            $args['tax_query'] = array(
-                array(
+            $args['tax_query'] = [
+                [
                     'taxonomy' => 'collections',
-                    'field' => 'term_id',
-                    'terms' => $collection_id,
-                ),
-            );
+                    'field'    => 'term_id',
+                    'terms'    => $collection_id,
+                ],
+            ];
         }
 
-        $comic_posts = get_posts($args);
+        $comic_posts      = get_posts($args);
         $image_button_url = null !== $direction && strlen($direction) > 0 ? get_option('toocheke-' . $direction . '-button') : "";
 
         // Get post IDs
@@ -137,31 +141,44 @@ if (!function_exists('toocheke_universal_adjacent_comic_link')):
         // Get prev and next post ID
         $currentIndex = array_search($current_post_id, $postIDs);
         if ($currentIndex > 0) {
-            $prevID = $postIDs[$currentIndex - 1];
+            $prevID     = $postIDs[$currentIndex - 1];
             $prev_title = esc_attr($comic_posts[$currentIndex - 1]->post_title);
         }
         if ($currentIndex < count($comic_posts) - 1) {
-            $nextID = $postIDs[$currentIndex + 1];
+            $nextID     = $postIDs[$currentIndex + 1];
             $next_title = esc_attr($comic_posts[$currentIndex + 1]->post_title);
         }
 
         // Return information
-        if ($direction == 'next' and !empty($nextID)):
-            $button = $display_default_button ? '<i class="fas fa-lg fa-chevron-right" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
+        if ($direction == 'next' and ! empty($nextID)):
+            $button    = $display_default_button ? '<i class="fas fa-lg fa-chevron-right" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
             $permalink = esc_url($collection_id > 0 ? add_query_arg('col', $collection_id, get_permalink($nextID)) : get_permalink($nextID));
             //add series id parameter
             $permalink = add_query_arg('sid', $series_id, $permalink);
             $link_html = '<a class="' . $direction . '-comic" href="' . $permalink . '" title="' . $next_title . '" >' . $button . '</a>';
 
-        elseif ($direction == 'previous' and !empty($prevID)):
-            $button = $display_default_button ? '<i class="fas fa-lg fa-chevron-left" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
+        elseif ($direction == 'previous' and ! empty($prevID)):
+            $button    = $display_default_button ? '<i class="fas fa-lg fa-chevron-left" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
             $permalink = esc_url($collection_id > 0 ? add_query_arg('col', $collection_id, get_permalink($prevID)) : get_permalink($prevID));
             //add series id parameter
             $permalink = add_query_arg('sid', $series_id, $permalink);
             $link_html = '<a class="' . $direction . '-comic" href="' . $permalink . '" title="' . $prev_title . '" >' . $button . '</a>';
 
         else:
-            return false;
+
+            if (get_option('toocheke-always-show-nav-buttons') && 1 == get_option('toocheke-always-show-nav-buttons')) {
+                $button = '';
+
+                if ($direction == 'next'):
+                    $button = $display_default_button ? '<i class="fas fa-lg fa-chevron-right" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
+                elseif ($direction == 'previous'):
+                    $button = $display_default_button ? '<i class="fas fa-lg fa-chevron-left" aria-hidden="true"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
+                endif;
+
+                $link_html = '<a href="javascript:;" class="' . $direction . '-comic disabled" >' . $button . '</a>';
+            } else {
+                return false;
+            }
         endif;
         return $link_html;
     }
@@ -180,7 +197,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
     $posttype = 'comic';
 
     // Quick check. If we have no posts at all, abort!
-    if (!$posts) {
+    if (! $posts) {
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $gotsome = $wpdb->get_var("SELECT 1 as test FROM $wpdb->posts WHERE post_type = '$posttype' AND post_status = 'publish' LIMIT 1");
     }
@@ -191,20 +208,20 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
 
     // week_begins = 0 stands for Sunday
     $week_begins = (int) get_option('start_of_week');
-    $ts = current_time('timestamp');
+    $ts          = current_time('timestamp');
 
     // Let's figure out when we are
-    if (!empty($monthnum) && !empty($year)) {
+    if (! empty($monthnum) && ! empty($year)) {
         $thismonth = zeroise(intval($monthnum), 2);
-        $thisyear = (int) $year;
-    } elseif (!empty($w)) {
+        $thisyear  = (int) $year;
+    } elseif (! empty($w)) {
         // We need to get the month from MySQL
         $thisyear = (int) substr($m, 0, 4);
         // it seems MySQL's weeks disagree with PHP's
         $d = (($w - 1) * 7) + 6;
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $thismonth = $wpdb->get_var("SELECT DATE_FORMAT((DATE_ADD('{$thisyear}0101', INTERVAL $d DAY) ), '%m')");
-    } elseif (!empty($m)) {
+    } elseif (! empty($m)) {
         $thisyear = (int) substr($m, 0, 4);
         if (strlen($m) < 6) {
             $thismonth = '01';
@@ -212,12 +229,12 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
             $thismonth = zeroise((int) substr($m, 4, 2), 2);
         }
     } else {
-        $thisyear = gmdate('Y', $ts);
+        $thisyear  = gmdate('Y', $ts);
         $thismonth = gmdate('m', $ts);
     }
 
     $unixmonth = mktime(0, 0, 0, $thismonth, 1, $thisyear);
-    $last_day = date('t', $unixmonth);
+    $last_day  = date('t', $unixmonth);
 
     // Get the next and previous month and year with at least one post
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -227,7 +244,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
 
     /* translators: Calendar caption: 1: month name, 2: 4-digit year */
     $calendar_caption = _x('%1$s %2$s', 'calendar caption', 'toocheke');
-    $calendar_output = '<table id="toocheke-calendar">
+    $calendar_output  = '<table id="toocheke-calendar">
 		<caption>' . sprintf(
         $calendar_caption,
         $wp_locale->get_month($thismonth),
@@ -236,7 +253,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
 		<thead>
 		<tr>';
 
-    $myweek = array();
+    $myweek = [];
 
     for ($wdcount = 0; $wdcount <= 6; $wdcount++) {
         $myweek[] = $wp_locale->get_weekday(($wdcount + $week_begins) % 7);
@@ -244,7 +261,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
 
     foreach ($myweek as $wd) {
         $day_name = $initial ? $wp_locale->get_weekday_initial($wd) : $wp_locale->get_weekday_abbrev($wd);
-        $wd = esc_attr($wd);
+        $wd       = esc_attr($wd);
         $calendar_output .= "\n\t\t<th scope=\"col\" title=\"$wd\">$day_name</th>";
     }
     add_filter('month_link', 'tooocheke_universal_month_link', 10, 3);
@@ -280,7 +297,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
 		<tbody>
 		<tr>';
 
-    $daywithpost = array();
+    $daywithpost = [];
 
     // Get days with posts
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -297,7 +314,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
         $calendar_output .= "\n\t\t" . '<td colspan="' . esc_attr($pad) . '" class="pad">&nbsp;</td>';
     }
 
-    $newrow = false;
+    $newrow      = false;
     $daysinmonth = (int) date('t', $unixmonth);
 
     for ($day = 1; $day <= $daysinmonth; ++$day) {
@@ -359,7 +376,7 @@ function tooocheke_universal_day_link($daylink, $year = '', $month = '', $day = 
 
     $slug = 'comic';
 
-    $relative = "/{$slug}/{$year}/{$month}/{$day}";
+    $relative      = "/{$slug}/{$year}/{$month}/{$day}";
     $day_permalink = home_url($relative);
 
     return $day_permalink;
@@ -374,13 +391,13 @@ function tooocheke_universal_month_link($monthlink, $year = '', $month = '')
 /**
  * Chapter navigation functions
  */
-if (!function_exists('toocheke_universal_get_previous_comic')):
+if (! function_exists('toocheke_universal_get_previous_comic')):
     function toocheke_universal_get_previous_comic($in_chapter = false)
 {
         return toocheke_universal_get_adjacent_comic(true, $in_chapter);
     }
 endif;
-if (!function_exists('toocheke_universal_get_previous_comic_permalink')):
+if (! function_exists('toocheke_universal_get_previous_comic_permalink')):
     function toocheke_universal_get_previous_comic_permalink()
 {
         $prev_comic = toocheke_universal_get_previous_comic(false);
@@ -390,7 +407,7 @@ if (!function_exists('toocheke_universal_get_previous_comic_permalink')):
         return false;
     }
 endif;
-if (!function_exists('toocheke_universal_get_previous_comic_in_chapter_permalink')):
+if (! function_exists('toocheke_universal_get_previous_comic_in_chapter_permalink')):
     function toocheke_universal_get_previous_comic_in_chapter_permalink()
 {
         $prev_comic = toocheke_universal_get_previous_comic(true);
@@ -402,19 +419,19 @@ if (!function_exists('toocheke_universal_get_previous_comic_in_chapter_permalink
         $chapter = toocheke_universal_get_adjacent_chapter(true);
         if (is_object($chapter)) {
             $terminal = toocheke_universal_get_chapter_comic_post($chapter->term_id, false);
-            return !empty($terminal) ? get_permalink($terminal->ID) : false;
+            return ! empty($terminal) ? get_permalink($terminal->ID) : false;
         }
 
         return false;
     }
 endif;
-if (!function_exists('toocheke_universal_get_next_comic')):
+if (! function_exists('toocheke_universal_get_next_comic')):
     function toocheke_universal_get_next_comic($in_chapter = false)
 {
         return toocheke_universal_get_adjacent_comic(false, $in_chapter);
     }
 endif;
-if (!function_exists('toocheke_universal_get_next_comic_permalink')):
+if (! function_exists('toocheke_universal_get_next_comic_permalink')):
     function toocheke_universal_get_next_comic_permalink()
 {
         $next_comic = toocheke_universal_get_next_comic(false);
@@ -424,7 +441,7 @@ if (!function_exists('toocheke_universal_get_next_comic_permalink')):
         return false;
     }
 endif;
-if (!function_exists('toocheke_universal_get_next_comic_in_chapter_permalink')):
+if (! function_exists('toocheke_universal_get_next_comic_in_chapter_permalink')):
     function toocheke_universal_get_next_comic_in_chapter_permalink()
 {
         $next_comic = toocheke_universal_get_next_comic(true);
@@ -436,34 +453,34 @@ if (!function_exists('toocheke_universal_get_next_comic_in_chapter_permalink')):
         $chapter = toocheke_universal_get_adjacent_chapter(false);
         if (is_object($chapter)) {
             $terminal = toocheke_universal_get_chapter_comic_post($chapter->term_id, true);
-            return !empty($terminal) ? get_permalink($terminal->ID) : false;
+            return ! empty($terminal) ? get_permalink($terminal->ID) : false;
         }
 
         return false;
     }
 endif;
 // 0 means get the first of them all, no matter chapter, otherwise 0 = this chapter.
-if (!function_exists('toocheke_universal_get_chapter_comic_post')):
+if (! function_exists('toocheke_universal_get_chapter_comic_post')):
     function toocheke_universal_get_chapter_comic_post($chapterID = 0, $first = true)
 {
 
         $sortOrder = $first ? "asc" : "desc";
 
-        if (!empty($chapterID)) {
-            $chapter = get_term_by('id', $chapterID, 'chapters');
+        if (! empty($chapterID)) {
+            $chapter      = get_term_by('id', $chapterID, 'chapters');
             $chapter_slug = $chapter->slug;
-            $args = array(
-                'chapters' => $chapter_slug,
-                'order' => $sortOrder,
+            $args         = [
+                'chapters'       => $chapter_slug,
+                'order'          => $sortOrder,
                 'posts_per_page' => 1,
-                'post_type' => 'comic',
-            );
+                'post_type'      => 'comic',
+            ];
         } else {
-            $args = array(
-                'order' => $sortOrder,
+            $args = [
+                'order'          => $sortOrder,
                 'posts_per_page' => 1,
-                'post_type' => 'comic',
-            );
+                'post_type'      => 'comic',
+            ];
         }
 
         $terminalComicQuery = new WP_Query($args);
@@ -479,7 +496,7 @@ endif;
  * Retrieve adjacent post link.
  *
  */
-if (!function_exists('toocheke_universal_get_adjacent_comic')):
+if (! function_exists('toocheke_universal_get_adjacent_comic')):
     function toocheke_universal_get_adjacent_comic($previous = true, $in_same_chapter = false, $taxonomy = 'comic')
 {
         global $post, $wpdb;
@@ -495,8 +512,8 @@ if (!function_exists('toocheke_universal_get_adjacent_comic')):
             $join = " INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id INNER JOIN $wpdb->term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id";
 
             if ($in_same_chapter) {
-                $chapt_array = wp_get_object_terms($post->ID, 'chapters', array('fields' => 'ids'));
-                if (!empty($chapt_array)) {
+                $chapt_array = wp_get_object_terms($post->ID, 'chapters', ['fields' => 'ids']);
+                if (! empty($chapt_array)) {
                     $join .= " AND tt.taxonomy = 'chapters' AND tt.term_id IN (" . implode(',', $chapt_array) . ")";
                 }
 
@@ -504,15 +521,15 @@ if (!function_exists('toocheke_universal_get_adjacent_comic')):
         }
 
         $adjacent = $previous ? 'previous' : 'next';
-        $op = $previous ? '<' : '>';
-        $order = $previous ? 'DESC' : 'ASC';
+        $op       = $previous ? '<' : '>';
+        $order    = $previous ? 'DESC' : 'ASC';
 
         $where = apply_filters("get_{$adjacent}_{$taxonomy}_where", $wpdb->prepare("WHERE p.post_date %s %s AND p.post_type = %s AND p.post_status = 'publish'", $op, $current_post_date, $post->post_type), $in_same_chapter);
-        $sort = apply_filters("get_{$adjacent}_{$taxonomy}_sort", "ORDER BY p.post_date $order LIMIT 1");
+        $sort  = apply_filters("get_{$adjacent}_{$taxonomy}_sort", "ORDER BY p.post_date $order LIMIT 1");
 
-        $query = "SELECT p.* FROM $wpdb->posts AS p $join $where $sort";
+        $query     = "SELECT p.* FROM $wpdb->posts AS p $join $where $sort";
         $query_key = "adjacent_{$taxonomy}_{$post->ID}_{$previous}_{$in_same_chapter}"; // . md5($query);
-        $result = wp_cache_get($query_key, 'counts');
+        $result    = wp_cache_get($query_key, 'counts');
         if (false !== $result) {
             return $result;
         }
@@ -526,7 +543,7 @@ if (!function_exists('toocheke_universal_get_adjacent_comic')):
         return $result;
     }
 endif;
-if (!function_exists('toocheke_universal_get_adjacent_chapter')):
+if (! function_exists('toocheke_universal_get_adjacent_chapter')):
     function toocheke_universal_get_adjacent_chapter($prev = false)
 {
         global $post;
@@ -545,19 +562,19 @@ if (!function_exists('toocheke_universal_get_adjacent_chapter')):
 
         $find_order = (bool) $prev ? $current_order - 1 : $current_order + 1;
 
-        if (!$find_order) {
+        if (! $find_order) {
             return false;
         }
 
-        $args = array(
-            'orderby' => 'chapter-order',
-            'order' => 'DESC',
-            'hide_empty' => 1,
+        $args = [
+            'orderby'       => 'chapter-order',
+            'order'         => 'DESC',
+            'hide_empty'    => 1,
             'chapter-order' => $find_order,
-        );
+        ];
 
         $all_chapters = get_terms('chapters', $args);
-        if (!is_null($all_chapters)) {
+        if (! is_null($all_chapters)) {
 
             foreach ($all_chapters as $chapter) {
                 $chapter_order = (int) get_term_meta($chapter->term_id, 'chapter-order', true);
@@ -570,21 +587,21 @@ if (!function_exists('toocheke_universal_get_adjacent_chapter')):
         return false;
     }
 endif;
-if (!function_exists('toocheke_universal_get_previous_chapter')):
+if (! function_exists('toocheke_universal_get_previous_chapter')):
     function toocheke_universal_get_previous_chapter()
 {
         $chapter = toocheke_universal_get_adjacent_chapter(true);
 
         if (is_object($chapter)) {
 
-            $child_args = array(
+            $child_args = [
                 'numberposts' => 1,
-                'post_type' => 'comic',
-                'orderby' => 'post_date',
-                'order' => 'ASC',
+                'post_type'   => 'comic',
+                'orderby'     => 'post_date',
+                'order'       => 'ASC',
                 'post_status' => 'publish',
-                'chapters' => $chapter->slug,
-            );
+                'chapters'    => $chapter->slug,
+            ];
             $chapter_posts = get_posts($child_args);
             if (is_array($chapter_posts)) {
                 $chapter_posts = reset($chapter_posts);
@@ -597,19 +614,19 @@ if (!function_exists('toocheke_universal_get_previous_chapter')):
         return false;
     }
 endif;
-if (!function_exists('toocheke_universal_get_next_chapter')):
+if (! function_exists('toocheke_universal_get_next_chapter')):
     function toocheke_universal_get_next_chapter()
 {
         $chapter = toocheke_universal_get_adjacent_chapter(false);
         if (is_object($chapter)) {
-            $child_args = array(
+            $child_args = [
                 'numberposts' => 1,
-                'post_type' => 'comic',
-                'orderby' => 'post_date',
-                'order' => 'ASC',
+                'post_type'   => 'comic',
+                'orderby'     => 'post_date',
+                'order'       => 'ASC',
                 'post_status' => 'publish',
-                'chapters' => $chapter->slug,
-            );
+                'chapters'    => $chapter->slug,
+            ];
             $chapter_posts = get_posts($child_args);
             if (is_array($chapter_posts)) {
                 $chapter_posts = reset($chapter_posts);

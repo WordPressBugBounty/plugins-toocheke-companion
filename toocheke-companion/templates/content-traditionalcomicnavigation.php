@@ -16,6 +16,7 @@ $display_no_of_comments = get_option('toocheke-comic-no-of-comments') && 1 == ge
 $series_id = null;
 $allow_home_comments = get_option('toocheke-comic-discussion');
 $home_layout = get_theme_mod('home_layout_setting', 'default');
+$always_show = get_option('toocheke-always-show-nav-buttons') && 1 == get_option('toocheke-always-show-nav-buttons');
 if('alt-1' === $home_layout || 'alt-2' === $home_layout  || 'alt-4' === $home_layout ){
     //toocheke_universal_set_post_views(get_the_ID());
 }
@@ -48,9 +49,10 @@ $allowed_tags = array(
 $random_url = home_url() . '/random?r=' . $randomNumber;
 $image_button_url = get_option('toocheke-random-button');
 $button = $display_default ? '<i class="fas fa-lg fa-random"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
+
 ?>
     <?php
-if ('DESC' === $comic_order) {
+if ($always_show || 'DESC' === $comic_order) {
     echo wp_kses(toocheke_universal_get_comic_link('ASC', 'backward', $latest_collection_id, $display_default, 'first', $series_id), $allowed_tags);
     echo wp_kses(toocheke_universal_adjacent_comic_link(get_the_ID(), $latest_collection_id, 'previous', $display_default, $series_id), $allowed_tags);
 }
@@ -61,7 +63,7 @@ if ('DESC' === $comic_order) {
         title="Random Comic"><?php echo wp_kses($button, $allowed_tags) ?></i></a>
     <?php
                 
-if ('ASC' === $comic_order) {
+if ($always_show || 'ASC' === $comic_order) {
 
     echo wp_kses(toocheke_universal_adjacent_comic_link(get_the_ID(), $latest_collection_id, 'next', $display_default, $series_id), $allowed_tags);
     echo wp_kses(toocheke_universal_get_comic_link('DESC', 'forward', $latest_collection_id, $display_default, 'latest', $series_id), $allowed_tags);

@@ -33,6 +33,9 @@ $allowed_tags = array(
 );
 //$random_url = home_url() . '/?random&amp;nocache=1&amp;post_type=comic&amp;r=' . $randomNumber;
 $random_url = home_url() . '/random?r=' . $randomNumber;
+if($series_id){
+    $random_url = add_query_arg('sid', $series_id, $random_url);
+}
 $image_button_url = get_option('toocheke-random-button');
 $button = $display_default ? '<i class="fas fa-lg fa-random"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
 ?>
@@ -40,7 +43,7 @@ $button = $display_default ? '<i class="fas fa-lg fa-random"></i>' : '<img class
 <div class="single-comic-navigation">
     <?php echo wp_kses(toocheke_universal_get_comic_link('ASC', 'backward', $collection_id, $display_default, 'first', $series_id), $allowed_tags); ?>
     <?php echo wp_kses(toocheke_universal_adjacent_comic_link(get_the_ID(), $collection_id, 'previous', $display_default, $series_id), $allowed_tags); ?>
-    <a style="<?php echo esc_attr($collection_id == 0 && null == $series_id && $display_random_button ? "" : "display:none") ?>"
+    <a style="<?php echo esc_attr($collection_id == 0 && $display_random_button ? "" : "display:none") ?>"
         href="<?php echo esc_url($random_url); ?>"
         title="Random Comic"><?php echo wp_kses($button, $allowed_tags) ?></a>
     <?php echo wp_kses(toocheke_universal_adjacent_comic_link(get_the_ID(), $collection_id, 'next', $display_default, $series_id), $allowed_tags); ?>

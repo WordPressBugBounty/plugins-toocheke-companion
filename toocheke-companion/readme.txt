@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, cartoon
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.181
+Stable tag: 1.182
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -106,6 +106,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.182 =
+* UPDATE. Enhanced random button feature by adding support for random comics within a series.
 
 = 1.181 =
 * UPDATE. Added option to decide whether to always show comic navigation buttons, even if there isn’t a first, previous, next, or last comic available.

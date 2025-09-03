@@ -47,6 +47,9 @@ $allowed_tags = array(
 );
 //$random_url = home_url() . '/?random&amp;nocache=1&amp;post_type=comic&amp;r=' . $randomNumber;
 $random_url = home_url() . '/random?r=' . $randomNumber;
+if($series_id){
+    $random_url = add_query_arg('sid', $series_id, $random_url);
+}
 $image_button_url = get_option('toocheke-random-button');
 $button = $display_default ? '<i class="fas fa-lg fa-random"></i>' : '<img class="comic-image-nav" src="' . esc_attr($image_button_url) . '" />';
 
@@ -58,7 +61,7 @@ if ($always_show || 'DESC' === $comic_order) {
 }
 ?>
 
-    <a style="<?php echo esc_attr(null == $series_id && $display_random_button ? "" : "display:none") ?>"
+    <a style="<?php echo esc_attr($display_random_button ? "" : "display:none") ?>"
         href="<?php echo esc_url($random_url); ?>"
         title="Random Comic"><?php echo wp_kses($button, $allowed_tags) ?></i></a>
     <?php

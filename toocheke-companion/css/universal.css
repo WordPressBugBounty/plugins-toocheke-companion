@@ -572,6 +572,9 @@ Universal theme styles
 #comic-support svg, #comic-support path, #comic-social svg, #comic-social path{
 	fill: currentColor;
 }
+.d-block{
+	display:block !important;
+}
 @media only screen and (max-width: 575px) {
 
 	.chapter-footer-nav,

@@ -53,8 +53,8 @@ $comic_links = paginate_links(array(
     'format' => '?comics_paged=%#%#comics-section',
     'current' => $comics_paged,
     'total' => $comics_query->max_num_pages,
-    'prev_text' => wp_kses(__('<i class=\'fas fa-chevron-left\'></i>', 'toocheke'), array('i' => array('class' => array()))),
-    'next_text' => wp_kses(__('<i class=\'fas fa-chevron-right\'></i>', 'toocheke'), array('i' => array('class' => array()))),
+    'prev_text' => wp_kses(__('<i class=\'fas fa-chevron-left\'></i>', 'toocheke-companion'), array('i' => array('class' => array()))),
+    'next_text' => wp_kses(__('<i class=\'fas fa-chevron-right\'></i>', 'toocheke-companion'), array('i' => array('class' => array()))),
 
 ));
 

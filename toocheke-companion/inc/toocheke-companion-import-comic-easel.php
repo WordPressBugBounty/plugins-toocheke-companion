@@ -84,7 +84,7 @@
     }
 ?>
 <div class="wrap">
-<h2><?php _e('Import From Comic Easel', 'toocheke-companion'); ?></h2>
+<h2><?php _e('Import From Comic Easel Plugin', 'toocheke-companion'); ?></h2>
 <?php
     global $imported;
     if ($imported !== 1):

@@ -59,9 +59,9 @@ echo '</div>';
  <?php
 the_posts_navigation(
     array(
-        'prev_text' => __('Older comics', 'toocheke'),
-        'next_text' => __('Newer comics', 'toocheke'),
-        'screen_reader_text' => __('Posts navigation', 'toocheke'),
+        'prev_text' => __('Older comics', 'toocheke-companion'),
+        'next_text' => __('Newer comics', 'toocheke-companion'),
+        'screen_reader_text' => __('Posts navigation', 'toocheke-companion'),
     )
 );
 

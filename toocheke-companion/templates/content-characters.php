@@ -190,8 +190,8 @@ if ($paged_characters_list) {
         'format' => '?paged=%#%',
         'current' => max(1, get_query_var('paged')),
         'total' => $total_number_of_pages,
-        'prev_text' => wp_kses(__('<i class=\'fas fa-chevron-left\'></i>', 'toocheke'), array('i' => array('class' => array()))),
-        'next_text' => wp_kses(__('<i class=\'fas fa-chevron-right\'></i>', 'toocheke'), array('i' => array('class' => array()))),
+        'prev_text' => wp_kses(__('<i class=\'fas fa-chevron-left\'></i>', 'toocheke-companion'), array('i' => array('class' => array()))),
+        'next_text' => wp_kses(__('<i class=\'fas fa-chevron-right\'></i>', 'toocheke-companion'), array('i' => array('class' => array()))),
     ));
 
     if ($links):

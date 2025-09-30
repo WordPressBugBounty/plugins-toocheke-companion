@@ -207,5 +207,135 @@ jQuery(document).ready(function ($) {
 		jQuery(this).attr('id', 'upload_series_bg_image_button');
 		jQuery('#upload_series_bg_image_button').text('Set series background image');
 	});
+	// ---------------------------
+	// ,Manga hero images
+	// ---------------------------
+	jQuery(document).ready(function ($) {
+		var file_frame;
+
+		function uploadHeroImage(button) {
+			var wrapper = button.closest('.hero-image-metabox');
+			var field = wrapper.find('input[type=hidden]');
+			var img = wrapper.find('img');
+
+			if (file_frame) {
+				file_frame.open();
+				return;
+			}
+
+			file_frame = wp.media.frames.file_frame = wp.media({
+				title: button.data('uploader_title') || 'Choose an image',
+				button: { text: button.data('uploader_button_text') || 'Set image' },
+				multiple: false
+			});
+
+			file_frame.on('select', function () {
+				var attachment = file_frame.state().get('selection').first().toJSON();
+				field.val(attachment.id);
+				img.attr('src', attachment.url).show();
+				wrapper.find('.remove-hero-image').show();
+			});
+
+			file_frame.open();
+		}
+
+		$(document).on('click', '.upload-hero-image', function (e) {
+			e.preventDefault();
+			uploadHeroImage($(this));
+		});
+
+		$(document).on('click', '.remove-hero-image', function (e) {
+			e.preventDefault();
+			var wrapper = $(this).closest('.hero-image-metabox');
+			wrapper.find('input[type=hidden]').val('');
+			wrapper.find('img').hide().attr('src', '');
+			$(this).hide();
+		});
+	});
+
+	/* Manga Chapter Images */
+
+	// ---------------------------
+	// Gallery image uploader
+	// ---------------------------
+	$(document.body).on('click', '.manga-page-upload-button', function (event) {
+		event.preventDefault();
+
+		const button = $(this);
+		const hiddenField = button.prev('input[type=hidden]');
+		let hiddenFieldValueArray = hiddenField.val() ? hiddenField.val().split(',').map(Number) : [];
+
+		const customUploader = wp.media({
+			title: 'Insert Chapter Pages',
+			library: { type: 'image' },
+			button: { text: 'Use these images' },
+			multiple: true
+		}).on('select', function () {
+			let selectedImages = customUploader.state().get('selection').map(item => item.toJSON());
+
+			selectedImages.forEach(image => {
+				const li = $('<li>', { 'data-id': image.id });
+				const span = $('<span>', {
+					class: 'manga-chapter-page',
+					css: { 'background-image': 'url(' + image.url + ')' }
+				});
+				const removeBtn = $('<a>', {
+					class: 'button manga-chapter-gallery-remove',
+					'data-hidden': hiddenField.attr('name'),
+					'data-id': image.id,
+					href: '#',
+					text: 'Remove'
+				});
+
+				li.append(span).append(removeBtn);
+				$('.manga-chapter-gallery').append(li);
+
+				hiddenFieldValueArray.push(image.id);
+			});
+
+			hiddenField.val(hiddenFieldValueArray.join(','));
+
+			// Refresh sortable
+			$('.manga-chapter-gallery').sortable('refresh');
+		}).open();
+	});
+
+	// ---------------------------
+	// Remove image event
+	// ---------------------------
+	$(document.body).on('click', '.manga-chapter-gallery-remove', function (event) {
+		event.preventDefault();
+
+		const button = $(this);
+		const imageId = parseInt(button.data('id'));
+		const hiddenField = $('input:hidden[name="' + button.data('hidden') + '"]');
+		let hiddenFieldValueArray = hiddenField.val() ? hiddenField.val().split(',').map(Number) : [];
+
+		button.parent().remove(); // remove <li>
+
+		// Remove from hidden field
+		hiddenFieldValueArray = hiddenFieldValueArray.filter(id => id !== imageId);
+		hiddenField.val(hiddenFieldValueArray.join(','));
+	});
+
+	// ---------------------------
+	// Drag & Drop Sorting
+	// ---------------------------
+	$('.manga-chapter-gallery').sortable({
+		items: 'li',
+		cursor: '-webkit-grabbing',
+		scrollSensitivity: 40,
+		stop: function () {
+			const hiddenField = $(this).siblings('input[type=hidden]'); // assumes hidden input is sibling
+			const sort = $(this).children('li').map(function () {
+				return $(this).data('id');
+			}).get();
+
+			hiddenField.val(sort.join(','));
+		}
+	});
+
+
+
 
 });

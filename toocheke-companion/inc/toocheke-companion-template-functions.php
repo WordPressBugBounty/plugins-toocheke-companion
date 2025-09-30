@@ -243,7 +243,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
     $next = $wpdb->get_row("SELECT MONTH(post_date) AS month, YEAR(post_date) AS year FROM $wpdb->posts WHERE post_date > '$thisyear-$thismonth-{$last_day} 23:59:59' AND post_type = '$posttype' AND post_status = 'publish' ORDER BY post_date ASC LIMIT 1");
 
     /* translators: Calendar caption: 1: month name, 2: 4-digit year */
-    $calendar_caption = _x('%1$s %2$s', 'calendar caption', 'toocheke');
+    $calendar_caption = _x('%1$s %2$s', 'calendar caption', 'toocheke-companion');
     $calendar_output  = '<table id="toocheke-calendar">
 		<caption>' . sprintf(
         $calendar_caption,
@@ -334,9 +334,9 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
         if (in_array($day, $daywithpost)) {
             // any posts today?
             // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
-            $date_format = date(_x('F j, Y', 'daily archives date format', 'toocheke'), strtotime("{$thisyear}-{$thismonth}-{$day}"));
+            $date_format = date(_x('F j, Y', 'daily archives date format', 'toocheke-companion'), strtotime("{$thisyear}-{$thismonth}-{$day}"));
             // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
-            $label = sprintf(__('Posts published on %s', 'toocheke'), $date_format);
+            $label = sprintf(__('Posts published on %s', 'toocheke-companion'), $date_format);
             add_filter('day_link', 'tooocheke_universal_day_link', 10, 4);
             $calendar_output .= sprintf(
                 '<a href="%s" aria-label="%s">%s</a>',

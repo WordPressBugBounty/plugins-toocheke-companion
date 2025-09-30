@@ -262,7 +262,7 @@
 
 ?>
 <div class="wrap">
-<h2><?php _e('Import From Webcomic', 'toocheke-companion'); ?></h2>
+<h2><?php _e('Import From Webcomic Plugin', 'toocheke-companion'); ?></h2>
 <?php
     global $imported;
     if ($imported !== 1):

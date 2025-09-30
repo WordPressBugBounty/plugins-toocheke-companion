@@ -1,10 +1,10 @@
 === Toocheke Companion ===
 Author: LeeToo
 Contributors: toocheke
-Tags: webcomic, comic, webtoon, cartoon
+Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.182
+Stable tag: 1.183
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -17,14 +17,15 @@ Transform your WordPress theme into a platform for publishing your webcomics.
 
 **Toocheke Companion Website:** [Toocheke Companion](https://leetoo.net/toocheke-companion/ "Toocheke Companion - Plugin for publishing your webcomic")
 
-Looking to publish your comics on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic posts. While it works best with the **Toocheke WordPress theme**, it is compatible with most modern WordPress themes.
+Looking to publish your comics or manga on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic and manga posts. While it works best with the **Toocheke WordPress theme**, it is compatible with most modern WordPress themes.
 
 ### Key Features
 
-- Display comic posts in nearly any WordPress theme
+- Display comics and manga in nearly any WordPress theme
 - Full support for the WordPress Block Editor (Gutenberg)
 - Includes 15 blocks and matching shortcodes for flexible comic layouts
 - Easy customization with color schemes and layout options
+- **New: Dedicated Manga layout support** — organize and display manga with series, volumes, and chapters
 - Responsive layout optimized for mobile and desktop
 - Dual-version responsive comic support (desktop/mobile)
 - Webtoon-style vertical scrolling support
@@ -33,7 +34,7 @@ Looking to publish your comics on your WordPress website? **Toocheke Companion**
 - Built-in social sharing, likes, bookmarks, and age verification
 - Top ten comics based on post views
 - Infinite scroll for archive display
-- Bilingual/multilingual comic support
+- Bilingual/multilingual comic and manga support
 
 == Installation == 
 
@@ -92,7 +93,21 @@ Toocheke Companion enables you to display comics using either shortcodes or the 
 15. **Toocheke Characters**  
     `[toocheke-characters]`
 
-All of the above are also available as Gutenberg blocks under the widgets category in the WordPress Block Editor.
+All of the above are also available as Gutenberg blocks under the widgets category in the WordPress Block Editor. 
+
+You can also display Manga features with the following shortcodes
+
+1. **All Manga Series**  
+    `[toocheke-all-manga-series]`
+
+2. **Popular Manga Series**  
+    `[toocheke-popular-manga-series]`
+
+3. **Popular Manga Volumes**  
+    `[toocheke-popular-manga-volumes]`
+
+4. **Popular Manga Chapters**  
+    `[toocheke-popular-manga-chapters]`
 
 
 == Frequently Asked Questions ==
@@ -107,8 +122,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
 
-= 1.182 =
-* UPDATE. Enhanced random button feature by adding support for random comics within a series.
+= 1.183 =
+* NEW. Added full Manga layout support, including dedicated series, volume, and chapter pages and support for Patreon and ChamaWP.
+* FIX. Minor styling and performance improvements.
 
 = 1.181 =
 * UPDATE. Added option to decide whether to always show comic navigation buttons, even if there isn’t a first, previous, next, or last comic available.
@@ -668,6 +684,8 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 * Font Awesome Free 5.8.1 by @fontawesome is licensed under (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) https://fontawesome.com/license/free
 * Gamajo_Template_Loader by Gary Jones licensed to use under the GPL-2.0 and later license (https://github.com/GaryJones/Gamajo-Template-Loader)
+* jQuery Fullscreen 0.6.0 Copyright (c) 2016 Vladimir Zhuravlev are licensed under MIT (https://github.com/private-face/jquery.fullscreen/blob/master/LICENSE)
+* Swiper 11.2.10 Copyright 2014-2025 Vladimir Kharlampidi are licensed under MIT (https://github.com/nolimits4web/swiper/blob/master/LICENSE)
 
 
 

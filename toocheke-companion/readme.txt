@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.8
-Stable tag: 1.183
+Stable tag: 1.184
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -121,6 +121,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.184 =
+* FIX. Minor styling and performance improvements.
 
 = 1.183 =
 * NEW. Added full Manga layout support, including dedicated series, volume, and chapter pages and support for Patreon and ChamaWP.

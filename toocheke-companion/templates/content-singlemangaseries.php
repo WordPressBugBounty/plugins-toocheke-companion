@@ -137,7 +137,7 @@
     if ($display_likes):
 ?>
 <p>
-		            <b>Like this:</b> <span class="single-comic-total-likes">
+		            <b><?php esc_html_e('Like this:', 'toocheke-companion'); ?></b> <span class="single-comic-total-likes">
 		               <?php echo do_shortcode("[toocheke-like-button]"); ?>
 		</span>
         </p>
@@ -147,8 +147,8 @@
 
 <?php if ($latest_chapter_link): ?>
     <div class="manga-series-nav">
-    <a class="btn btn-outline-black btn-sm btn-manga-chapter-link btn-manga-first-chapter" title="<?php echo esc_attr($first_chapter_title) ?>" href="<?php echo esc_url($first_chapter_link); ?>"><i class="fas fa-lg fa-step-backward fa-fw"></i> Read First Chapter</a>
-<a class="btn btn-outline-black btn-sm btn-manga-chapter-link btn-manga-latest-chapter" title="<?php echo esc_attr($latest_chapter_title) ?>" href="<?php echo esc_url($latest_chapter_link); ?>">Read Latest Chapter <i class="fas fa-lg fa-step-forward fa-fw"></i></a>
+    <a class="btn btn-outline-black btn-sm btn-manga-chapter-link btn-manga-first-chapter" title="<?php echo esc_attr($first_chapter_title) ?>" href="<?php echo esc_url($first_chapter_link); ?>"><i class="fas fa-lg fa-step-backward fa-fw"></i> <?php esc_html_e('Read First Chapter', 'toocheke-companion'); ?></a>
+<a class="btn btn-outline-black btn-sm btn-manga-chapter-link btn-manga-latest-chapter" title="<?php echo esc_attr($latest_chapter_title) ?>" href="<?php echo esc_url($latest_chapter_link); ?>"><?php esc_html_e('Read Latest Chapter', 'toocheke-companion'); ?> <i class="fas fa-lg fa-step-forward fa-fw"></i></a>
     </div>
 
 <?php endif; ?>

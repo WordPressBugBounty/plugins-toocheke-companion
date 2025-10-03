@@ -59,8 +59,9 @@
                         $img_url = wp_get_attachment_image_url($img_id, 'full'); ?>
                         <?php if ($img_url): ?>
                             <swiper-slide>
-                                
+                                 <div class="swiper-zoom-container">
                                 <img src="<?php echo esc_url($img_url); ?>" alt="" />
+                        </div>
                                 </swiper-slide>
                         <?php endif; ?>
                     <?php endforeach; ?>
@@ -101,7 +102,7 @@ if ($chapters_query->have_posts()) : ?>
 ?>
 <hr />
 <p>
-		            <b>Like this:</b> <span class="single-comic-total-likes">
+		            <b><?php esc_html_e('Like this:', 'toocheke-companion'); ?></b> <span class="single-comic-total-likes">
 		               <?php echo do_shortcode("[toocheke-like-button]"); ?>
 		</span>
         </p>
@@ -110,9 +111,9 @@ if ($chapters_query->have_posts()) : ?>
         ?>
 </div>
 <div id="manga-page-options">
-<div id="btn-one-page" class="page-icons-wrapper one-page"><div class="icon-wrapper"><svg viewBox="0 0 25 50" fill="none" xmlns="http://www.w3.org/2000/svg" width="55" height="70"><path stroke-width="2" stroke="#000" d="M.5.5h24v49H.5z"></path></svg></div><span class="icon-text">1 page</span></div>
-<div id="btn-two-pages" class="page-icons-wrapper two-pages"><div class="make-two-pages"><svg viewBox="0 0 25 50" fill="none" xmlns="http://www.w3.org/2000/svg" width="35" height="70" class="two-pages-icon"><path stroke-width="2" stroke="#000" d="M.5.5h24v49H.5z"></path></svg><svg viewBox="0 0 25 50" fill="none" xmlns="http://www.w3.org/2000/svg" width="35" height="70" class="two-pages-icon"><path stroke-width="2" stroke="#000" d="M.5.5h24v49H.5z"></path></svg></div><span class="icon-text">2 pages</span></div>
-<div id="btn-fullscreen" class="page-icons-wrapper fullscreen"><svg id="fullsreen-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="70" height="70" class="fullscreen-icon right"><defs><style>.full-screen-path{fill:#fff}</style></defs><path class="full-screen-path" d="M0 0v128h32V32h96V0H0Zm32 480v-96H0v128h128v-32H32ZM384 0v32h96v96h32V0H384Zm96 384v96h-96v32h128V384h-32Z"></path><path class="full-screen-path" transform="rotate(45 256.002 256)" d="M-77.28 240.83h666.57v30.33H-77.28z"></path><path class="full-screen-path" transform="rotate(-45 256 256.002)" d="M-77.28 240.83h666.57v30.33H-77.28z"></path></svg><span class="icon-text">Fullscreen</span></div>
+<div id="btn-one-page" class="page-icons-wrapper one-page"><div class="icon-wrapper"><svg viewBox="0 0 25 50" fill="none" xmlns="http://www.w3.org/2000/svg" width="55" height="70"><path stroke-width="2" stroke="#000" d="M.5.5h24v49H.5z"></path></svg></div><span class="icon-text"><?php esc_html_e('1 page', 'toocheke-companion'); ?></span></div>
+<div id="btn-two-pages" class="page-icons-wrapper two-pages"><div class="make-two-pages"><svg viewBox="0 0 25 50" fill="none" xmlns="http://www.w3.org/2000/svg" width="35" height="70" class="two-pages-icon"><path stroke-width="2" stroke="#000" d="M.5.5h24v49H.5z"></path></svg><svg viewBox="0 0 25 50" fill="none" xmlns="http://www.w3.org/2000/svg" width="35" height="70" class="two-pages-icon"><path stroke-width="2" stroke="#000" d="M.5.5h24v49H.5z"></path></svg></div><span class="icon-text"><?php esc_html_e('2 pages', 'toocheke-companion'); ?></span></div>
+<div id="btn-fullscreen" class="page-icons-wrapper fullscreen"><svg id="fullsreen-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="70" height="70" class="fullscreen-icon right"><defs><style>.full-screen-path{fill:#fff}</style></defs><path class="full-screen-path" d="M0 0v128h32V32h96V0H0Zm32 480v-96H0v128h128v-32H32ZM384 0v32h96v96h32V0H384Zm96 384v96h-96v32h128V384h-32Z"></path><path class="full-screen-path" transform="rotate(45 256.002 256)" d="M-77.28 240.83h666.57v30.33H-77.28z"></path><path class="full-screen-path" transform="rotate(-45 256 256.002)" d="M-77.28 240.83h666.57v30.33H-77.28z"></path></svg><span class="icon-text"><?php esc_html_e('Fullscreen', 'toocheke-companion'); ?></span></div>
 </div>
 </div>
 

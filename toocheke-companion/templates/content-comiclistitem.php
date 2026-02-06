@@ -8,7 +8,7 @@
  */
 //show comic number only for singlre comic series
 $companion = new Toocheke_Companion_Comic_Features();
-$show_comic_number = is_front_page() && is_home();
+$show_comic_number = is_front_page();
 $display_likes = get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes');
 $display_no_views = get_option('toocheke-comic-no-of-views') && 1 == get_option('toocheke-comic-no-of-views');
 $rank = get_query_var('rank');

@@ -11,7 +11,7 @@ $templates = new Toocheke_Companion_Template_Loader;
 $companion = new Toocheke_Companion_Comic_Features();
 $series_id = null;
 $series_id = isset($_GET['sid']) ? (int) $_GET['sid'] : null;
-$collection_id = 0;
+$collection_id = isset($_GET['col']) ? (int) $_GET['col'] : 0;
 $display_default = get_option('toocheke-comics-navigation') && 1 == get_option('toocheke-comics-navigation');
 $display_random_button = get_option('toocheke-random-navigation') && 1 == get_option('toocheke-random-navigation');
 $display_likes = get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes');
@@ -54,6 +54,36 @@ $templates->get_template_part('content', 'chaptersdropdown');
 $templates->get_template_part('content', 'chaptersnavigation');
 ?>
     </div>
+    <?php
+
+$social_content = false;
+$support_content = false;
+if (post_type_exists('comic')):
+    ob_start();
+    do_action('toocheke_get_sharing_buttons');
+    $social_content = ob_get_contents();
+    ob_end_clean();
+endif;
+?>
+
+
+                  <?php
+if ($social_content):
+?>
+    <div id="comic-social">
+        <?php
+echo wp_kses($social_content, $companion->toocheke_allowed_html());
+?>
+      </div>
+      <?php
+endif;
+?>
+
+
+
+                 
+           
+                 
     <div id="comic-analytics">
                   <?php
 if ($display_no_of_comments) {

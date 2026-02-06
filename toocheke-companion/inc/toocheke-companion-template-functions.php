@@ -407,7 +407,7 @@ if (! function_exists('toocheke_universal_get_previous_comic_permalink')):
         return false;
     }
 endif;
-if (! function_exists('toocheke_universal_get_previous_comic_in_chapter_permalink')):
+/* if (! function_exists('toocheke_universal_get_previous_comic_in_chapter_permalink')):
     function toocheke_universal_get_previous_comic_in_chapter_permalink()
 {
         $prev_comic = toocheke_universal_get_previous_comic(true);
@@ -424,7 +424,7 @@ if (! function_exists('toocheke_universal_get_previous_comic_in_chapter_permalin
 
         return false;
     }
-endif;
+endif; */
 if (! function_exists('toocheke_universal_get_next_comic')):
     function toocheke_universal_get_next_comic($in_chapter = false)
 {
@@ -441,7 +441,7 @@ if (! function_exists('toocheke_universal_get_next_comic_permalink')):
         return false;
     }
 endif;
-if (! function_exists('toocheke_universal_get_next_comic_in_chapter_permalink')):
+/* if (! function_exists('toocheke_universal_get_next_comic_in_chapter_permalink')):
     function toocheke_universal_get_next_comic_in_chapter_permalink()
 {
         $next_comic = toocheke_universal_get_next_comic(true);
@@ -458,7 +458,7 @@ if (! function_exists('toocheke_universal_get_next_comic_in_chapter_permalink'))
 
         return false;
     }
-endif;
+endif; */
 // 0 means get the first of them all, no matter chapter, otherwise 0 = this chapter.
 if (! function_exists('toocheke_universal_get_chapter_comic_post')):
     function toocheke_universal_get_chapter_comic_post($chapterID = 0, $first = true)
@@ -544,95 +544,169 @@ if (! function_exists('toocheke_universal_get_adjacent_comic')):
     }
 endif;
 if (! function_exists('toocheke_universal_get_adjacent_chapter')):
-    function toocheke_universal_get_adjacent_chapter($prev = false)
+    function toocheke_universal_get_adjacent_chapter($prev = false, $comic_id = null, $series_id = null)
 {
-        global $post;
+       if (! get_the_terms($comic_id, 'chapters')) {
+                return false;
+            }
+            $current_chapter = get_the_terms($comic_id, 'chapters')[0];
 
-        $current_chapter = get_the_terms($post->ID, 'chapters');
-
-        if (is_array($current_chapter)) {$current_chapter = reset($current_chapter);} else {return;}
+            /* if (is_array($current_chapter)) {$current_chapter = reset($current_chapter);} else {return;}
 
         // cache the calculation of the desired chapter - workaround for bug with w3 total cache's object cache
-        $current_order = wp_cache_get('toocheke_universal_current_order_' . $current_chapter->slug);
-        if (false === $current_order) {
-            $current_order = (int) get_term_meta($current_chapter->term_id, 'chapter-order', true);
-            //$current_order = $current_chapter->chapter-order;
-            wp_cache_set('toocheke_universal_current_order_' . $current_chapter->slug, $current_order);
-        }
+        $current_chapter_order = wp_cache_get('toocheke_current_order_' . $current_chapter->slug);
+        if (false === $current_chapter_order) {
 
-        $find_order = (bool) $prev ? $current_order - 1 : $current_order + 1;
+        $current_chapter_order = (int) get_term_meta($current_chapter->term_id, 'chapter-order', true);
+        //$current_chapter_order = $current_chapter->chapter-order;
+        wp_cache_set('toocheke_current_order_' . $current_chapter->slug, $current_chapter_order);
+        } */
 
-        if (! $find_order) {
-            return false;
-        }
+            $current_chapter_id = $current_chapter->term_id;
 
-        $args = [
-            'orderby'       => 'chapter-order',
-            'order'         => 'DESC',
-            'hide_empty'    => 1,
-            'chapter-order' => $find_order,
-        ];
+            //create array for searching
+            $all_chapters_args = [
+                'orderby'    => 'meta_value_num',
+                'order'      => 'ASC',
+                'meta_query' => [
+                    [
+                        'key'  => 'chapter-order',
+                        'type' => 'NUMERIC',
+                    ]],
+                'hide_empty' => 1,
+            ];
 
-        $all_chapters = get_terms('chapters', $args);
-        if (! is_null($all_chapters)) {
-
-            foreach ($all_chapters as $chapter) {
-                $chapter_order = (int) get_term_meta($chapter->term_id, 'chapter-order', true);
-                if ($chapter_order == $find_order) {
-                    return $chapter;
+            $all_chapters_array      = get_terms('chapters', $all_chapters_args);
+            $filtered_chapters_array = [];
+            if ($all_chapters_array) {
+                //handle chapters array creation in case there is a series
+                foreach ($all_chapters_array as $chapter) {
+                    $chapter_comic_args = [
+                        'posts_per_page'         => 1,
+                        'post_parent'            => $series_id,
+                        'post_type'              => 'comic',
+                        'orderby'                => 'post_date',
+                        'order'                  => 'ASC',
+                        "tax_query"              => [
+                            [
+                                'taxonomy' => "chapters", // use the $tax you define at the top of your script
+                                'field'    => 'term_id',
+                                'terms'    => $chapter->term_id, // use the current term in your foreach loop
+                            ],
+                        ],
+                        'no_found_rows'          => true,
+                        'update_post_meta_cache' => false,
+                        'update_post_term_cache' => false,
+                    ];
+                    $chapter_comic_query = new WP_Query($chapter_comic_args);
+                    if ($chapter_comic_query->have_posts()) {
+                        $filtered_chapters_array[] = $chapter;
+                    }
                 }
 
+                if ($filtered_chapters_array) {
+                    // Lets get all the term id's from the array of term objects
+                    $chapter_ids = wp_list_pluck($filtered_chapters_array, 'term_id');
+                    //echo '<pre>'; print_r($chapter_ids); echo '</pre>';
+
+                    /**
+                     * We now need to locate the position of the current chapter amongst the $chapters_ids array. \
+                     * This way, we can now know which chapters are adjacent to the current one
+                     */
+                    $current_chapter_index = array_search($current_chapter_id, $chapter_ids);
+
+                    // Set default variables to hold the next and previous chapters
+                    $previous_chapter = null;
+                    $next_chapter     = null;
+
+                    $previous_chapter_index = $prev && $current_chapter_index >= 0 ? $current_chapter_index - 1 : null;
+                    $next_chapter_index     = ! $prev && $current_chapter_index < intval(count($chapter_ids) - 1) ? $current_chapter_index + 1 : null;
+
+                    // Get the previous chapter
+
+                    if ($previous_chapter_index > -1) {
+                        $previous_chapter = $filtered_chapters_array[$previous_chapter_index];
+                    }
+
+                    // Get the next chapter
+                    if ($next_chapter_index) {
+                        $next_chapter = $filtered_chapters_array[$next_chapter_index];
+                    }
+
+                    //return the chapter
+                    if ($prev) {
+                        return $previous_chapter ? $previous_chapter : false;
+                    } else {
+                        return $next_chapter ? $next_chapter : false;
+                    }
+
+                    //echo  $current_chapter_index;
+                    //echo '<pre>'; print_r($term_ids); echo '</pre>';
+                } else {
+                    return false;
+                }
             }
-        }
-        return false;
     }
 endif;
 if (! function_exists('toocheke_universal_get_previous_chapter')):
-    function toocheke_universal_get_previous_chapter()
+    function toocheke_universal_get_previous_chapter($series_id = null, $comic_id = null)
 {
-        $chapter = toocheke_universal_get_adjacent_chapter(true);
+        $chapter = toocheke_universal_get_adjacent_chapter(true, $comic_id, $series_id);
 
         if (is_object($chapter)) {
 
-            $child_args = [
-                'numberposts' => 1,
-                'post_type'   => 'comic',
-                'orderby'     => 'post_date',
-                'order'       => 'ASC',
-                'post_status' => 'publish',
-                'chapters'    => $chapter->slug,
-            ];
-            $chapter_posts = get_posts($child_args);
-            if (is_array($chapter_posts)) {
-                $chapter_posts = reset($chapter_posts);
+                $child_args = [
+                    'post_parent' => $series_id,
+                    'numberposts' => 1,
+                    'post_type'   => 'comic',
+                    'orderby'     => 'post_date',
+                    'order'       => 'ASC',
+                    'post_status' => 'publish',
+                    'chapters'    => $chapter->slug,
+                ];
+                $chapter_posts = get_posts($child_args);
+                if (is_array($chapter_posts)) {
+                    $chapter_posts = reset($chapter_posts);
+                    $permalink     = get_permalink($chapter_posts->ID);
 
-                return get_permalink($chapter_posts->ID);
+                    if ($series_id) {
+                        $permalink = add_query_arg('sid', $series_id, $permalink);
+                    }
+
+                    return $permalink;
+                }
+
             }
-
-        }
 
         return false;
     }
 endif;
 if (! function_exists('toocheke_universal_get_next_chapter')):
-    function toocheke_universal_get_next_chapter()
+    function toocheke_universal_get_next_chapter($series_id = null, $comic_id = null)
 {
-        $chapter = toocheke_universal_get_adjacent_chapter(false);
+        $chapter = toocheke_universal_get_adjacent_chapter(false, $comic_id, $series_id);
         if (is_object($chapter)) {
-            $child_args = [
-                'numberposts' => 1,
-                'post_type'   => 'comic',
-                'orderby'     => 'post_date',
-                'order'       => 'ASC',
-                'post_status' => 'publish',
-                'chapters'    => $chapter->slug,
-            ];
-            $chapter_posts = get_posts($child_args);
-            if (is_array($chapter_posts)) {
-                $chapter_posts = reset($chapter_posts);
-                return get_permalink($chapter_posts->ID);
+                $child_args = [
+                    'post_parent' => $series_id,
+                    'numberposts' => 1,
+                    'post_type'   => 'comic',
+                    'orderby'     => 'post_date',
+                    'order'       => 'ASC',
+                    'post_status' => 'publish',
+                    'chapters'    => $chapter->slug,
+                ];
+                $chapter_posts = get_posts($child_args);
+                if (is_array($chapter_posts)) {
+                    $chapter_posts = reset($chapter_posts);
+                    $permalink     = get_permalink($chapter_posts->ID);
+
+                    if ($series_id) {
+                        $permalink = add_query_arg('sid', $series_id, $permalink);
+                    }
+
+                    return $permalink;
+                }
             }
-        }
         return false;
     }
 endif;

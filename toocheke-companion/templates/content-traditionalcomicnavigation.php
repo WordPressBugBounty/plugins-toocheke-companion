@@ -6,7 +6,7 @@ if (get_query_var('comic_order')) {
 }
 $templates = new Toocheke_Companion_Template_Loader;
 $companion = new Toocheke_Companion_Comic_Features();
-$latest_collection_id = 0;
+$latest_collection_id   = null !== get_query_var('latest_collection_id') ? (int) get_query_var('latest_collection_id') : 0;
 $below_comic = null !== get_query_var('below_comic') ? (int) get_query_var('below_comic') : 0;
 $display_default = get_option('toocheke-comics-navigation') && 1 == get_option('toocheke-comics-navigation');
 $display_random_button = get_option('toocheke-random-navigation') && 1 == get_option('toocheke-random-navigation');
@@ -83,6 +83,30 @@ $post = $comic_post;
 
 ?>
     </div>
+     <?php
+
+$social_content = false;
+$support_content = false;
+if (post_type_exists('comic')):
+    ob_start();
+    do_action('toocheke_get_sharing_buttons');
+    $social_content = ob_get_contents();
+    ob_end_clean();
+endif;
+?>
+
+
+                  <?php
+if ($social_content):
+?>
+    <div id="comic-social">
+        <?php
+echo wp_kses($social_content, $companion->toocheke_allowed_html());
+?>
+      </div>
+      <?php
+endif;
+?>
     <div id="comic-analytics">
 	                        <?php
 if ($display_no_of_comments) {

@@ -7,12 +7,15 @@
      * @package Toocheke
      */
     //intiailize volume variables
+    $slides_per_view = get_option('toocheke-manga-default-pages') ? (int) get_option('toocheke-manga-default-pages') : 2;
+    $two_pages_class =  $slides_per_view > 1 ? 'two-pages' : '';
     $display_likes                = get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes');
     $display_no_views             = get_option('toocheke-comic-no-of-views') && 1 == get_option('toocheke-comic-no-of-views');
     $manga_chapter_id = get_the_ID();
     $manga_volume_id    = get_post_meta($manga_chapter_id, 'volume_id', true);
     $volume_permalink = get_permalink( $manga_volume_id );
     $chapters_query = null;
+    $rtl = get_option('toocheke-manga-rtl') ? true : false;
 
     if ($manga_volume_id) {
     $chapters_query = new WP_Query([
@@ -39,7 +42,7 @@
    <!--./MANGA TOP NAV-->
 
                      <!--start content-->
-                         <div class="manga-chapter-container manga-reader-container two-pages">
+                         <div class="manga-chapter-container manga-reader-container <?php echo esc_attr($two_pages_class);?> <?php echo $rtl ? 'rtl' : 'ltr'; ?>">
                   
     <?php
     // Get swipe direction setting
@@ -53,7 +56,8 @@
            <div id="swiper-loader-container">
     <div class="spinner"></div>
 </div>
-            <swiper-container id="manga-swiper" class="swiper"   pagination="true" pagination-type="progressbar" navigation="true" space-between="0" slides-per-view="2" slides-per-group="2"  keyboard="true" events-prefix="swiper-" breakpoints='{"0":{"direction":"vertical","slidesPerView":1},"768":{"direction":"horizontal","slidesPerView":2}}'>
+<div dir="<?php echo $rtl ? 'rtl' : 'ltr'; ?>">
+            <swiper-container id="manga-swiper" class="swiper"   pagination="true" pagination-type="progressbar" navigation="true" space-between="0" slides-per-view="<?php echo esc_attr($slides_per_view); ?>" slides-per-group="<?php echo esc_attr($slides_per_view); ?>"  keyboard="true" events-prefix="swiper-" breakpoints='{"0":{"direction":"vertical","slidesPerView":1},"768":{"direction":"horizontal","slidesPerView":<?php echo esc_attr($slides_per_view); ?>}}' >
 
                    <?php foreach ($all_images as $img_id): 
                         $img_url = wp_get_attachment_image_url($img_id, 'full'); ?>
@@ -68,7 +72,7 @@
 <swiper-slide><a href="<?php echo esc_url($volume_permalink);?>" class="btn-manga-close-reader btn btn-dark">Close Reader</a></swiper-slide>
                </swiper-container>
 
-            
+                        </div>
         <?php endif;
     
     ?>

@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.185
+ * Version:     1.194
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.185');
+    define('TOOCHEKE_COMPANION_VERSION', '1.194');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -56,6 +56,7 @@ class Toocheke_Companion_Comic_Features
 
         add_action('init', [$this, 'toocheke_companion_create_comic_custom_post_type'], 0);
         register_activation_hook(__FILE__, [$this, 'toocheke_rewrite_flush']);
+        register_activation_hook(__FILE__, [$this, 'toocheke_set_default_options']);
         add_action('admin_menu', [$this, 'toocheke_add_plugin_main_menu'], 0);
         add_action('admin_head', [$this, 'toocheke_manga_menu_highlighting'], 0);
         add_action('admin_head-post-new.php', [$this, 'toocheke_add_all_posts_button'], 0);
@@ -287,6 +288,19 @@ class Toocheke_Companion_Comic_Features
         add_filter('manage_edit-manga_series_sortable_columns', [$this, 'toocheke_manga_series_sortable_columns']);
         add_filter('manage_edit-manga_volume_sortable_columns', [$this, 'toocheke_manga_volume_sortable_columns']);
         add_filter('manage_edit-manga_chapter_sortable_columns', [$this, 'toocheke_manga_chapter_sortable_columns']);
+
+        //Upgrade functions
+        add_action('admin_init', [$this, 'toocheke_companion_upgrade_check']);
+
+        //Premium metaboxes
+        add_action('add_meta_boxes', [$this, 'toocheke_add_buy_comic_metaboxes']);
+         add_action('save_post_comic', [$this, 'toocheke_save_comic_pricing_metabox']);
+    }
+    /* Set default options */
+    public function toocheke_set_default_options(){
+        if (get_option('toocheke-global-buy-comic') === false) {
+            add_option('toocheke-global-buy-comic', 1);
+        }
     }
     /* Rewrite Functions */
     public function toocheke_rewrite_flush()
@@ -2474,26 +2488,94 @@ class Toocheke_Companion_Comic_Features
             ?>
 
             <h2 class="nav-tab-wrapper">
-                <a href="?page=toocheke-options-page&tab=comic_display_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">Display</a>
-                <a href="?page=toocheke-options-page&tab=ordering_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">Ordering</a>
-                <a href="?page=toocheke-options-page&tab=comic_archive_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">Archive</a>
-                <a href="?page=toocheke-options-page&tab=navigation_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">Navigation</a>
-                <a href="?page=toocheke-options-page&tab=social_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Sharing</a>
-                <a href="?page=toocheke-options-page&tab=support_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">Support Links</a>
-                <a href="?page=toocheke-options-page&tab=analytics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">Analytics</a>
-                <a href="?page=toocheke-options-page&tab=top_ten_comics_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">Top 10</a>
-                <a href="?page=toocheke-options-page&tab=series_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">Series</a>
-                <a href="?page=toocheke-options-page&tab=comic_discussion_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">Discussion</a>
-                <a href="?page=toocheke-options-page&tab=blog_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">Blog</a>
-                <a href="?page=toocheke-options-page&tab=age_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">Age</a>
-                <a href="?page=toocheke-options-page&tab=language_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">Language</a>
-                <a href="?page=toocheke-options-page&tab=comic_images_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">Images</a>
-                <a href="?page=toocheke-options-page&tab=rss_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">RSS</a>
+                <a href="?page=toocheke-options-page&tab=comic_display_options"
+                class="nav-tab <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">
+                    Display
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=ordering_options"
+                class="nav-tab <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">
+                    Ordering
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=comic_archive_options"
+                class="nav-tab <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">
+                    Archive
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=navigation_options"
+                class="nav-tab <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">
+                    Navigation
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=social_options"
+                class="nav-tab <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">
+                    Social Sharing
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=support_options"
+                class="nav-tab <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">
+                    Support Links
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=analytics_options"
+                class="nav-tab <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">
+                    Analytics
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=top_ten_comics_options"
+                class="nav-tab <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">
+                    Top 10
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=series_options"
+                class="nav-tab <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">
+                    Series
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=comic_discussion_options"
+                class="nav-tab <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">
+                    Discussion
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=blog_options"
+                class="nav-tab <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">
+                    Blog
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=age_options"
+                class="nav-tab <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">
+                    Age
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=language_options"
+                class="nav-tab <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">
+                    Language
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=comic_images_options"
+                class="nav-tab <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">
+                    Images
+                </a>
+
+                <a href="?page=toocheke-options-page&tab=rss_options"
+                class="nav-tab <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">
+                    RSS
+                </a>
+
                 <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
-                    <a href="?page=toocheke-options-page&tab=buy_options" class="nav-tab<?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">Buy Comic</a>
-                    <a href="?page=toocheke-options-page&tab=sponsor_options" class="nav-tab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">Sponsor Comic</a>
+                    <a href="?page=toocheke-options-page&tab=buy_options"
+                    class="nav-tab <?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">
+                        Buy Comic
+                    </a>
+
+                    <a href="?page=toocheke-options-page&tab=sponsor_options"
+                    class="nav-tab <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">
+                        Sponsor Comic
+                    </a>
                 <?php endif; ?>
             </h2>
+
             <form method="post" action="<?php echo esc_url(add_query_arg('tab', $active_tab, admin_url('options.php'))); ?>">
                 <?php
                 // Option for display desktop and mobile versions of comic
@@ -2561,6 +2643,12 @@ class Toocheke_Companion_Comic_Features
                             add_settings_field("toocheke-comic-panel-swipe-navigation", "Do you want to enable the ability to swipe through the comic, panel-by-panel, similar to Instgram's swipe navigation?", [$this, 'toocheke_comic_panel_swipe_navigation_checkbox'], "toocheke-options-page", "toocheke_comic_panel_swipe_navigation_section");
                             register_setting("toocheke-settings", "toocheke-comic-panel-swipe-navigation");
                         }
+                        //manga option
+                        add_settings_section("toocheke_manga_page_navigation_section", "Manga Page Navigation", [$this, 'toocheke_manga_page_navigation_message'], "toocheke-options-page");
+                        add_settings_field("toocheke-manga-default-pages", "How many pages do you want to display by default?", [$this, 'toocheke_manga_default_pages_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
+                        register_setting("toocheke-settings", "toocheke-manga-default-pages");
+                        add_settings_field("toocheke-manga-rtl", "Which reading format do you want?", [$this, 'toocheke_manga_rtl_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
+                        register_setting("toocheke-settings", "toocheke-manga-rtl");
                         //navigation buttons settings
                         add_settings_section("toocheke_comic_navigation_options_section", "Comic Navigation", [$this, 'toocheke_display_comic_navigation_message'], "toocheke-options-page");
                         add_settings_section("toocheke_custom_comic_navigation_section", "", "", "toocheke-options-page");
@@ -2995,10 +3083,12 @@ class Toocheke_Companion_Comic_Features
                         if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
                             add_settings_section("toocheke_buy_comic_info_section", "Buy Comic", [$this, 'toocheke_buy_comic_display_message'], "toocheke-options-page");
                             add_settings_section("toocheke_buy_comic_options_section", "Options to enable", [$this, 'toocheke_buy_comic_options_display_message'], "toocheke-options-page");
+                            add_settings_field("toocheke-global-buy-comic", "Do you want to set the pricing globally", [$this, 'toocheke_global_buy_comic_checkbox'], "toocheke-options-page", "toocheke_buy_comic_options_section");
                             add_settings_field("toocheke-original-art", "Do you wish to offer sales of the original art for each comic?", [$this, 'toocheke_buy_original_checkbox'], "toocheke-options-page", "toocheke_buy_comic_options_section");
                             add_settings_field("toocheke-print", "Do you wish to offer sales of the print for each comic?", [$this, 'toocheke_buy_print_checkbox'], "toocheke-options-page", "toocheke_buy_comic_options_section");
                             register_setting("toocheke-settings", "toocheke-original-art");
                             register_setting("toocheke-settings", "toocheke-print");
+                            register_setting("toocheke-settings", "toocheke-global-buy-comic");
                             //PayPal Fields section
                             add_settings_section("toocheke_paypal_settings_section", "PayPal Settings", [$this, 'toocheke_paypal_settings_display_message'], "toocheke-options-page");
                             add_settings_field(
@@ -3307,6 +3397,10 @@ class Toocheke_Companion_Comic_Features
             {
                 echo 'This determines whether a panel-by-panel swipe navigation(similar to Instagram) will be added to the comic page.';
             }
+            public function toocheke_manga_page_navigation_message()
+            {
+                echo 'Configure the navigation for your manga reader.';
+            }
             public function toocheke_display_comics_order_message()
             {
                 echo 'This sets the sorting order for comics.';
@@ -3453,13 +3547,11 @@ class Toocheke_Companion_Comic_Features
             }
             public function toocheke_display_input_WYSIWYG($args)
             {
-                printf(
-                    wp_editor(
-                        get_option($args['name'], ''),
-                        $args['name'],
-                        ['textarea_name' => $args['name']]
-                    )
-                );
+                 wp_editor(
+        get_option($args['name'], ''),
+        $args['name'],
+        ['textarea_name' => $args['name']]
+    );
             }
             public function toocheke_series_publish_options_checkbox()
             {
@@ -3570,6 +3662,14 @@ class Toocheke_Companion_Comic_Features
     ?>
         <input type="checkbox" name="toocheke-original-art" value="1"
             <?php checked(1, get_option('toocheke-original-art'), true); ?> /> Check for Yes
+    <?php
+            }
+            public function toocheke_global_buy_comic_checkbox()
+            {
+    ?>
+
+        <input type="checkbox" name="toocheke-global-buy-comic" value="1"
+            <?php checked(1, get_option('toocheke-global-buy-comic'), true); ?> /> Check for Yes
     <?php
             }
             public function toocheke_buy_print_checkbox()
@@ -3842,6 +3942,24 @@ class Toocheke_Companion_Comic_Features
     ?>
         <input type="checkbox" id="toocheke-comics-navigation" name="toocheke-comics-navigation" value="1"
             <?php checked(1, get_option('toocheke-comics-navigation'), 1); ?> /> Check for Yes
+    <?php
+            }
+                public function toocheke_manga_default_pages_radio()
+            {
+    ?>
+        <input type="radio" name="toocheke-manga-default-pages" value="1"
+            <?php checked('1', get_option('toocheke-manga-default-pages'), true); ?>> 1 page
+        <input type="radio" name="toocheke-manga-default-pages" value="2"
+            <?php checked('2', get_option('toocheke-manga-default-pages'), true); ?>> 2 pages
+    <?php
+            }
+              public function toocheke_manga_rtl_radio()
+            {
+    ?>
+        <input type="radio" name="toocheke-manga-rtl" value="0"
+            <?php checked('0', get_option('toocheke-manga-rtl'), true); ?>> Left to right
+        <input type="radio" name="toocheke-manga-rtl" value="1"
+            <?php checked('1', get_option('toocheke-manga-rtl'), true); ?>> Right to left
     <?php
             }
             public function toocheke_comics_order_radio()
@@ -4659,32 +4777,32 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
             //This function saves the data you put in the meta box
             public function toocheke_comic_blog_post_editor_save_postdata($post_id)
-            {
+{
+    if (isset($_POST['comic_blog_post_editor_nonce']) && isset($_POST['comic'])) {
 
-                if (isset($_POST['comic_blog_post_editor_nonce']) && isset($_POST['comic'])) {
+        //Not save if the user hasn't submitted changes
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
 
-                    //Not save if the user hasn't submitted changes
-                    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-                        return;
-                    }
+        // Verifying whether input is coming from the proper form
+        if (! wp_verify_nonce($_POST['comic_blog_post_editor_nonce'])) {
+            return;
+        }
 
-                    // Verifying whether input is coming from the proper form
-                    if (! wp_verify_nonce($_POST['comic_blog_post_editor_nonce'])) {
-                        return;
-                    }
-
-                    // Making sure the user has permission
-                    if ('post' == $_POST['comic']) {
-                        if (! current_user_can('edit_post', $post_id)) {
-                            return;
-                        }
-                    }
-                }
-                if (isset($_POST['comic_blog_post_editor'])) {
-                    $data = wp_kses_post($_POST['comic_blog_post_editor']);
-                    update_post_meta($post_id, 'comic_blog_post_editor', $data);
-                }
+        // Making sure the user has permission
+        if ('post' == $_POST['comic']) {
+            if (! current_user_can('edit_post', $post_id)) {
+                return;
             }
+        }
+    }
+    
+    if (isset($_POST['comic_blog_post_editor'])) {
+        $data = $this->toocheke_sanitize_rich_text_with_embeds($_POST['comic_blog_post_editor']);
+        update_post_meta($post_id, 'comic_blog_post_editor', $data);
+    }
+}
             /**
              * Extra WYSIWYG meta boxy editor for comics
              */
@@ -4776,32 +4894,32 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
 
             //This function saves the data you put in the meta box
             public function toocheke_2nd_language_comic_blog_post_editor_save_postdata($post_id)
-            {
+{
+    if (isset($_POST['comic_2nd_language_blog_post_editor_nonce']) && isset($_POST['comic'])) {
 
-                if (isset($_POST['comic_2nd_language_blog_post_editor_nonce']) && isset($_POST['comic'])) {
+        //Not save if the user hasn't submitted changes
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
 
-                    //Not save if the user hasn't submitted changes
-                    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-                        return;
-                    }
+        // Verifying whether input is coming from the proper form
+        if (! wp_verify_nonce($_POST['comic_2nd_language_blog_post_editor_nonce'])) {
+            return;
+        }
 
-                    // Verifying whether input is coming from the proper form
-                    if (! wp_verify_nonce($_POST['comic_2nd_language_blog_post_editor_nonce'])) {
-                        return;
-                    }
-
-                    // Making sure the user has permission
-                    if ('post' == $_POST['comic']) {
-                        if (! current_user_can('edit_post', $post_id)) {
-                            return;
-                        }
-                    }
-                }
-                if (isset($_POST['comic_2nd_language_blog_post_editor'])) {
-                    $data = wp_kses_post($_POST['comic_2nd_language_blog_post_editor']);
-                    update_post_meta($post_id, 'comic_2nd_language_blog_post_editor', $data);
-                }
+        // Making sure the user has permission
+        if ('post' == $_POST['comic']) {
+            if (! current_user_can('edit_post', $post_id)) {
+                return;
             }
+        }
+    }
+    
+    if (isset($_POST['comic_2nd_language_blog_post_editor'])) {
+        $data = $this->toocheke_sanitize_rich_text_with_embeds($_POST['comic_2nd_language_blog_post_editor']);
+        update_post_meta($post_id, 'comic_2nd_language_blog_post_editor', $data);
+    }
+}
             /**
              * Extra WYSIWYG meta boxy editor for comics
              */
@@ -6651,7 +6769,7 @@ value="' . esc_attr($image_id) . '" />';
                 add_submenu_page('toocheke-menu', 'Manga Hub', 'Manga Hub', 'edit_posts', 'toocheke-manga-hub', [$this, 'toocheke_manga_hub_page'], 14);
 
                 if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
-                    add_submenu_page('toocheke-menu', 'Premium', 'Premium', 'manage_options', 'toocheke-premium-hub', [$this, 'toocheke_premium_hub_page'], 15);
+                    add_submenu_page('toocheke-menu', 'Premium Hub', 'Premium Hub', 'manage_options', 'toocheke-premium-hub', [$this, 'toocheke_premium_hub_page'], 15);
                 }
                 add_submenu_page('toocheke-menu', 'Options', 'Options', 'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page'], 16);
                 add_submenu_page('toocheke-menu', 'Import From Comic Easel', 'Import From Comic Easel', 'edit_posts', 'toocheke-import-comic-easel', [$this, 'toocheke_include_import_comic_easel_page'], 17);
@@ -6991,8 +7109,73 @@ value="' . esc_attr($image_id) . '" />';
                 // Check for bot User-Agent
                 $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
-                if (empty($user_agent) || preg_match('/bot|crawl|spider|slurp|mediapartners/i', $user_agent)) {
+                if (empty($user_agent)) {
+                    wp_send_json_error('No user agent detected');
+                }
+
+                // Comprehensive bot detection pattern
+                $bot_patterns = [
+                    // Traditional bots
+                    'bot', 'crawl', 'spider', 'slurp', 'mediapartners',
+                    
+                    // AI Bots
+                    'gptbot',           // OpenAI ChatGPT
+                    'chatgpt',          // ChatGPT variations
+                    'claude',           // Anthropic Claude
+                    'claudebot',        // Claude's crawler
+                    'google-extended',  // Google Bard/Gemini
+                    'bard',             // Google Bard
+                    'gemini',           // Google Gemini
+                    'copilot',          // Microsoft Copilot
+                    'bingbot',          // Bing (used by Copilot)
+                    'perplexity',       // Perplexity AI
+                    'perplexitybot',    // Perplexity crawler
+                    'anthropic',        // Anthropic variations
+                    'cohere',           // Cohere AI
+                    'you\.com',         // You.com AI
+                    'meta-externalagent', // Meta AI
+                    'facebookbot',      // Facebook/Meta
+                    'applebot',         // Apple Intelligence
+                    'amazonbot',        // Amazon AI
+                    'diffbot',          // Diffbot AI
+                    'bytespider',       // ByteDance (TikTok)
+                    'ccbot',            // Common Crawl (used by many AI)
+                    'omgili',           // Omgili bot
+                    'petalbot',         // Huawei AI
+                    'yandex',           // Yandex AI
+                    'ia_archiver',      // Internet Archive
+                    'semrush',          // SEMrush bot
+                    'ahrefsbot',        // Ahrefs
+                    'mj12bot',          // Majestic
+                    'dotbot',           // SEO bot
+                    'scrapy',           // Scrapy framework
+                    'python-requests',  // Common scraping library
+                    'axios',            // HTTP client (often used in automation)
+                    'curl',             // Command line tool
+                    'wget',             // Download tool
+                    'headless',         // Headless browsers
+                    'phantom',          // PhantomJS
+                    'selenium',         // Selenium automation
+                    'webdriver',        // Browser automation
+                ];
+
+                $pattern = '/(' . implode('|', $bot_patterns) . ')/i';
+
+                if (preg_match($pattern, $user_agent)) {
                     wp_send_json_error('Bot detected');
+                }
+
+                // Also check for suspicious patterns in the user agent
+                $suspicious_patterns = [
+                    '/^(python|java|ruby|perl|php)\//i',  // Programming language clients
+                    '/^$/i',                                // Empty user agents
+                    '/^mozilla\/[0-9]\.[0-9]$/i',          // Minimal Mozilla strings
+                ];
+
+                foreach ($suspicious_patterns as $pattern) {
+                    if (preg_match($pattern, $user_agent)) {
+                        wp_send_json_error('Suspicious user agent detected');
+                    }
                 }
 
                 // Security
@@ -8842,6 +9025,147 @@ value="' . esc_attr($image_id) . '" />';
                     }
                 }
             }
+            public function toocheke_companion_upgrade_check(){
+                 $installed_version = get_option('toocheke_companion_version');
+
+                // Only run when updating from a previous version to 1.190+
+                if (version_compare($installed_version, '1.190', '<')) {
+
+                    // Set the new option ONLY if it doesn't exist already
+                    if (get_option('toocheke-global-buy-comic') === false) {
+                        update_option('toocheke-global-buy-comic', 1);
+                    }
+
+                    // Store new version so this never runs again
+                    update_option('toocheke_companion_version', TOOCHEKE_COMPANION_VERSION);
+                }
+            }
+            public function toocheke_add_buy_comic_metaboxes(){
+                $theme = wp_get_theme();
+
+                 if ('Toocheke Premium' === $theme->name || 'Toocheke Premium' === $theme->parent_theme) {
+                    add_meta_box(
+                        'toocheke_comic_pricing',
+                        __('Pricing for "Buy Comic"', 'toocheke'),
+                        [$this, 'toocheke_comic_pricing_metabox_callback'], 
+                        'comic', 
+                        'normal',
+                        'high'
+                    );
+                }
+            }
+            public function toocheke_comic_pricing_metabox_callback($post) {
+                wp_nonce_field('toocheke_comic_pricing_nonce', 'toocheke_comic_pricing_nonce');
+
+                $fields = [
+                    'original_us_price' => 'Orignal Art - US Price',
+                    'original_us_shipping' => 'Orignal Art - US Shipping',
+                    'original_canada_price' => 'Orignal Art - Canada Price',
+                    'original_canada_shipping' => 'Orignal Art - Canada Shipping',
+                    'original_international_price' => 'Orignal Art - International Price',
+                    'original_international_shipping' => 'Orignal Art - International Shipping',
+                    'print_us_price' => 'Print - US Price',
+                    'print_us_shipping' => 'Print - US Shipping',
+                    'print_canada_price' => 'Print - Canada Price',
+                    'print_canada_shipping' => 'Print - Canada Shipping',
+                    'print_international_price' => 'Print - International Price',
+                    'print_international_shipping' => 'Print - International Shipping',
+                ];
+
+                foreach ($fields as $key => $label) {
+                    $value = get_post_meta($post->ID, $key, true); // empty if not set
+                    echo '<p>';
+                    echo '<label for="' . esc_attr($key) . '">' . esc_html($label) . ':</label> ';
+                    echo '<input type="number" step="0.01" min="0" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+                    echo '</p>';
+                }
+            }
+           
+
+public function toocheke_save_comic_pricing_metabox($post_id) {
+    if (!isset($_POST['toocheke_comic_pricing_nonce'])) return;
+    if (!wp_verify_nonce($_POST['toocheke_comic_pricing_nonce'], 'toocheke_comic_pricing_nonce')) return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+
+    $fields = [
+        'original_us_price',
+        'original_us_shipping',
+        'original_canada_price',
+        'original_canada_shipping',
+        'original_international_price',
+        'original_international_shipping',
+        'print_us_price',
+        'print_us_shipping',
+        'print_canada_price',
+        'print_canada_shipping',
+        'print_international_price',
+        'print_international_shipping',
+    ];
+
+    foreach ($fields as $field) {
+        if (isset($_POST[$field]) && $_POST[$field] !== '') {
+            update_post_meta($post_id, $field, floatval($_POST[$field]));
+        } else {
+            delete_post_meta($post_id, $field); // remove empty fields
+        }
+    }
+}
+/**
+ * Sanitize rich text content while allowing YouTube embeds
+ */
+private function toocheke_sanitize_rich_text_with_embeds($content)
+{
+    // Get all allowed tags from wp_kses_post
+    $allowed_tags = wp_kses_allowed_html('post');
+    
+    // Add iframe with YouTube-specific attributes
+    $allowed_tags['iframe'] = array(
+        'src'             => true,
+        'width'           => true,
+        'height'          => true,
+        'frameborder'     => true,
+        'allowfullscreen' => true,
+        'allow'           => true,
+        'title'           => true,
+        'class'           => true,
+        'id'              => true,
+        'style'           => true,
+    );
+    
+    // Sanitize with custom allowed tags
+    $sanitized = wp_kses($content, $allowed_tags);
+    
+    // Additional security: ensure iframe src only allows YouTube domains
+    $sanitized = preg_replace_callback(
+        '/<iframe([^>]*)src=["\']([^"\']*)["\']([^>]*)>/i',
+        function($matches) {
+            $src = $matches[2];
+            $allowed_domains = array(
+                'youtube.com',
+                'www.youtube.com',
+                'youtube-nocookie.com',
+                'www.youtube-nocookie.com'
+            );
+            
+            $parsed = parse_url($src);
+            if (isset($parsed['host'])) {
+                foreach ($allowed_domains as $domain) {
+                    if (strpos($parsed['host'], $domain) !== false) {
+                        return '<iframe' . $matches[1] . 'src="' . esc_url($src) . '"' . $matches[3] . '>';
+                    }
+                }
+            }
+            
+            // If not from allowed domain, remove the iframe
+            return '';
+        },
+        $sanitized
+    );
+    
+    return $sanitized;
+}
+
+
         }
 
         /**

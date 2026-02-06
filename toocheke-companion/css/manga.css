@@ -445,11 +445,17 @@ display: block;
  .manga-reader-container.two-pages img {
     position: absolute;
   }
-  .manga-reader-container.two-pages swiper-slide:nth-child(even) img {
+  .ltr.manga-reader-container.two-pages swiper-slide:nth-child(even) img {
     left: 0;
   }
-   .manga-reader-container.two-pages swiper-slide:nth-child(odd) img {
+   .ltr.manga-reader-container.two-pages swiper-slide:nth-child(odd) img {
     right: 0;
+  }
+    .rtl.manga-reader-container.two-pages swiper-slide:nth-child(even) img {
+    right: 0;
+  }
+   .rtl.manga-reader-container.two-pages swiper-slide:nth-child(odd) img {
+    left: 0;
   }
   swiper-container {
   width: 1480px;

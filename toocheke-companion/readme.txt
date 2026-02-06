@@ -3,8 +3,8 @@ Author: LeeToo
 Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
-Tested up to: 6.8
-Stable tag: 1.185
+Tested up to: 6.9
+Stable tag: 1.194
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -121,6 +121,34 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.194 =
+* FIX: Resolved comic navigation for collections when using non-Toocheke themes.
+
+= 1.193 =
+* UPDATE: Added support for social sharing buttons when using non-Toocheke themes.
+
+= 1.192 =
+* FIX: Improved handling of Series IDs in chapter navigation buttons.
+* FIX: Added additional bot-detection safeguards to prevent automated crawling from inflating like counts.
+
+= 1.191 =
+* UPDATE: Comic blog post fields now support embedded YouTube videos with secure iframe handling
+
+= 1.190 =
+* UPDATE: Added the ability to set "Buy Comic" pricing directly on individual comic posts, in addition to the existing global pricing options. This allows per-comic pricing. **Premium only**.
+
+= 1.189 =
+* UPDATE: Confirmed compatibility with WordPress 6.9.
+
+= 1.188 =
+* UPDATE: Added support for right-to-left (RTL) reading, enabling proper layout for languages such as Japanese.
+
+= 1.187 =
+* FIX: Resolved an issue where the comic list was not displaying correctly.
+
+= 1.186 =
+* UPDATE: Added option to set the default manga page view (single page or two-page spread).
 
 = 1.185 =
 * NEW. Added zoom functionality for a better manga reading experience on mobile devices. Now you can easily zoom in and out for improved readability and navigation.

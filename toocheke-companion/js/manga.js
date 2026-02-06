@@ -33,10 +33,12 @@ jQuery(document).ready(function ($) {
         jQuery("swiper-container").attr("slides-per-group", "2");
         jQuery('.manga-reader-container').addClass('two-pages');
     });
-    jQuery("swiper-slide img").click(function () {
+
+  /*   jQuery("swiper-slide img").click(function () {
         jQuery('.manga-page-nav').toggleClass('d-block');
 
-    });
+    }); */
+  
 
     const mainSwiper = document.querySelector('swiper-container');
 
@@ -73,6 +75,13 @@ if (swiperEl) {
 function setup(swiper) {
   console.log('Swiper ready:', swiper);
 
+  // --- Add tap handler for toggling navigation ---
+
+swiper.on('tap', function (swiperInstance, e) {
+  if (e.target.tagName.toLowerCase() === 'img') {
+    jQuery('.manga-page-nav').toggleClass('d-block');
+  }
+});
   const images = swiperEl.querySelectorAll('swiper-slide img');
   let loadedCount = 0;
 

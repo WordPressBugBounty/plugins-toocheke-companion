@@ -12,13 +12,16 @@ $display_default = get_option('toocheke-comics-navigation') && 1 == get_option('
 $comic_order = get_option('toocheke-chapter-first-comic') ? get_option('toocheke-chapter-first-comic') : 'DESC';
 $series_id = null;
 $comic_id = null;
+
 $series_id = isset($_GET['sid']) ? (int) $_GET['sid'] : null;
 if (get_query_var('series_id')) {
     $series_id = (int) get_query_var('series_id');
 }
+
 if (is_singular('series') && !$series_id) {
     $series_id = get_the_ID();
 }
+
 if (is_singular('comic') ) {
     $comic_id = get_the_ID();
 }

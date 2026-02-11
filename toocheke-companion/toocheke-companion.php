@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.194
+ * Version:     1.195
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.194');
+    define('TOOCHEKE_COMPANION_VERSION', '1.195');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -1243,15 +1243,16 @@ class Toocheke_Companion_Comic_Features
                     echo '—';
                 }
                 break;
-            case 'patreon_level':
-                // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
-                include_once ABSPATH . 'wp-admin/includes/plugin.php';
-                if (is_plugin_active('patreon-connect/patreon.php')) {
-                    $patreon_level = get_post_meta($id, 'patreon-level', true);
-                    //echo $this->toocheke_get_patreon_level_label($patreon_level) ;
-                    echo '<a href="' . admin_url('/edit.php?post_type=comic&patreon_level=' . $patreon_level) . '">' . $this->toocheke_get_patreon_level_label($patreon_level) . '</a>';
-                }
-                break;
+           case 'patreon_level':
+            // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+            if (is_plugin_active('patreon-connect/patreon.php')) {
+                $patreon_level = get_post_meta($id, 'patreon-level', true);
+                
+                // Escape both the URL and the displayed text
+                echo '<a href="' . esc_url(admin_url('/edit.php?post_type=comic&patreon_level=' . urlencode($patreon_level))) . '">' . esc_html($this->toocheke_get_patreon_level_label($patreon_level)) . '</a>';
+            }
+            break;
             default:
                 break;
         } // end switch
@@ -1340,7 +1341,8 @@ class Toocheke_Companion_Comic_Features
         }
 
         $query->set('meta_key', 'patreon-level');
-        $query->set('meta_value', $_GET['patreon_level']);
+        // Sanitize the GET parameter before using it
+        $query->set('meta_value', sanitize_text_field($_GET['patreon_level']));
     }
     /* Genre specific functions and terms */
     public function toocheke_companion_genre_load_media()
@@ -6943,6 +6945,9 @@ value="' . esc_attr($image_id) . '" />';
                 if (! current_user_can('edit_post', $post_id)) {
                     return;
                 }
+
+                 $post_id = absint($post_id); 
+
                 // check nonce
                 if (isset($_POST['toocheke_companion_nonce']) && ! wp_verify_nonce($_POST['toocheke_companion_nonce'], 'toocheke_companion_quick_edit_nonce')) {
                     return;
@@ -6950,11 +6955,11 @@ value="' . esc_attr($image_id) . '" />';
 
                 // update the series for the comic
                 if (isset($_POST['parent_id'])) {
-                    update_post_meta($post_id, 'post_parent', $_POST['parent_id']);
+                    update_post_meta($post_id, 'post_parent', sanitize_text_field($_POST['parent_id']));
                 }
-                // update patreon level
+                // update patreon level - SANITIZE INPUT
                 if (isset($_REQUEST['patreon_level'])) {
-                    update_post_meta($post_id, 'patreon-level', $_REQUEST['patreon_level']);
+                    update_post_meta($post_id, 'patreon-level', sanitize_text_field($_REQUEST['patreon_level']));
                 }
             }
             /**
@@ -6973,15 +6978,21 @@ value="' . esc_attr($image_id) . '" />';
 
                 // for each post ID
                 foreach ($_POST['post_ids'] as $id) {
+                    // Sanitize post ID
+                    $id = absint($id);
 
-                    // if series is empty,  we shouldn't change it
-                    if (! empty($_POST['series'])) {
-                        update_post_meta($id, 'post_parent', $_POST['series']);
+                    if (! current_user_can('edit_post', $id)) {
+                        continue;
                     }
 
-                    // if patreon level empty, do nothing
+                    // if series is empty, we shouldn't change it
+                    if (! empty($_POST['series'])) {
+                        update_post_meta($id, 'post_parent', sanitize_text_field($_POST['series']));
+                    }
+
+                    // if patreon level empty, do nothing - SANITIZE INPUT
                     if (! empty($_POST['patreon_level'])) {
-                        update_post_meta($id, 'patreon-level', $_POST['patreon_level']);
+                        update_post_meta($id, 'patreon-level', sanitize_text_field($_POST['patreon_level']));
                     }
                 }
 

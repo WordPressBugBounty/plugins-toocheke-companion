@@ -10,8 +10,6 @@
  * Get latest six chapters of comics. If there are no chapters or chapters with no comics, don't display.
  */
 $series_id = get_query_var('series_id');
-echo $series_id;
-echo 'ndani';
 $chapter_comic_order = get_option('toocheke-chapter-first-comic') ? get_option('toocheke-chapter-first-comic') : 'DESC';
 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
 $chapter_args = array(

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.194
+Stable tag: 1.196
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -98,16 +98,16 @@ All of the above are also available as Gutenberg blocks under the widgets catego
 You can also display Manga features with the following shortcodes
 
 1. **All Manga Series**  
-    `[toocheke-all-manga-series]`
+    `[toocheke-all-manga-series]` or `[toocheke-all-manga-series title="Your Title Here"]`
 
 2. **Popular Manga Series**  
-    `[toocheke-popular-manga-series]`
+    `[toocheke-popular-manga-series]` or `[toocheke-popular-manga-series title="Your Title Here"]`
 
 3. **Popular Manga Volumes**  
-    `[toocheke-popular-manga-volumes]`
+    `[toocheke-popular-manga-volumes]` or `[toocheke-popular-manga-volumes title="Your Title Here"]`
 
 4. **Popular Manga Chapters**  
-    `[toocheke-popular-manga-chapters]`
+    `[toocheke-popular-manga-chapters]` or `[toocheke-popular-manga-chapters title="Your Title Here"]`
 
 
 == Frequently Asked Questions ==
@@ -121,6 +121,12 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.196 =
+* NEW: Added optional `title` attribute to manga archive shortcodes. Section headings can now be overridden via shortcode while still falling back to Customizer settings.
+
+= 1.195 =
+* SECURITY: Fixed Cross-Site Scripting (XSS) vulnerability in Patreon Level functionality. Added input sanitization and output escaping to prevent malicious code injection. Thanks to the security researchers for responsible disclosure.
 
 = 1.194 =
 * FIX: Resolved comic navigation for collections when using non-Toocheke themes.

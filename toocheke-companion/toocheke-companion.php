@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.196
+ * Version:     1.197
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.196');
+    define('TOOCHEKE_COMPANION_VERSION', '1.197');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -2999,7 +2999,13 @@ class Toocheke_Companion_Comic_Features
                         add_settings_section("toocheke_image_click_section", "Allow Click to Enlarge for Images", [$this, 'toocheke_image_click_message'], "toocheke-options-page");
                         add_settings_field("toocheke-image-click", "Do you want to enable the click to enlarge feature for comic images?", [$this, 'toocheke_image_click_checkbox'], "toocheke-options-page", "toocheke_image_click_section");
                         register_setting("toocheke-settings", "toocheke-image-click");
+
+                        //Option for determining whether to protect images
+                        add_settings_section("toocheke_image_protect_section", "Protection of Comic Images", [$this, 'toocheke_image_protection_message'], "toocheke-options-page");
+                        add_settings_field("toocheke-image-protection", "Do you want to protect the images in your comic post?", [$this, 'toocheke_image_protection_checkbox'], "toocheke-options-page", "toocheke_image_protect_section");
+                        register_setting("toocheke-settings", "toocheke-image-protection");
                         break;
+                    
                     case 'rss_options':
                         //Option for determining whether to add comics to main RSS feed
                         add_settings_section("toocheke_comics_to_main_rss_section", "Add comic posts to main feed?", [$this, 'toocheke_rss_message'], "toocheke-options-page");
@@ -3387,6 +3393,10 @@ class Toocheke_Companion_Comic_Features
             {
                 echo 'This determines whether you can click an image to enlarge on comic pages';
             }
+            public function toocheke_image_protection_message()
+            {
+                echo 'Helps prevent other websites from displaying your comic images by blocking direct access (hotlink protection).';
+            }
             public function toocheke_rss_message()
             {
                 echo 'This determines whether the comic posts will be added to the main feed: ' . esc_url(get_bloginfo('url') . '/feed');
@@ -3687,6 +3697,13 @@ class Toocheke_Companion_Comic_Features
     ?>
         <input type="checkbox" name="toocheke-image-click" value="1"
             <?php checked(1, get_option('toocheke-image-click'), true); ?> /> Check for Yes
+    <?php
+            }
+             public function toocheke_image_protection_checkbox()
+            {
+    ?>
+        <input type="checkbox" name="toocheke-image-protection" value="1"
+            <?php checked(1, get_option('toocheke-image-protection'), true); ?> /> Check for Yes
     <?php
             }
             public function toocheke_comics_to_main_rss_checkbox()
@@ -9226,6 +9243,415 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
 
 
         }
+        /**
+ * Toocheke Image Protection
+ * 
+ * Automatically protects all comic post images by serving them through a 
+ * proxy script 
+ */
+class Toocheke_Image_Protection {
+    
+    private static $instance = null;
+    
+    public static function get_instance() {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    private function __construct() {
+        // Initialize hooks
+        add_action('init', array($this, 'init'));
+        add_action('template_redirect', array($this, 'serve_protected_image'));
+        
+        // Hook into content and meta filtering - with lower priority to run AFTER existing filters
+        add_filter('the_content', array($this, 'protect_content_images'), 999);
+        add_filter('get_post_metadata', array($this, 'protect_meta_images'), 9999, 4);
+        add_filter('post_thumbnail_html', array($this, 'protect_featured_image'), 999, 5);
+    }
+    
+    public function init() {
+        // Nothing needed here anymore - using $_GET directly
+    }
+    
+    /**
+     * Check if this is a comic post
+     */
+    private function is_comic_post($post_id = null) {
+        if (!$post_id) {
+            $post_id = get_the_ID();
+        }
+        return get_post_type($post_id) === 'comic';
+    }
+    
+    /**
+     * Protect images in the_content
+     * Runs AFTER toocheke_wrap_content_img (priority 999 vs default 10)
+     */
+    public function protect_content_images($content) {
+        if (!$this->is_comic_post() || is_admin()) {
+            return $content;
+        }
+        
+        return $this->replace_image_urls($content);
+    }
+    
+    /**
+     * Protect images in meta fields
+     * Runs AFTER toocheke_wrap_meta_content_img (priority 9999 vs 999)
+     */
+    public function protect_meta_images($metadata, $post_id, $meta_key, $single) {
+        if (!$this->is_comic_post($post_id) || is_admin()) {
+            return $metadata;
+        }
+        
+        // Only process specific meta fields
+        $protected_fields = array(
+            'desktop_comic_editor',
+            'desktop_comic_2nd_language_editor',
+            'mobile_comic_2nd_language_editor'
+        );
+        
+        if (!isset($meta_key) || !in_array($meta_key, $protected_fields)) {
+            return $metadata;
+        }
+        
+        // Get list of filters to prevent infinite loop
+        global $wp_current_filter;
+        $filter_key = count($wp_current_filter) - 2;
+        if (isset($wp_current_filter[$filter_key]) && 'get_post_metadata' === $wp_current_filter[$filter_key]) {
+            return $metadata;
+        }
+        
+        // Get the actual meta value
+        remove_filter('get_post_metadata', array($this, 'protect_meta_images'), 9999);
+        $current_meta = get_post_meta($post_id, $meta_key, true);
+        add_filter('get_post_metadata', array($this, 'protect_meta_images'), 9999, 4);
+        
+        if (empty($current_meta)) {
+            return $metadata;
+        }
+        
+        // Protect images in the meta content
+        $protected_meta = $this->replace_image_urls($current_meta);
+        
+        return $protected_meta;
+    }
+    
+    /**
+     * Protect featured image
+     */
+    public function protect_featured_image($html, $post_id, $post_thumbnail_id, $size, $attr) {
+        if (!$this->is_comic_post($post_id) || is_admin()) {
+            return $html;
+        }
+        
+        return $this->replace_image_urls($html);
+    }
+    
+    /**
+     * Replace image URLs with protected proxy URLs
+     */
+    private function replace_image_urls($content) {
+        if (empty($content)) {
+            return $content;
+        }
+        
+        // Use DOMDocument to parse HTML properly
+        libxml_use_internal_errors(true);
+        
+        $dom = new DOMDocument();
+        $dom->loadHTML(
+            '<?xml encoding="UTF-8">' . $content,
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+        );
+        
+        libxml_clear_errors();
+        
+        // Process img tags
+        $images = $dom->getElementsByTagName('img');
+        $images_array = iterator_to_array($images);
+        
+        foreach ($images_array as $img) {
+            $src = $img->getAttribute('src');
+            if ($src && $this->is_local_image($src)) {
+                $protected_url = $this->create_protected_url($src);
+                $img->setAttribute('src', $protected_url);
+                $img->setAttribute('data-toocheke-protected', '1');
+            }
+            
+            // Also handle srcset if present
+            $srcset = $img->getAttribute('srcset');
+            if ($srcset) {
+                $protected_srcset = $this->protect_srcset($srcset);
+                $img->setAttribute('srcset', $protected_srcset);
+            }
+        }
+        
+        // Process source tags (for picture elements)
+        $sources = $dom->getElementsByTagName('source');
+        $sources_array = iterator_to_array($sources);
+        
+        foreach ($sources_array as $source) {
+            $srcset = $source->getAttribute('srcset');
+            if ($srcset && $this->is_local_image($srcset)) {
+                $protected_url = $this->create_protected_url($srcset);
+                $source->setAttribute('srcset', $protected_url);
+            }
+        }
+        
+        $content = $dom->saveHTML();
+        $content = str_replace('<?xml encoding="UTF-8">', '', $content);
+        
+        // Decode any HTML entities that might have been created
+        $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        return $content;
+    }
+    
+    /**
+     * Protect srcset attribute
+     */
+    private function protect_srcset($srcset) {
+        $sources = explode(',', $srcset);
+        $protected_sources = array();
+        
+        foreach ($sources as $source) {
+            $source = trim($source);
+            $parts = preg_split('/\s+/', $source);
+            
+            if (count($parts) >= 1 && $this->is_local_image($parts[0])) {
+                $protected_url = $this->create_protected_url($parts[0]);
+                $parts[0] = $protected_url;
+                $protected_sources[] = implode(' ', $parts);
+            } else {
+                $protected_sources[] = $source;
+            }
+        }
+        
+        return implode(', ', $protected_sources);
+    }
+    
+    /**
+     * Check if image is local (from your site)
+     */
+    private function is_local_image($url) {
+        $site_url = site_url();
+        $upload_dir = wp_upload_dir();
+        
+        // Check if URL contains site domain or upload directory
+        return (strpos($url, $site_url) !== false || strpos($url, $upload_dir['baseurl']) !== false);
+    }
+    
+    /**
+     * Create protected URL for image
+     */
+    private function create_protected_url($original_url) {
+        // Use URL-safe base64 encoding (no padding, URL-safe characters)
+        // Remove = padding and replace +/ with -_
+        $encoded = rtrim(strtr(base64_encode($original_url), '+/', '-_'), '=');
+        
+        // Create a hash for verification (not user-dependent like nonces)
+        $hash = $this->create_verification_hash($encoded);
+        
+        // Create protected URL
+        $protected_url = add_query_arg(
+            array(
+                'toocheke_img' => $encoded,
+                'toocheke_hash' => $hash
+            ),
+            home_url('/')
+        );
+        
+        return $protected_url;
+    }
+    
+    /**
+     * Create verification hash for encoded URL
+     */
+    private function create_verification_hash($encoded) {
+        // Use ONLY values that are 100% stable across all requests
+        $site = site_url();
+        $home = home_url();
+        $db = DB_NAME;
+        
+        $secret = $site . $home . $db;
+        
+        return substr(md5($encoded . $secret), 0, 10);
+    }
+    
+    /**
+     * Verify the hash matches the encoded URL
+     */
+    private function verify_hash($encoded, $hash) {
+        return $hash === $this->create_verification_hash($encoded);
+    }
+    
+    /**
+     * Serve protected image
+     */
+    public function serve_protected_image() {
+        // Use $_GET directly instead of query_vars to avoid routing issues
+        $img = isset($_GET['toocheke_img']) ? $_GET['toocheke_img'] : '';
+        $hash = isset($_GET['toocheke_hash']) ? $_GET['toocheke_hash'] : '';
+        
+        if (empty($img)) {
+            return;
+        }
+        
+        // Normalize for URL-safe base64 (space might have replaced -)
+        $img = str_replace(' ', '-', $img);
+        
+        // Verify hash
+        if (!$this->verify_hash($img, $hash)) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        // HOTLINK PROTECTION: Check referer
+        if (!$this->is_valid_referer()) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        // Decode URL-safe base64
+        // Convert back from URL-safe format: - and _ to + and /
+        // Add back padding if needed
+        $base64 = strtr($img, '-_', '+/');
+        $padding = strlen($base64) % 4;
+        if ($padding) {
+            $base64 .= str_repeat('=', 4 - $padding);
+        }
+        $original_url = base64_decode($base64);
+        
+        // Verify it's a local image
+        if (!$this->is_local_image($original_url)) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        // Get file path from URL
+        $upload_dir = wp_upload_dir();
+        $file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $original_url);
+        
+        // Also handle theme directory images
+        if (strpos($original_url, get_stylesheet_directory_uri()) !== false) {
+            $file_path = str_replace(get_stylesheet_directory_uri(), get_stylesheet_directory(), $original_url);
+        } elseif (strpos($original_url, get_template_directory_uri()) !== false) {
+            $file_path = str_replace(get_template_directory_uri(), get_template_directory(), $original_url);
+        }
+        
+        // Clean up the file path (remove query strings if any)
+        $file_path = preg_replace('/\?.*$/', '', $file_path);
+        
+        // Check if file exists
+        if (!file_exists($file_path)) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        // Security check - ensure file is within allowed directories
+        $real_path = realpath($file_path);
+        
+        if (!$real_path) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        $allowed_paths = array(
+            realpath($upload_dir['basedir']),
+            realpath(get_stylesheet_directory()),
+            realpath(get_template_directory())
+        );
+        
+        $is_allowed = false;
+        foreach ($allowed_paths as $allowed_path) {
+            if ($allowed_path && strpos($real_path, $allowed_path) === 0) {
+                $is_allowed = true;
+                break;
+            }
+        }
+        
+        if (!$is_allowed) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        // Get mime type
+        $mime_type = wp_check_filetype($real_path);
+        
+        if (!$mime_type['type']) {
+            $this->serve_denied_image();
+            exit;
+        }
+        
+        // Set headers and serve image
+        header('Content-Type: ' . $mime_type['type']);
+        header('Content-Length: ' . filesize($real_path));
+        header('Cache-Control: private, max-age=3600');
+        header('X-Robots-Tag: noindex, nofollow');
+        
+        readfile($real_path);
+        
+        exit;
+    }
+    
+    /**
+     * Check if the referer is valid (not a hotlink)
+     */
+    private function is_valid_referer() {
+        // Get the referer
+        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+        
+        $site_url = site_url();
+        $home_url = home_url();
+        
+        // If there's a referer and it's from our site, allow it
+        if (!empty($referer)) {
+            if (strpos($referer, $site_url) === 0 || strpos($referer, $home_url) === 0) {
+                return true;
+            }
+            // Referer exists but is from external site = hotlink
+            return false;
+        }
+        
+        // No referer at all - this could be:
+        // 1. Direct browser access (typing URL in address bar)
+        // 2. Opening link in new tab
+        // 3. Some privacy browsers that strip referer
+        // 4. Accessing from bookmarks
+        
+        // We'll block this to prevent direct access
+        // If you want to allow no-referer access, change this to: return true;
+        return false;
+    }
+    
+    /**
+     * Serve the "access denied" image
+     */
+    private function serve_denied_image() {
+        $denied_image = plugin_dir_path(__FILE__) . 'img/denied.jpg';
+        
+        // Check if denied image exists
+        if (!file_exists($denied_image)) {
+            // Fallback: serve a simple text response
+            status_header(403);
+            header('Content-Type: text/plain');
+            die('Access Denied');
+        }
+        
+        // Serve the denied image
+        status_header(403);
+        header('Content-Type: image/jpeg');
+        header('Content-Length: ' . filesize($denied_image));
+        header('Cache-Control: public, max-age=86400'); // Cache for 24 hours
+        header('X-Robots-Tag: noindex, nofollow');
+        
+        readfile($denied_image);
+        exit;
+    }
+}
 
         /**
          * Template loader.
@@ -9242,6 +9668,12 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
 
         $Toocheke_Companion_Comic_Features = new Toocheke_Companion_Comic_Features();
         $Toocheke_Companion_Comic_Features->init();
+
+        // Initialize the protection 
+        // Only initialize image protection if the option is enabled
+        if (get_option('toocheke-image-protection') == 1) {
+            Toocheke_Image_Protection::get_instance();
+        }
 
         // Now, include your block registration file
         // Ensure the path is correct, based on where you put 'toocheke-companion-blocks.php'

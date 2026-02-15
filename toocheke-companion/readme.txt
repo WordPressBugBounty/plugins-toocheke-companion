@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.196
+Stable tag: 1.197
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -121,6 +121,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.197 =
+* NEW: Image protection for comic posts (prevents direct access and hotlinking). Enable via Toocheke → Options → Images.
 
 = 1.196 =
 * NEW: Added optional `title` attribute to manga archive shortcodes. Section headings can now be overridden via shortcode while still falling back to Customizer settings.

@@ -345,6 +345,8 @@ width: 100%;
     .manga-series-filter-form {
         flex-direction: column;
         gap: 10px;
+        height: auto;
+        overflow: visible;
     }
     .manga-series-filter-form .filter-field {
         width: 100%;

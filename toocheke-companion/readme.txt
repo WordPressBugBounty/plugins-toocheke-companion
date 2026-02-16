@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.197
+Stable tag: 1.198
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -121,6 +121,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.198 =
+* FIX: Mobile layout for manga series filter
 
 = 1.197 =
 * NEW: Image protection for comic posts (prevents direct access and hotlinking). Enable via Toocheke → Options → Images.

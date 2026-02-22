@@ -13,12 +13,16 @@ $display_likes = get_option('toocheke-comic-likes') && 1 == get_option('toocheke
 $display_no_views = get_option('toocheke-comic-no-of-views') && 1 == get_option('toocheke-comic-no-of-views');
 $rank = get_query_var('rank');
 $series_id = get_query_var('series_id');
+$col_id = get_query_var('col_id');
 ?>
 <li id="post-<?php esc_attr(the_ID());?>" <?php wp_kses_data((string) post_class()); ?>>
 <?php
 $comic_url = get_permalink($post);
 if ($series_id) {
     $comic_url = add_query_arg('sid', $series_id, $comic_url);
+}
+if ($col_id) {
+    $comic_url = add_query_arg('col', $col_id, $comic_url);
 }
 ?>
        <?php if ('publish' === get_post_status($id)): ?>

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.201
+Stable tag: 1.202
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -116,7 +116,7 @@ You can also display Manga features with the following shortcodes
     `[toocheke-latest-manga-series]`
 
 7. **First Manga Volume**  
-    `[toocheke-first-manga-volume]` or `[toocheke-first-manga-volume sid="####"]`4
+    `[toocheke-first-manga-volume]` or `[toocheke-first-manga-volume sid="####"]`
 
 8. **Latest Manga Volume**  
     `[toocheke-latest-manga-volume]` or `[toocheke-latest-manga-volume sid="####"]`
@@ -132,6 +132,9 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.202 =
+* UPDATE: Enabled navigation within a collection when using the [toocheke-collection-archive] shortcode
 
 = 1.201 =
 * NEW: Added shortcodes to display first and latest Manga Series:

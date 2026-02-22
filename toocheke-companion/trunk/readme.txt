@@ -116,7 +116,7 @@ You can also display Manga features with the following shortcodes
     `[toocheke-latest-manga-series]`
 
 7. **First Manga Volume**  
-    `[toocheke-first-manga-volume]` or `[toocheke-first-manga-volume sid="####"]`4
+    `[toocheke-first-manga-volume]` or `[toocheke-first-manga-volume sid="####"]`
 
 8. **Latest Manga Volume**  
     `[toocheke-latest-manga-volume]` or `[toocheke-latest-manga-volume sid="####"]`

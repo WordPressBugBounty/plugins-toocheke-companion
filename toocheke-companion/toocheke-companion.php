@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.202
+ * Version:     1.203
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.202');
+    define('TOOCHEKE_COMPANION_VERSION', '1.203');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -4050,6 +4050,10 @@ class Toocheke_Companion_Comic_Features
                 Segmented By Chapters - Plain Text List</option>
             <option value="chapters-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
                 Segmented By Chapters - Gallery/Grid</option>
+            <option value="collections-plain-text-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "collections-plain-text-list"); ?>>
+                Segmented By Collections - Plain Text List</option>
+            <option value="collections-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "collections-gallery"); ?>>
+                Segmented By Collections - Gallery/Grid</option>
             <option value="series-plain-text-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
                 Segmented By Series - Plain Text List</option>
             <option value="series-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
@@ -8647,7 +8651,7 @@ public function toocheke_enqueue_manga_filter_script()
                     $like   = '%' . $wpdb->esc_like($query->query['s']) . '%';
                     $search = preg_replace(
                         "#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
-                        $wpdb->prepare($sql, $like, $like),
+                        $wpdb->prepare($sql, $like),
                         $search
                     );
                 }

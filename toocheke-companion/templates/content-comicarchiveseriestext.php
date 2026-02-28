@@ -45,10 +45,15 @@ if ($series_query->have_posts()):
         if ($series_comics) {
             echo '<h3>' . wp_kses_data($series_name) . '</h3> ';
             foreach ($series_comics as $comic) {
-                setup_postdata($comic);?>
+                setup_postdata($comic);
+                $comic_url = get_permalink($comic->ID);
+                if ($series_id && $series_id > 0) {
+                    $comic_url = add_query_arg('sid', $series_id, $comic_url);
+                }
+                ?>
 		            <div class="comic-archive-item">
 		  <span class="comic-archive-date"><?php echo wp_kses_data(date('F j, Y', strtotime($comic->post_date))); ?></span>
-		  <span class="comic-archive-title"><a href="<?php echo esc_url(get_permalink($comic->ID)); ?>" title="<?php echo esc_attr($comic->post_title) ?>"><?php echo wp_kses_data($comic->post_title) ?></a></span>
+		  <span class="comic-archive-title"><a href="<?php echo esc_url($comic_url); ?>" title="<?php echo esc_attr($comic->post_title) ?>"><?php echo wp_kses_data($comic->post_title) ?></a></span>
 		  </div>
 
 		            <?php

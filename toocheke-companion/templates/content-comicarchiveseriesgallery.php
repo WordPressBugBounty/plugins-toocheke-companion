@@ -47,11 +47,15 @@ if ($series_query->have_posts()):
             echo '<div id="comic-grid">';
             foreach ($series_comics as $comic) {
                 setup_postdata($comic);
+                $comic_url = get_permalink($comic->ID);
+                if ($series_id && $series_id > 0) {
+                    $comic_url = add_query_arg('sid', $series_id, $comic_url);
+                }
                 echo '<span class="comic-thumbnail-wrapper">';
                 if (get_the_post_thumbnail($comic->ID) != '') {
 
                     echo '<a href="';
-                    echo esc_url(get_permalink($comic->ID));
+                    echo  esc_url($comic_url);
                     echo '">';
                     echo get_the_post_thumbnail($comic->ID, 'thumbnail');
                     echo '</a>';
@@ -59,7 +63,7 @@ if ($series_query->have_posts()):
                 } else {
 
                     echo '<a href="';
-                    echo esc_url(get_permalink($comic->ID));
+                    echo  esc_url($comic_url);
                     echo '" >';
                     echo '<img src="';
                     echo esc_attr(toocheke_catch_that_image_alt($comic));
@@ -68,7 +72,7 @@ if ($series_query->have_posts()):
 
                 }
                 echo '<br/>';
-                echo '<span class="posted-on">Posted on <a href="' . esc_url(get_permalink($comic->ID)) . '">' . wp_kses_data(date('F j, Y', strtotime($comic->post_date))) . '</a></span>';
+                echo '<span class="posted-on">Posted on <a href="' . esc_url($comic_url) . '">' . wp_kses_data(date('F j, Y', strtotime($comic->post_date))) . '</a></span>';
                 echo '</span>';
             } // foreach($series_comics
             echo '</div>';

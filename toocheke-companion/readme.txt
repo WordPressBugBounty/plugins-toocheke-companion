@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.202
+Stable tag: 1.203
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -132,6 +132,10 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.203 =
+* UPDATE: Updated series archive layouts so comic navigation is now restricted to the current series.
+* NEW: Added two new archive layout options for collections.
 
 = 1.202 =
 * UPDATE: Enabled navigation within a collection when using the [toocheke-collection-archive] shortcode

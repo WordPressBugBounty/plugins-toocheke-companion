@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.204
+Stable tag: 1.205
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -132,6 +132,10 @@ Go to **Settings > Permalinks** and click **Save**. This will refresh your perma
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
+
+= 1.205 =
+* UPDATE: Thumbnails now have a fixed size, regardless of the original image dimensions. This ensures consistency in layout across your site.
+* NEW: Added an option to include featured images as enclosures in RSS feeds
 
 = 1.204 =
 * UPDATE: Added image protection option for comics scheduled in the future.

@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.204
+ * Version:     1.205
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -261,6 +261,7 @@ class Toocheke_Companion_Comic_Features
         add_filter('pre_get_posts', [$this, 'toocheke_feed_post_status']);
         add_filter('the_excerpt_rss', [$this, 'toocheke_add_metadata_to_rss']);
         add_filter('the_content_feed', [$this, 'toocheke_add_metadata_to_rss']);
+        add_action('rss2_item',  [$this, 'toocheke_add_comic_featured_image_to_rss']);
 
         //Manga functions
         add_filter('manage_edit-manga_series_columns', [$this, 'toocheke_companion_add_manga_series_columns']);
@@ -8706,6 +8707,27 @@ public function toocheke_enqueue_manga_filter_script()
                 }
                 return $content;
             }
+            public function toocheke_add_comic_featured_image_to_rss($content) 
+            {
+                global $post;
+                // Check if the current post is of 'comic' post type
+                if ('comic' === get_post_type($post)) {
+                    // Get the ID of the featured image
+                    $thumbnail_id = get_post_thumbnail_id($post);
+                    
+                    // Get the full URL of the featured image
+                    $featured_image_url = get_the_post_thumbnail_url($post, 'full');
+                    
+                    if ($featured_image_url) {
+                        // Get MIME type based on the file extension
+                        $mime_type = get_post_mime_type($thumbnail_id); // This retrieves MIME type
+                        
+                        // Add the enclosure tag to the RSS feed
+                        echo '<enclosure url="' . esc_url($featured_image_url) . '" type="' . esc_attr($mime_type) . '" />'; // Dynamically set MIME type
+                    }
+                }
+            }
+
 
             public function toocheke_get_paypal_currencies()
             {
@@ -9643,10 +9665,12 @@ class Toocheke_Image_Protection {
         }
         
         // HOTLINK PROTECTION: Check referer
+        /*
         if (!$this->is_valid_referer()) {
             $this->serve_denied_image();
             exit;
         }
+        */
         
         // Decode URL-safe base64
         // Convert back from URL-safe format: - and _ to + and /
@@ -9659,10 +9683,12 @@ class Toocheke_Image_Protection {
         $original_url = base64_decode($base64);
         
         // Verify it's a local image
+        /*
         if (!$this->is_local_image($original_url)) {
             $this->serve_denied_image();
             exit;
         }
+        */
         
         // Get file path from URL
         $upload_dir = wp_upload_dir();

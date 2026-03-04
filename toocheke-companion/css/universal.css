@@ -91,12 +91,11 @@ Universal theme styles
 
 .comic-item .thmb {
 	position: relative;
-	display: table-cell;
-	vertical-align: middle;
-	height: 70px;
-	width: 70px;
-	overflow: hidden;
-	max-height: 70px;
+    display: table-cell;
+    vertical-align: middle;
+    height: 70px;
+    width: 70px;
+    overflow: hidden;
 }
 
 .comic-item .rank {
@@ -111,11 +110,10 @@ Universal theme styles
 }
 
 #comic-list .thmb img {
-	max-height: 70px;
-	max-width: none !important;
-	width: auto;
-	margin: 0 !important;
-	padding: 0 !important;
+	width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .comic-item .comic-info {

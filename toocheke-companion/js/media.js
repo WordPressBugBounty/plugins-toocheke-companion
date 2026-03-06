@@ -49,164 +49,285 @@ jQuery(document).ready(function ($) {
 			$(this).closest('tr').siblings().animate({ height: 'toggle', opacity: 'toggle' }, 'slow');
 		}
 	});
+/* Comic Post Media */
+jQuery(function ($) {
+
+    var guide = $('#toocheke-featured-image-ratio-guide');
+    if (!guide.length) return;
+
+    function toggleGuide() {
+        // If WP has a featured image set, the #postimagediv contains an <img>
+        var hasImage = $('#postimagediv .inside img').length > 0;
+        guide.toggle(!hasImage);
+    }
+
+    // Run on page load
+    toggleGuide();
+
+    // WP updates featured image via AJAX; watch for changes
+    var target = document.querySelector('#postimagediv .inside');
+    if (target) {
+        var observer = new MutationObserver(function () {
+            toggleGuide();
+        });
+        observer.observe(target, { childList: true, subtree: true });
+    }
+
+    // Also hook clicks to catch remove/set actions
+    $(document).on('click', '#postimagediv a', function () {
+        setTimeout(toggleGuide, 300);
+    });
+
+});
+var comicscout_image_file_frame;
+
+jQuery.fn.upload_comicscout_image = function (button) {
+
+	// If the media frame already exists, reopen it.
+	if (comicscout_image_file_frame) {
+		comicscout_image_file_frame.open();
+		return;
+	}
+
+	comicscout_image_file_frame = wp.media.frames.comicscout_image_file_frame = wp.media({
+		title: button.data('uploader_title'),
+		button: {
+			text: button.data('uploader_button_text'),
+		},
+		multiple: false
+	});
+
+	comicscout_image_file_frame.on('select', function () {
+
+		var attachment = comicscout_image_file_frame.state().get('selection').first().toJSON();
+
+		jQuery("#comicscout_image").val(attachment.id);
+
+		jQuery("#comicscout-image-metabox img")
+			.attr('src', attachment.url)
+			.attr('srcset', attachment.url)
+			.show();
+
+		jQuery('#upload_comicscout_image_button')
+			.attr('id', 'remove_comicscout_image_button')
+			.text('Remove thumbnail for ComicScout');
+
+	});
+
+	comicscout_image_file_frame.open();
+};
+
+jQuery('#comicscout-image-metabox').on('click', '#upload_comicscout_image_button', function (event) {
+	event.preventDefault();
+	jQuery.fn.upload_comicscout_image(jQuery(this));
+});
+
+jQuery('#comicscout-image-metabox').on('click', '#remove_comicscout_image_button', function (event) {
+
+	event.preventDefault();
+
+	jQuery('#comicscout_image').val('');
+
+	jQuery('#comicscout-image-metabox img')
+		.attr('src', '')
+		.attr('srcset', '')
+		.hide();
+
+	jQuery(this)
+		.attr('id', 'upload_comicscout_image_button')
+		.text('Upload thumbnail for ComicScout');
+
+});
+
 
 	/* Series Hero Image */
-	// Uploading files
-	//Desktop
-	var series_hero_desktop_file_frame;
+// Uploading files
+// Desktop
+var series_hero_desktop_file_frame;
 
-	jQuery.fn.upload_series_hero_image = function (button) {
-		var button_id = button.attr('id');
-		var field_id = button_id.replace('_button', '');
+jQuery.fn.upload_series_hero_image = function (button) {
 
-		// If the media frame already exists, reopen it.
-		if (series_hero_desktop_file_frame) {
-			series_hero_desktop_file_frame.open();
-			return;
-		}
-
-		// Create the media frame.
-		series_hero_desktop_file_frame = wp.media.frames.series_hero_desktop_file_frame = wp.media({
-			title: jQuery(this).data('uploader_title'),
-			button: {
-				text: jQuery(this).data('uploader_button_text'),
-			},
-			multiple: false
-		});
-
-		// When an image is selected, run a callback.
-		series_hero_desktop_file_frame.on('select', function () {
-			jQuery('#series-hero-metabox img').attr('src', '');
-			var attachment = series_hero_desktop_file_frame.state().get('selection').first().toJSON();
-			jQuery("#" + field_id).val(attachment.id);
-			jQuery("#series-hero-metabox img").attr('src', attachment.url);
-			jQuery("#series-hero-metabox img").attr('srcset', attachment.url);
-			jQuery('#series-hero-metabox img').show();
-			jQuery('#' + button_id).attr('id', 'remove_series_hero_image_button');
-			jQuery('#remove_series_hero_image_button').text('Remove series hero image');
-		});
-
-		// Finally, open the modal
+	// If the media frame already exists, reopen it.
+	if (series_hero_desktop_file_frame) {
 		series_hero_desktop_file_frame.open();
-	};
+		return;
+	}
 
-	jQuery('#series-hero-metabox').on('click', '#upload_series_hero_image_button', function (event) {
-		event.preventDefault();
-		jQuery.fn.upload_series_hero_image(jQuery(this));
+	series_hero_desktop_file_frame = wp.media.frames.series_hero_desktop_file_frame = wp.media({
+		title: button.data('uploader_title'),
+		button: {
+			text: button.data('uploader_button_text'),
+		},
+		multiple: false
 	});
 
-	jQuery('#series-hero-metabox').on('click', '#remove_series_hero_image_button', function (event) {
-		event.preventDefault();
-		jQuery('#upload_series_hero_image').val('');
-		jQuery('#series-hero-metabox img').attr('src', '');
-		jQuery("#series-hero-metabox img").attr('srcset', '');
-		jQuery('#series-hero-metabox img').hide();
-		jQuery(this).attr('id', 'upload_series_hero_image_button');
-		jQuery('#upload_series_hero_image_button').text('Set series hero image');
+	series_hero_desktop_file_frame.on('select', function () {
+
+		var attachment = series_hero_desktop_file_frame.state().get('selection').first().toJSON();
+
+		jQuery("#series_hero_image").val(attachment.id);
+
+		jQuery("#series-hero-metabox img")
+			.attr('src', attachment.url)
+			.attr('srcset', attachment.url)
+			.show();
+
+		jQuery('#upload_series_hero_image_button')
+			.attr('id', 'remove_series_hero_image_button')
+			.text('Remove series hero image');
+
 	});
 
-	//Mobile
-	var series_hero_mobile_file_frame;
+	series_hero_desktop_file_frame.open();
+};
 
-	jQuery.fn.upload_series_mobile_hero_image = function (button) {
-		var button_id = button.attr('id');
-		var field_id = button_id.replace('_button', '');
+jQuery('#series-hero-metabox').on('click', '#upload_series_hero_image_button', function (event) {
+	event.preventDefault();
+	jQuery.fn.upload_series_hero_image(jQuery(this));
+});
 
-		// If the media frame already exists, reopen it.
-		if (series_hero_mobile_file_frame) {
-			series_hero_mobile_file_frame.open();
-			return;
-		}
+jQuery('#series-hero-metabox').on('click', '#remove_series_hero_image_button', function (event) {
 
-		// Create the media frame.
-		series_hero_mobile_file_frame = wp.media.frames.series_hero_mobile_file_frame = wp.media({
-			title: jQuery(this).data('uploader_title'),
-			button: {
-				text: jQuery(this).data('uploader_button_text'),
-			},
-			multiple: false
-		});
+	event.preventDefault();
 
-		// When an image is selected, run a callback.
-		series_hero_mobile_file_frame.on('select', function () {
-			var attachment = series_hero_mobile_file_frame.state().get('selection').first().toJSON();
-			jQuery("#" + field_id).val(attachment.id);
-			jQuery("#series-mobile-hero-metabox img").attr('src', attachment.url);
-			jQuery("#series-mobile-hero-metabox img").attr('srcset', attachment.url);
-			jQuery('#series-mobile-hero-metabox img').show();
-			jQuery('#' + button_id).attr('id', 'emove_series_mobile_hero_image_button');
-			jQuery('#emove_series_mobile_hero_image_button').text('Remove series hero image');
-		});
+	jQuery('#series_hero_image').val('');
 
-		// Finally, open the modal
+	jQuery('#series-hero-metabox img')
+		.attr('src', '')
+		.attr('srcset', '')
+		.hide();
+
+	jQuery(this)
+		.attr('id', 'upload_series_hero_image_button')
+		.text('Set series hero image');
+
+});
+
+
+
+/* Mobile Hero */
+
+var series_hero_mobile_file_frame;
+
+jQuery.fn.upload_series_mobile_hero_image = function (button) {
+
+	if (series_hero_mobile_file_frame) {
 		series_hero_mobile_file_frame.open();
-	};
+		return;
+	}
 
-	jQuery('#series-mobile-hero-metabox').on('click', '#upload_series_mobile_hero_image_button', function (event) {
-		event.preventDefault();
-		jQuery.fn.upload_series_mobile_hero_image(jQuery(this));
+	series_hero_mobile_file_frame = wp.media.frames.series_hero_mobile_file_frame = wp.media({
+		title: button.data('uploader_title'),
+		button: {
+			text: button.data('uploader_button_text'),
+		},
+		multiple: false
 	});
 
-	jQuery('#series-mobile-hero-metabox').on('click', '#remove_series_mobile_hero_image_button', function (event) {
-		event.preventDefault();
-		jQuery('#upload_series_mobile_hero_image').val('');
-		jQuery('#series-mobile-hero-metabox img').attr('src', '');
-		jQuery("#series-mobile-hero-metabox img").attr('srcset', '');
-		jQuery('#series-mobile-hero-metabox img').hide();
-		jQuery(this).attr('id', 'upload_series_mobile_hero_image_button');
-		jQuery('#upload_series_mobile_hero_image_button').text('Set series hero image');
+	series_hero_mobile_file_frame.on('select', function () {
+
+		var attachment = series_hero_mobile_file_frame.state().get('selection').first().toJSON();
+
+		jQuery("#series_mobile_hero_image").val(attachment.id);
+
+		jQuery("#series-mobile-hero-metabox img")
+			.attr('src', attachment.url)
+			.attr('srcset', attachment.url)
+			.show();
+
+		jQuery('#upload_series_mobile_hero_image_button')
+			.attr('id', 'remove_series_mobile_hero_image_button')
+			.text('Remove series hero image');
+
 	});
-	//Background
-	var series_bg_file_frame;
 
-	jQuery.fn.upload_series_bg_image = function (button) {
-		var button_id = button.attr('id');
-		var field_id = button_id.replace('_button', '');
+	series_hero_mobile_file_frame.open();
+};
 
-		// If the media frame already exists, reopen it.
-		if (series_bg_file_frame) {
-			series_bg_file_frame.open();
-			return;
-		}
+jQuery('#series-mobile-hero-metabox').on('click', '#upload_series_mobile_hero_image_button', function (event) {
+	event.preventDefault();
+	jQuery.fn.upload_series_mobile_hero_image(jQuery(this));
+});
 
-		// Create the media frame.
-		series_bg_file_frame = wp.media.frames.series_bg_file_frame = wp.media({
-			title: jQuery(this).data('uploader_title'),
-			button: {
-				text: jQuery(this).data('uploader_button_text'),
-			},
-			multiple: false
-		});
+jQuery('#series-mobile-hero-metabox').on('click', '#remove_series_mobile_hero_image_button', function (event) {
 
-		// When an image is selected, run a callback.
-		series_bg_file_frame.on('select', function () {
-			var attachment = series_bg_file_frame.state().get('selection').first().toJSON();
-			jQuery("#" + field_id).val(attachment.id);
-			jQuery("#series-bg-image-metabox img").attr('src', attachment.url);
-			jQuery("#series-bg-image-metabox img").attr('srcset', attachment.url);
-			jQuery('#series-bg-image-metabox img').show();
-			jQuery('#' + button_id).attr('id', 'remove_series_bg_image_button');
-			jQuery('#remove_series_bg_image_button').text('Remove series background image image');
-		});
+	event.preventDefault();
 
-		// Finally, open the modal
+	jQuery('#series_mobile_hero_image').val('');
+
+	jQuery('#series-mobile-hero-metabox img')
+		.attr('src', '')
+		.attr('srcset', '')
+		.hide();
+
+	jQuery(this)
+		.attr('id', 'upload_series_mobile_hero_image_button')
+		.text('Set series hero image');
+
+});
+
+
+
+/* Background Image */
+
+var series_bg_file_frame;
+
+jQuery.fn.upload_series_bg_image = function (button) {
+
+	if (series_bg_file_frame) {
 		series_bg_file_frame.open();
-	};
+		return;
+	}
 
-	jQuery('#series-bg-image-metabox').on('click', '#upload_series_bg_image_button', function (event) {
-		event.preventDefault();
-		jQuery.fn.upload_series_bg_image(jQuery(this));
+	series_bg_file_frame = wp.media.frames.series_bg_file_frame = wp.media({
+		title: button.data('uploader_title'),
+		button: {
+			text: button.data('uploader_button_text'),
+		},
+		multiple: false
 	});
 
-	jQuery('#series-bg-image-metabox').on('click', '#remove_series_bg_image_button', function (event) {
-		event.preventDefault();
-		jQuery('#upload_series_bg_image').val('');
-		jQuery('#series-bg-image-metabox img').attr('src', '');
-		jQuery("#series-bg-image-metabox img").attr('srcset', '');
-		jQuery('#series-bg-image-metabox img').hide();
-		jQuery(this).attr('id', 'upload_series_bg_image_button');
-		jQuery('#upload_series_bg_image_button').text('Set series background image');
+	series_bg_file_frame.on('select', function () {
+
+		var attachment = series_bg_file_frame.state().get('selection').first().toJSON();
+
+		jQuery("#series_bg_image").val(attachment.id);
+
+		jQuery("#series-bg-image-metabox img")
+			.attr('src', attachment.url)
+			.attr('srcset', attachment.url)
+			.show();
+
+		jQuery('#upload_series_bg_image_button')
+			.attr('id', 'remove_series_bg_image_button')
+			.text('Remove series background image');
+
 	});
+
+	series_bg_file_frame.open();
+};
+
+jQuery('#series-bg-image-metabox').on('click', '#upload_series_bg_image_button', function (event) {
+	event.preventDefault();
+	jQuery.fn.upload_series_bg_image(jQuery(this));
+});
+
+jQuery('#series-bg-image-metabox').on('click', '#remove_series_bg_image_button', function (event) {
+
+	event.preventDefault();
+
+	jQuery('#series_bg_image').val('');
+
+	jQuery('#series-bg-image-metabox img')
+		.attr('src', '')
+		.attr('srcset', '')
+		.hide();
+
+	jQuery(this)
+		.attr('id', 'upload_series_bg_image_button')
+		.text('Set series background image');
+
+});
 	// ---------------------------
 	// ,Manga hero images
 	// ---------------------------

@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.205
+ * Version:     1.206
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.204');
+    define('TOOCHEKE_COMPANION_VERSION', '1.206');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -127,6 +127,8 @@ class Toocheke_Companion_Comic_Features
 
         add_action('admin_init', [$this, 'toocheke_audio_meta_box']);
         add_action('admin_init', [$this, 'toocheke_add_comic_series_meta_box']);
+         add_action('add_meta_boxes', [$this, 'toocheke_comicscout_image_add_metabox'], 11);
+        add_action('save_post_comic', [$this, 'toocheke_comicscout_image_save']);
         add_action('save_post', [$this, 'toocheke_comic_audio_save_postdata']);
         add_action('post_edit_form_tag', [$this, 'toocheke_update_edit_form']);
         add_action('admin_init', [$this, 'toocheke_replace_term_description_field']);
@@ -158,7 +160,7 @@ class Toocheke_Companion_Comic_Features
         add_filter('manage_genres_custom_column', [$this, 'toocheke_companion_add_genre_image_column_content'], 10, 3);
         add_filter('manage_edit-genres_sortable_columns', [$this, 'toocheke_companion_genre_add_image_column_sortable']);
         add_action('init', [$this, 'toocheke_companion_create_genre_page_on_theme_activation']);
-        add_action('do_meta_boxes', [$this, 'toocheke_move_comic_featured_image_metabox']);
+        add_action('add_meta_boxes', [$this, 'toocheke_move_comic_featured_image_metabox'], 10);
         add_action('delete_post', [$this, 'toocheke_delete_series_comics']);
         add_filter('excerpt_length', [$this, 'toocheke_excerpt_length'], 999);
         add_filter('excerpt_length', [$this, 'toocheke_universal_excerpt_length'], 999);
@@ -182,17 +184,17 @@ class Toocheke_Companion_Comic_Features
         add_filter('the_content', [$this, 'toocheke_add_comic_hovertext_to_content'], 999);
         add_filter('get_post_metadata', [$this, 'toocheke_add_hovertext_to_desktop_comic_editor_meta'], 10, 4);
 
-        add_action('do_meta_boxes', [$this, 'toocheke_move_series_featured_image_metabox']);
-        add_action('admin_init', [$this, 'toocheke_series_hero_image_add_metabox']);
-        add_action('save_post', [$this, 'toocheke_series_hero_image_save']);
-        add_action('admin_init', [$this, 'toocheke_series_mobile_hero_image_add_metabox']);
-        add_action('save_post', [$this, 'toocheke_series_mobile_hero_image_save']);
-        add_action('admin_init', [$this, 'toocheke_series_bg_image_add_metabox']);
-        add_action('save_post', [$this, 'toocheke_series_bg_image_save']);
-        add_action('admin_init', [$this, 'toocheke_series_bg_color_add_metabox']);
-        add_action('save_post', [$this, 'toocheke_series_bg_color_save']);
-        add_action('admin_init', [$this, 'toocheke_series_sidebar_content_meta_box']);
-        add_action('save_post', [$this, 'toocheke_series_sidebar_content_save_postdata']);
+        add_action('add_meta_boxes', [$this, 'toocheke_move_series_featured_image_metabox'], 10);
+        add_action('add_meta_boxes', [$this, 'toocheke_series_hero_image_add_metabox'], 11);
+        add_action('save_post_series', [$this, 'toocheke_series_hero_image_save']);
+        add_action('add_meta_boxes', [$this, 'toocheke_series_mobile_hero_image_add_metabox'], 12);
+        add_action('save_post_series', [$this, 'toocheke_series_mobile_hero_image_save']);
+        add_action('add_meta_boxes', [$this, 'toocheke_series_bg_image_add_metabox'], 13);
+        add_action('save_post_series', [$this, 'toocheke_series_bg_image_save']);
+        add_action('add_meta_boxes', [$this, 'toocheke_series_bg_color_add_metabox'], 14);
+        add_action('save_post_series', [$this, 'toocheke_series_bg_color_save']);
+        add_action('add_meta_boxes', [$this, 'toocheke_series_sidebar_content_meta_box'], 15);
+        add_action('save_post_series', [$this, 'toocheke_series_sidebar_content_save_postdata']);
 
         add_filter('pre_get_posts', [$this, 'toocheke_companion_comics_sort']);
         /* patreon functions */
@@ -228,7 +230,7 @@ class Toocheke_Companion_Comic_Features
 
         /* Age metaboxes */
         add_action('save_post', [$this, 'toocheke_age_verification_save_postdata']);
-        add_action('admin_init', [$this, 'toocheke_age_verification_meta_box']);
+        add_action('add_meta_boxes', [$this, 'toocheke_age_verification_meta_box'], 99);
 
         /* Add bookmark nav */
         add_filter('wp_nav_menu_items', [$this, 'toocheke_add_bookmark_nav_item'], 10, 2);
@@ -261,7 +263,8 @@ class Toocheke_Companion_Comic_Features
         add_filter('pre_get_posts', [$this, 'toocheke_feed_post_status']);
         add_filter('the_excerpt_rss', [$this, 'toocheke_add_metadata_to_rss']);
         add_filter('the_content_feed', [$this, 'toocheke_add_metadata_to_rss']);
-        add_action('rss2_item',  [$this, 'toocheke_add_comic_featured_image_to_rss']);
+        add_action('rss2_item',  [$this, 'toocheke_add_comic_images_to_rss']);
+        add_action('rss2_ns', [$this, 'toocheke_add_rss_namespaces']);
 
         //Manga functions
         add_filter('manage_edit-manga_series_columns', [$this, 'toocheke_companion_add_manga_series_columns']);
@@ -5315,6 +5318,41 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                 }
             }
             /**
+             * ComicScout Image Metabox
+             */
+            public function toocheke_comicscout_image_add_metabox()
+            {
+                add_meta_box('comicscout-image-metabox', __('ComicScout Thumbnail', 'toocheke-companion'), [
+                    $this,
+                    'toocheke_comicscout_image_display_metabox'
+                ], 'comic', 'side', 'high');
+            }
+            public function toocheke_comicscout_image_display_metabox($post)
+            {
+                $this->toocheke_render_image_metabox(
+                    $post,
+                    'comicscout_image_id',
+                    'comicscout_image',
+                    'upload_comicscout_image_button',
+                    'remove_comicscout_image_button',
+                    __('Upload thumbnail for ComicScout','toocheke-companion'),
+                    __('Remove thumbnail for ComicScout','toocheke-companion'),
+                    '⭐ <strong>Featured on <a href="https://www.thecomicscout.com/" target="_blank">ComicScout</a>!</strong><br>Used for ComicScout listings.<br><strong>Recommended size: 1000 × 1500px</strong>.',
+                    '2/3'
+                );
+            }
+            
+            public function toocheke_comicscout_image_save($post_id)
+            {
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+                if (wp_is_post_revision($post_id)) return;
+
+                if (isset($_POST['comicscout_image'])) {
+                    update_post_meta($post_id, 'comicscout_image_id', (int) $_POST['comicscout_image']);
+                }
+            }
+
+            /**
              * Series Hero Metabox
              */
             public function toocheke_series_hero_image_add_metabox()
@@ -5322,55 +5360,35 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                 add_meta_box('series-hero-metabox', __('Series Hero Image(Desktop)', 'toocheke-companion'), [
                     $this,
                     'toocheke_series_hero_image_display_metabox'
-                ], 'series', 'side', 'high');
+                ], 'series', 'side', 'core');
             }
-
             public function toocheke_series_hero_image_display_metabox($post)
             {
-                global $content_width, $_wp_additional_image_sizes;
-
-                $image_id = get_post_meta($post->ID, 'series_hero_image_id', true);
-
-                $old_content_width = $content_width;
-                $content_width     = 254;
-
-                if ($image_id && get_post($image_id)) {
-
-                    if (! isset($_wp_additional_image_sizes['post-thumbnail'])) {
-                        $thumbnail_html = wp_get_attachment_image($image_id, [$content_width, $content_width]);
-                    } else {
-                        $thumbnail_html = wp_get_attachment_image($image_id, 'post-thumbnail');
-                    }
-
-                    if (! empty($thumbnail_html)) {
-                        $content = $thumbnail_html;
-                        $content .= '<p class="hide-if-no-js"><a href="javascript:;" id="remove_series_hero_image_button">' . esc_html__('Remove
-        series hero image', 'toocheke-companion') . '</a></p>';
-                        $content .= '<input type="hidden" id="upload_series_hero_image" name="series_hero_image"
-    value="' . esc_attr($image_id) . '" />';
-                    }
-
-                    $content_width = $old_content_width;
-                } else {
-
-                    $content = '<img src="" style="width:' . esc_attr($content_width) . 'px;height:auto;border:0;display:none;" />';
-                    $content .= '<p class="hide-if-no-js"><a title="' . esc_attr__('Set series hero image', 'toocheke-companion') . '"
-        href="javascript:;" id="upload_series_hero_image_button"
-        data-uploader_title="' . esc_attr__('Choose an image', 'toocheke-companion') . '"
-        data-uploader_button_text="' . esc_attr__('Set series hero image', 'toocheke-companion') . '">' .
-                        esc_html__('Set series hero image', 'toocheke-companion') . '</a></p>';
-                    $content .= '<input type="hidden" id="upload_series_hero_image" name="series_hero_image" value="" />';
-                }
-
-                echo $content;
+                $this->toocheke_render_image_metabox(
+                    $post,
+                    'series_hero_image_id',
+                    'series_hero_image',
+                    'upload_series_hero_image_button',
+                    'remove_series_hero_image_button',
+                    __('Set series hero image','toocheke-companion'),
+                    __('Remove series hero image','toocheke-companion'),
+                    'Used for the series header on desktop.',
+                    '16/9'
+                );
             }
             public function toocheke_series_hero_image_save($post_id)
             {
+ 
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+                if (wp_is_post_revision($post_id)) return;
+
                 if (isset($_POST['series_hero_image'])) {
-                    $image_id = (int) $_POST['series_hero_image'];
-                    update_post_meta($post_id, 'series_hero_image_id', $image_id);
+                    update_post_meta($post_id, 'series_hero_image_id', (int) $_POST['series_hero_image']);
                 }
             }
+
+
+            
             /**
              * Series Mobile Hero Metabox
              */
@@ -5379,55 +5397,33 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                 add_meta_box('series-mobile-hero-metabox', __('Series Hero Image(Mobile)', 'toocheke-companion'), [
                     $this,
                     'toocheke_series_mobile_hero_image_display_metabox'
-                ], 'series', 'side', 'high', 90);
+                ], 'series', 'side', 'core', 90);
             }
-
             public function toocheke_series_mobile_hero_image_display_metabox($post)
             {
-                global $content_width, $_wp_additional_image_sizes;
-
-                $image_id = get_post_meta($post->ID, 'series_mobile_hero_image_id', true);
-
-                $old_content_width = $content_width;
-                $content_width     = 254;
-
-                if ($image_id && get_post($image_id)) {
-
-                    if (! isset($_wp_additional_image_sizes['post-thumbnail'])) {
-                        $thumbnail_html = wp_get_attachment_image($image_id, [$content_width, $content_width]);
-                    } else {
-                        $thumbnail_html = wp_get_attachment_image($image_id, 'post-thumbnail');
-                    }
-
-                    if (! empty($thumbnail_html)) {
-                        $content = $thumbnail_html;
-                        $content .= '<p class="hide-if-no-js"><a href="javascript:;" id="remove_series_mobile_hero_image_button">' . esc_html__('Remove
-    series hero image', 'toocheke-companion') . '</a></p>';
-                        $content .= '<input type="hidden" id="upload_series_mobile_hero_image" name="series_mobile_hero_image"
-value="' . esc_attr($image_id) . '" />';
-                    }
-
-                    $content_width = $old_content_width;
-                } else {
-
-                    $content = '<img src="" style="width:' . esc_attr($content_width) . 'px;height:auto;border:0;display:none;" />';
-                    $content .= '<p class="hide-if-no-js"><a title="' . esc_attr__('Set series hero image', 'toocheke-companion') . '"
-    href="javascript:;" id="upload_series_mobile_hero_image_button"
-    data-uploader_title="' . esc_attr__('Choose an image', 'toocheke-companion') . '"
-    data-uploader_button_text="' . esc_attr__('Set series hero image', 'toocheke-companion') . '">' .
-                        esc_html__('Set series hero image', 'toocheke-companion') . '</a></p>';
-                    $content .= '<input type="hidden" id="upload_series_mobile_hero_image" name="series_mobile_hero_image" value="" />';
-                }
-
-                echo $content;
+                $this->toocheke_render_image_metabox(
+                    $post,
+                    'series_mobile_hero_image_id',
+                    'series_mobile_hero_image',
+                    'upload_series_mobile_hero_image_button',
+                    'remove_series_mobile_hero_image_button',
+                    __('Set mobile hero image','toocheke-companion'),
+                    __('Remove mobile hero image','toocheke-companion'),
+                    'Used for the series header on mobile devices.',
+                    '3/4'
+                );
             }
-            public function toocheke_series_mobile_hero_image_save($post_id)
+           public function toocheke_series_mobile_hero_image_save($post_id)
             {
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+                if (wp_is_post_revision($post_id)) return;
+
                 if (isset($_POST['series_mobile_hero_image'])) {
-                    $image_id = (int) $_POST['series_mobile_hero_image'];
-                    update_post_meta($post_id, 'series_mobile_hero_image_id', $image_id);
+                    update_post_meta($post_id, 'series_mobile_hero_image_id', (int) $_POST['series_mobile_hero_image']);
                 }
             }
+
+           
 
             /**
              * Series Background Image Metabox
@@ -5437,55 +5433,33 @@ value="' . esc_attr($image_id) . '" />';
                 add_meta_box('series-bg-image-metabox', __('Series Background Image', 'toocheke-companion'), [
                     $this,
                     'toocheke_series_bg_image_display_metabox'
-                ], 'series', 'side', 'high');
+                ], 'series', 'side', 'core');
             }
-
             public function toocheke_series_bg_image_display_metabox($post)
             {
-                global $content_width, $_wp_additional_image_sizes;
-
-                $image_id = get_post_meta($post->ID, 'series_bg_image_id', true);
-
-                $old_content_width = $content_width;
-                $content_width     = 254;
-
-                if ($image_id && get_post($image_id)) {
-
-                    if (! isset($_wp_additional_image_sizes['post-thumbnail'])) {
-                        $thumbnail_html = wp_get_attachment_image($image_id, [$content_width, $content_width]);
-                    } else {
-                        $thumbnail_html = wp_get_attachment_image($image_id, 'post-thumbnail');
-                    }
-
-                    if (! empty($thumbnail_html)) {
-                        $content = $thumbnail_html;
-                        $content .= '<p class="hide-if-no-js"><a href="javascript:;" id="remove_series_bg_image_button">' . esc_html__('Remove
-        series background image', 'toocheke-companion') . '</a></p>';
-                        $content .= '<input type="hidden" id="upload_series_bg_image" name="series_bg_image"
-    value="' . esc_attr($image_id) . '" />';
-                    }
-
-                    $content_width = $old_content_width;
-                } else {
-
-                    $content = '<img src="" style="width:' . esc_attr($content_width) . 'px;height:auto;border:0;display:none;" />';
-                    $content .= '<p class="hide-if-no-js"><a title="' . esc_attr__('Set series background image', 'toocheke-companion') . '"
-        href="javascript:;" id="upload_series_bg_image_button"
-        data-uploader_title="' . esc_attr__('Choose an image', 'toocheke-companion') . '"
-        data-uploader_button_text="' . esc_attr__('Set series background image', 'toocheke-companion') . '">' .
-                        esc_html__('Set series background image', 'toocheke-companion') . '</a></p>';
-                    $content .= '<input type="hidden" id="upload_series_bg_image" name="series_bg_image" value="" />';
-                }
-
-                echo $content;
+                $this->toocheke_render_image_metabox(
+                    $post,
+                    'series_bg_image_id',
+                    'series_bg_image',
+                    'upload_series_bg_image_button',
+                    'remove_series_bg_image_button',
+                    __('Set series background image','toocheke-companion'),
+                    __('Remove series background image','toocheke-companion'),
+                    'Optional background image for the series page.',
+                    '16/9'
+                );
             }
+            
             public function toocheke_series_bg_image_save($post_id)
             {
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+                if (wp_is_post_revision($post_id)) return;
+
                 if (isset($_POST['series_bg_image'])) {
-                    $image_id = (int) $_POST['series_bg_image'];
-                    update_post_meta($post_id, 'series_bg_image_id', $image_id);
+                    update_post_meta($post_id, 'series_bg_image_id', (int) $_POST['series_bg_image']);
                 }
             }
+
             /**
              * Series Background Color Metabox
              */
@@ -5495,7 +5469,7 @@ value="' . esc_attr($image_id) . '" />';
                 add_meta_box('series-bg-color-metabox', esc_html__('Series Background Color', 'toocheke-companion'), [
                     $this,
                     'toocheke_series_bg_color_display_metabox'
-                ], 'series', 'side', 'high');
+                ], 'series', 'side', 'core');
             }
             public function toocheke_series_bg_color_display_metabox($post)
             {
@@ -5541,7 +5515,7 @@ value="' . esc_attr($image_id) . '" />';
                     [$this, 'toocheke_series_sidebar_content'],
                     'series',
                     "side",
-                    "high"
+                    "core"
                 );
             }
 
@@ -5989,16 +5963,73 @@ value="' . esc_attr($image_id) . '" />';
             public function toocheke_move_comic_featured_image_metabox()
             {
                 remove_meta_box('postimagediv', 'comic', 'side');
-                add_meta_box('postimagediv', __('Comic Thumbnail', 'toocheke-companion'), 'post_thumbnail_meta_box', 'comic', 'side', 'high');
+
+                  add_meta_box(
+        'postimagediv',
+        __('Comic Thumbnail', 'toocheke-companion'),
+        array($this, 'toocheke_comic_thumbnail_metabox'),
+        'comic',
+        'side',
+        'high'
+    );
             }
+           public function toocheke_comic_thumbnail_metabox($post)
+{
+    echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
+        Recommended size for social media: <strong>1200 × 630px</strong>.
+    </p>';
+
+    // Add an ID so JS can hide/show it
+    echo '<div id="toocheke-featured-image-ratio-guide" style="
+        width:100%;
+        aspect-ratio:1.91/1;
+        background:#f6f7f7;
+        border:2px dashed #ccd0d4;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        font-size:12px;
+        color:#646970;
+        margin-bottom:10px;">
+        Image Preview
+    </div>';
+
+    post_thumbnail_meta_box($post);
+}
             /**
              * Move Featured Image Metabox on 'series' post type
              */
             public function toocheke_move_series_featured_image_metabox()
             {
                 remove_meta_box('postimagediv', 'series', 'side');
-                add_meta_box('postimagediv', __('Series Thumbnail', 'toocheke-companion'), 'post_thumbnail_meta_box', 'series', 'side', 'high');
+                add_meta_box('postimagediv', __('Series Thumbnail', 'toocheke-companion'),  array($this, 'toocheke_series_thumbnail_metabox'), 'series', 'side', 'high');
             }
+             public function toocheke_series_thumbnail_metabox($post)
+            {
+                echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
+                    Recommended size for social media: <strong>1200 × 630px</strong>.
+                </p>';
+
+                // Add an ID so JS can hide/show it
+                echo '<div id="toocheke-featured-image-ratio-guide" style="
+                    width:100%;
+                    aspect-ratio:1.91/1;
+                    background:#f6f7f7;
+                    border:2px dashed #ccd0d4;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    text-align:center;
+                    font-size:12px;
+                    color:#646970;
+                    margin-bottom:10px;">
+                    Image Preview
+                </div>';
+
+                post_thumbnail_meta_box($post);
+            }
+
             /**
              * Move Featured Image and publish metaboxes in manga CPT's
              */
@@ -8707,23 +8738,75 @@ public function toocheke_enqueue_manga_filter_script()
                 }
                 return $content;
             }
-            public function toocheke_add_comic_featured_image_to_rss($content) 
+            public function toocheke_add_rss_namespaces()
+            {
+                echo 'xmlns:toocheke="https://toocheke.com/rss/"';
+            }
+            public function toocheke_add_comic_images_to_rss()
             {
                 global $post;
-                // Check if the current post is of 'comic' post type
-                if ('comic' === get_post_type($post)) {
-                    // Get the ID of the featured image
-                    $thumbnail_id = get_post_thumbnail_id($post);
-                    
-                    // Get the full URL of the featured image
-                    $featured_image_url = get_the_post_thumbnail_url($post, 'full');
-                    
-                    if ($featured_image_url) {
-                        // Get MIME type based on the file extension
-                        $mime_type = get_post_mime_type($thumbnail_id); // This retrieves MIME type
-                        
-                        // Add the enclosure tag to the RSS feed
-                        echo '<enclosure url="' . esc_url($featured_image_url) . '" type="' . esc_attr($mime_type) . '" />'; // Dynamically set MIME type
+
+                if ('comic' !== get_post_type($post)) {
+                    return;
+                }
+
+                /*
+                * Featured image
+                */
+                $thumbnail_id        = get_post_thumbnail_id($post->ID);
+                $featured_image_url  = $thumbnail_id ? wp_get_attachment_image_url($thumbnail_id, 'full') : '';
+                $featured_meta       = $thumbnail_id ? wp_get_attachment_metadata($thumbnail_id) : [];
+                $featured_mime_type  = $thumbnail_id ? get_post_mime_type($thumbnail_id) : '';
+                $featured_file_path  = $thumbnail_id ? get_attached_file($thumbnail_id) : '';
+                $featured_length     = ($featured_file_path && file_exists($featured_file_path)) ? filesize($featured_file_path) : 0;
+
+                if ($featured_image_url && $thumbnail_id) {
+                    $featured_width  = !empty($featured_meta['width']) ? (int) $featured_meta['width'] : 0;
+                    $featured_height = !empty($featured_meta['height']) ? (int) $featured_meta['height'] : 0;
+                    $featured_aspect = ($featured_width > 0 && $featured_height > 0)
+                        ? round($featured_width / $featured_height, 4)
+                        : '';
+
+                    echo '<enclosure url="' . esc_url($featured_image_url) . '" length="' . esc_attr($featured_length) . '" type="' . esc_attr($featured_mime_type) . '" />' . "\n";
+
+                    echo '<toocheke:featured_image'
+                        . ' url="' . esc_url($featured_image_url) . '"'
+                        . ' type="' . esc_attr($featured_mime_type) . '"'
+                        . ' width="' . esc_attr($featured_width) . '"'
+                        . ' height="' . esc_attr($featured_height) . '"'
+                        . ' aspect_ratio="' . esc_attr($featured_aspect) . '"'
+                        . ' />' . "\n";
+                }
+
+                /*
+                * ComicScout image
+                * Falls back to featured image if no custom ComicScout image is set
+                */
+                $comicscout_image_id = get_post_meta($post->ID, 'comicscout_image_id', true);
+
+                if (!$comicscout_image_id) {
+                    $comicscout_image_id = $thumbnail_id;
+                }
+
+                if ($comicscout_image_id) {
+                    $comicscout_image_url  = wp_get_attachment_image_url($comicscout_image_id, 'full');
+                    $comicscout_meta       = wp_get_attachment_metadata($comicscout_image_id);
+                    $comicscout_mime_type  = get_post_mime_type($comicscout_image_id);
+
+                    if ($comicscout_image_url) {
+                        $comicscout_width  = !empty($comicscout_meta['width']) ? (int) $comicscout_meta['width'] : 0;
+                        $comicscout_height = !empty($comicscout_meta['height']) ? (int) $comicscout_meta['height'] : 0;
+                        $comicscout_aspect = ($comicscout_width > 0 && $comicscout_height > 0)
+                            ? round($comicscout_width / $comicscout_height, 4)
+                            : '';
+
+                        echo '<toocheke:comicscout_thumbnail'
+                            . ' url="' . esc_url($comicscout_image_url) . '"'
+                            . ' type="' . esc_attr($comicscout_mime_type) . '"'
+                            . ' width="' . esc_attr($comicscout_width) . '"'
+                            . ' height="' . esc_attr($comicscout_height) . '"'
+                            . ' aspect_ratio="' . esc_attr($comicscout_aspect) . '"'
+                            . ' />' . "\n";
                     }
                 }
             }
@@ -9395,7 +9478,84 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
             'page'       => $page,
         ]);
     }
+    private function toocheke_render_image_metabox(
+    $post,
+    $meta_key,
+    $input_name,
+    $upload_button_id,
+    $remove_button_id,
+    $set_text,
+    $remove_text,
+    $instruction = '',
+    $ratio = '1/1'
+) {
 
+    global $content_width, $_wp_additional_image_sizes;
+
+    $image_id = get_post_meta($post->ID, $meta_key, true);
+
+    $old_content_width = $content_width;
+    $content_width = 254;
+
+    if ($instruction) {
+        echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">'
+        . $instruction .
+        '</p>';
+    }
+
+    if ($image_id && get_post($image_id)) {
+
+        if (!isset($_wp_additional_image_sizes['post-thumbnail'])) {
+            $thumbnail_html = wp_get_attachment_image($image_id, [$content_width, $content_width]);
+        } else {
+            $thumbnail_html = wp_get_attachment_image($image_id, 'post-thumbnail');
+        }
+
+        if (!empty($thumbnail_html)) {
+
+            echo $thumbnail_html;
+
+            echo '<p class="hide-if-no-js">
+            <a href="javascript:;" id="'.$remove_button_id.'">'.$remove_text.'</a>
+            </p>';
+
+            echo '<input type="hidden" id="'.$input_name.'" name="'.$input_name.'" value="'.esc_attr($image_id).'" />';
+        }
+
+        $content_width = $old_content_width;
+
+    } else {
+
+        echo '<div style="
+        width:100%;
+        aspect-ratio:'.$ratio.';
+        background:#f6f7f7;
+        border:2px dashed #ccd0d4;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        font-size:12px;
+        color:#646970;
+        margin-bottom:10px;">
+        Image Preview
+        </div>';
+
+        // IMPORTANT: Keep the IMG element for JS preview
+        echo '<img src="" style="width:100%;height:auto;border:0;display:none;margin-bottom:10px;" />';
+
+        echo '<p class="hide-if-no-js">
+        <a title="'.$set_text.'"
+        href="javascript:;" id="'.$upload_button_id.'"
+        data-uploader_title="'.esc_attr__('Choose an image','toocheke-companion').'"
+        data-uploader_button_text="'.$set_text.'">
+        '.$set_text.'
+        </a>
+        </p>';
+
+        echo '<input type="hidden" id="'.$input_name.'" name="'.$input_name.'" value="" />';
+    }
+}
 
         }
         /**
@@ -10318,7 +10478,9 @@ class Toocheke_Future_Comic_Image_Protection {
         } while ( file_exists( $candidate ) );
         return $candidate;
     }
+    
 }
+
 
         /**
          * Template loader.

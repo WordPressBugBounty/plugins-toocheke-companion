@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.205
+Stable tag: 1.206
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -18,6 +18,8 @@ Transform your WordPress theme into a platform for publishing your webcomics.
 **Toocheke Companion Website:** [Toocheke Companion](https://leetoo.net/toocheke-companion/ "Toocheke Companion - Plugin for publishing your webcomic")
 
 Looking to publish your comics or manga on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic and manga posts. While it works best with the **Toocheke WordPress theme**, it is compatible with most modern WordPress themes.
+
+Comics published with Toocheke Companion can also be discovered through **[ComicScout](https://www.thecomicscout.com/)** — a curated discovery platform built specifically for independent comic websites designed to help readers discover new comics and drive traffic back to creators' sites.
 
 ### Key Features
 
@@ -35,6 +37,7 @@ Looking to publish your comics or manga on your WordPress website? **Toocheke Co
 - Top ten comics based on post views
 - Infinite scroll for archive display
 - Bilingual/multilingual comic and manga support
+- ★ **ComicScout integration** — get your comic listed on [ComicScout](https://www.thecomicscout.com/), a curated discovery platform built specifically for independent comic websites to help readers discover new comics
 
 == Installation == 
 
@@ -127,11 +130,23 @@ You can also display Manga features with the following shortcodes
 
 Go to **Settings > Permalinks** and click **Save**. This will refresh your permalink settings.
 
+= What images should I upload for ComicScout listings? =
+
+To optimize how your comic appears on ComicScout, upload the following images when publishing a comic post:
+
+* Comic Thumbnail – Recommended size: 1200 × 630 px. This image is used for social sharing and general previews.
+* ComicScout Thumbnail – Recommended size: 1000 × 1500 px. This vertical image is used for ComicScout listings.
+
 = Where can I get support? =
 
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
+
 == Changelog ==
+
+= 1.206 =
+* NEW: Added a ComicScout Thumbnail Image field for comic posts, allowing creators to upload a vertical thumbnail optimized for ComicScout listings (recommended 1000×1500).
+* UPDATE: Improved the comic RSS feed to include both the featured image and ComicScout Thumbnail Image
 
 = 1.205 =
 * UPDATE: Thumbnails now have a fixed size, regardless of the original image dimensions. This ensures consistency in layout across your site.

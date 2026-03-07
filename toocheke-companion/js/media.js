@@ -52,280 +52,145 @@ jQuery(document).ready(function ($) {
 /* Comic Post Media */
 jQuery(function ($) {
 
+    /* Featured image ratio guide toggle */
     var guide = $('#toocheke-featured-image-ratio-guide');
-    if (!guide.length) return;
 
     function toggleGuide() {
-        // If WP has a featured image set, the #postimagediv contains an <img>
+        if (!guide.length) return;
         var hasImage = $('#postimagediv .inside img').length > 0;
         guide.toggle(!hasImage);
     }
 
-    // Run on page load
-    toggleGuide();
+    if (guide.length) {
+        toggleGuide();
 
-    // WP updates featured image via AJAX; watch for changes
-    var target = document.querySelector('#postimagediv .inside');
-    if (target) {
-        var observer = new MutationObserver(function () {
-            toggleGuide();
+        var target = document.querySelector('#postimagediv .inside');
+        if (target) {
+            new MutationObserver(toggleGuide).observe(target, { childList: true, subtree: true });
+        }
+
+        $(document).on('click', '#postimagediv a', function () {
+            setTimeout(toggleGuide, 300);
         });
-        observer.observe(target, { childList: true, subtree: true });
     }
 
-    // Also hook clicks to catch remove/set actions
-    $(document).on('click', '#postimagediv a', function () {
-        setTimeout(toggleGuide, 300);
-    });
-
-});
-var comicscout_image_file_frame;
-
-jQuery.fn.upload_comicscout_image = function (button) {
-
-	// If the media frame already exists, reopen it.
-	if (comicscout_image_file_frame) {
-		comicscout_image_file_frame.open();
-		return;
-	}
-
-	comicscout_image_file_frame = wp.media.frames.comicscout_image_file_frame = wp.media({
-		title: button.data('uploader_title'),
-		button: {
-			text: button.data('uploader_button_text'),
-		},
-		multiple: false
-	});
-
-	comicscout_image_file_frame.on('select', function () {
-
-		var attachment = comicscout_image_file_frame.state().get('selection').first().toJSON();
-
-		jQuery("#comicscout_image").val(attachment.id);
-
-		jQuery("#comicscout-image-metabox img")
-			.attr('src', attachment.url)
-			.attr('srcset', attachment.url)
-			.show();
-
-		jQuery('#upload_comicscout_image_button')
-			.attr('id', 'remove_comicscout_image_button')
-			.text('Remove thumbnail for ComicScout');
-
-	});
-
-	comicscout_image_file_frame.open();
-};
-
-jQuery('#comicscout-image-metabox').on('click', '#upload_comicscout_image_button', function (event) {
-	event.preventDefault();
-	jQuery.fn.upload_comicscout_image(jQuery(this));
-});
-
-jQuery('#comicscout-image-metabox').on('click', '#remove_comicscout_image_button', function (event) {
-
-	event.preventDefault();
-
-	jQuery('#comicscout_image').val('');
-
-	jQuery('#comicscout-image-metabox img')
-		.attr('src', '')
-		.attr('srcset', '')
-		.hide();
-
-	jQuery(this)
-		.attr('id', 'upload_comicscout_image_button')
-		.text('Upload thumbnail for ComicScout');
-
-});
-
-
-	/* Series Hero Image */
-// Uploading files
-// Desktop
-var series_hero_desktop_file_frame;
-
-jQuery.fn.upload_series_hero_image = function (button) {
-
-	// If the media frame already exists, reopen it.
-	if (series_hero_desktop_file_frame) {
-		series_hero_desktop_file_frame.open();
-		return;
-	}
-
-	series_hero_desktop_file_frame = wp.media.frames.series_hero_desktop_file_frame = wp.media({
-		title: button.data('uploader_title'),
-		button: {
-			text: button.data('uploader_button_text'),
-		},
-		multiple: false
-	});
-
-	series_hero_desktop_file_frame.on('select', function () {
-
-		var attachment = series_hero_desktop_file_frame.state().get('selection').first().toJSON();
-
-		jQuery("#series_hero_image").val(attachment.id);
-
-		jQuery("#series-hero-metabox img")
-			.attr('src', attachment.url)
-			.attr('srcset', attachment.url)
-			.show();
-
-		jQuery('#upload_series_hero_image_button')
-			.attr('id', 'remove_series_hero_image_button')
-			.text('Remove series hero image');
-
-	});
-
-	series_hero_desktop_file_frame.open();
-};
-
-jQuery('#series-hero-metabox').on('click', '#upload_series_hero_image_button', function (event) {
-	event.preventDefault();
-	jQuery.fn.upload_series_hero_image(jQuery(this));
-});
-
-jQuery('#series-hero-metabox').on('click', '#remove_series_hero_image_button', function (event) {
-
-	event.preventDefault();
-
-	jQuery('#series_hero_image').val('');
-
-	jQuery('#series-hero-metabox img')
-		.attr('src', '')
-		.attr('srcset', '')
-		.hide();
-
-	jQuery(this)
-		.attr('id', 'upload_series_hero_image_button')
-		.text('Set series hero image');
-
-});
-
-
-
-/* Mobile Hero */
-
-var series_hero_mobile_file_frame;
-
-jQuery.fn.upload_series_mobile_hero_image = function (button) {
-
-	if (series_hero_mobile_file_frame) {
-		series_hero_mobile_file_frame.open();
-		return;
-	}
-
-	series_hero_mobile_file_frame = wp.media.frames.series_hero_mobile_file_frame = wp.media({
-		title: button.data('uploader_title'),
-		button: {
-			text: button.data('uploader_button_text'),
-		},
-		multiple: false
-	});
-
-	series_hero_mobile_file_frame.on('select', function () {
-
-		var attachment = series_hero_mobile_file_frame.state().get('selection').first().toJSON();
-
-		jQuery("#series_mobile_hero_image").val(attachment.id);
-
-		jQuery("#series-mobile-hero-metabox img")
-			.attr('src', attachment.url)
-			.attr('srcset', attachment.url)
-			.show();
-
-		jQuery('#upload_series_mobile_hero_image_button')
-			.attr('id', 'remove_series_mobile_hero_image_button')
-			.text('Remove series hero image');
-
-	});
-
-	series_hero_mobile_file_frame.open();
-};
-
-jQuery('#series-mobile-hero-metabox').on('click', '#upload_series_mobile_hero_image_button', function (event) {
-	event.preventDefault();
-	jQuery.fn.upload_series_mobile_hero_image(jQuery(this));
-});
-
-jQuery('#series-mobile-hero-metabox').on('click', '#remove_series_mobile_hero_image_button', function (event) {
-
-	event.preventDefault();
-
-	jQuery('#series_mobile_hero_image').val('');
-
-	jQuery('#series-mobile-hero-metabox img')
-		.attr('src', '')
-		.attr('srcset', '')
-		.hide();
-
-	jQuery(this)
-		.attr('id', 'upload_series_mobile_hero_image_button')
-		.text('Set series hero image');
-
-});
-
-
-
-/* Background Image */
-
-var series_bg_file_frame;
-
-jQuery.fn.upload_series_bg_image = function (button) {
-
-	if (series_bg_file_frame) {
-		series_bg_file_frame.open();
-		return;
-	}
-
-	series_bg_file_frame = wp.media.frames.series_bg_file_frame = wp.media({
-		title: button.data('uploader_title'),
-		button: {
-			text: button.data('uploader_button_text'),
-		},
-		multiple: false
-	});
-
-	series_bg_file_frame.on('select', function () {
-
-		var attachment = series_bg_file_frame.state().get('selection').first().toJSON();
-
-		jQuery("#series_bg_image").val(attachment.id);
-
-		jQuery("#series-bg-image-metabox img")
-			.attr('src', attachment.url)
-			.attr('srcset', attachment.url)
-			.show();
-
-		jQuery('#upload_series_bg_image_button')
-			.attr('id', 'remove_series_bg_image_button')
-			.text('Remove series background image');
-
-	});
-
-	series_bg_file_frame.open();
-};
-
-jQuery('#series-bg-image-metabox').on('click', '#upload_series_bg_image_button', function (event) {
-	event.preventDefault();
-	jQuery.fn.upload_series_bg_image(jQuery(this));
-});
-
-jQuery('#series-bg-image-metabox').on('click', '#remove_series_bg_image_button', function (event) {
-
-	event.preventDefault();
-
-	jQuery('#series_bg_image').val('');
-
-	jQuery('#series-bg-image-metabox img')
-		.attr('src', '')
-		.attr('srcset', '')
-		.hide();
-
-	jQuery(this)
-		.attr('id', 'upload_series_bg_image_button')
-		.text('Set series background image');
+    /**
+     * Generic image metabox uploader factory.
+     *
+     * @param {string} metaboxId      - The metabox wrapper element ID  (e.g. 'comicscout-image-metabox')
+     * @param {string} inputId        - The hidden input ID              (e.g. 'comicscout_image')
+     * @param {string} uploadBtnId    - The upload link ID               (e.g. 'upload_comicscout_image_button')
+     * @param {string} removeBtnId    - The remove link ID               (e.g. 'remove_comicscout_image_button')
+     * @param {string} setLabel       - Text shown on the upload link    (e.g. 'Upload thumbnail for ComicScout')
+     * @param {string} removeLabel    - Text shown on the remove link    (e.g. 'Remove thumbnail for ComicScout')
+     */
+    function initImageMetabox(metaboxId, inputId, uploadBtnId, removeBtnId, setLabel, removeLabel) {
+        var metabox   = $('#' + metaboxId);
+        var fileFrame = null;
+
+        /* Upload */
+        metabox.on('click', '#' + uploadBtnId, function (e) {
+            e.preventDefault();
+            var button = $(this);
+
+            if (fileFrame) {
+                fileFrame.open();
+                return;
+            }
+
+            fileFrame = wp.media({
+                title:    button.data('uploader_title'),
+                button:   { text: button.data('uploader_button_text') },
+                multiple: false
+            });
+
+            fileFrame.on('select', function () {
+                var attachment = fileFrame.state().get('selection').first().toJSON();
+
+                $('#' + inputId).val(attachment.id);
+
+                // Hide the "Image Preview" placeholder, show the actual preview img
+                metabox.find('div[style*="aspect-ratio"]').hide();
+                metabox.find('img')
+                    .attr('src',    attachment.url)
+                    .attr('srcset', attachment.url)
+                    .show();
+
+                metabox.find('#' + uploadBtnId)
+                    .attr('id', removeBtnId)
+                    .text(removeLabel);
+            });
+
+            fileFrame.open();
+        });
+
+        /* Remove */
+        metabox.on('click', '#' + removeBtnId, function (e) {
+            e.preventDefault();
+
+            $('#' + inputId).val('');
+
+            // Hide the preview img, restore the "Image Preview" placeholder
+            metabox.find('img')
+                .attr('src',    '')
+                .attr('srcset', '')
+                .hide();
+            metabox.find('div[style*="aspect-ratio"]').show();
+
+            $(this)
+                .attr('id', uploadBtnId)
+                .text(setLabel);
+
+            fileFrame = null; // reset so a fresh frame opens next time
+        });
+    }
+
+    /* --- Register each metabox --- */
+
+    initImageMetabox(
+        'comicscout-social-share-image-metabox',
+        'comicscout_social_share_image',
+        'upload_comicscout_social_share_image_button',
+        'remove_comicscout_social_share_image_button',
+        'Upload social share image for ComicScout',
+        'Remove social share image for ComicScout'
+    );
+
+    initImageMetabox(
+        'comicscout-image-metabox',
+        'comicscout_image',
+        'upload_comicscout_image_button',
+        'remove_comicscout_image_button',
+        'Upload thumbnail for ComicScout',
+        'Remove thumbnail for ComicScout'
+    );
+
+    initImageMetabox(
+        'series-hero-metabox',
+        'series_hero_image',
+        'upload_series_hero_image_button',
+        'remove_series_hero_image_button',
+        'Set series hero image',
+        'Remove series hero image'
+    );
+
+    initImageMetabox(
+        'series-mobile-hero-metabox',
+        'series_mobile_hero_image',
+        'upload_series_mobile_hero_image_button',
+        'remove_series_mobile_hero_image_button',
+        'Set mobile hero image',
+        'Remove mobile hero image'
+    );
+
+    initImageMetabox(
+        'series-bg-image-metabox',
+        'series_bg_image',
+        'upload_series_bg_image_button',
+        'remove_series_bg_image_button',
+        'Set series background image',
+        'Remove series background image'
+    );
 
 });
 	// ---------------------------

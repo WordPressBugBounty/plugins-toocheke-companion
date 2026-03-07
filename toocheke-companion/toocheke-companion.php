@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.206
+ * Version:     1.207
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.206');
+    define('TOOCHEKE_COMPANION_VERSION', '1.207');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -129,6 +129,8 @@ class Toocheke_Companion_Comic_Features
         add_action('admin_init', [$this, 'toocheke_add_comic_series_meta_box']);
          add_action('add_meta_boxes', [$this, 'toocheke_comicscout_image_add_metabox'], 11);
         add_action('save_post_comic', [$this, 'toocheke_comicscout_image_save']);
+        add_action('add_meta_boxes', [$this, 'toocheke_comicscout_social_share_image_add_metabox'], 12);
+        add_action('save_post_comic', [$this, 'toocheke_comicscout_social_share_image_save']);
         add_action('save_post', [$this, 'toocheke_comic_audio_save_postdata']);
         add_action('post_edit_form_tag', [$this, 'toocheke_update_edit_form']);
         add_action('admin_init', [$this, 'toocheke_replace_term_description_field']);
@@ -5351,7 +5353,53 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                     update_post_meta($post_id, 'comicscout_image_id', (int) $_POST['comicscout_image']);
                 }
             }
+            /**
+             * ComicScout Social Share Image Metabox
+             */
+            public function toocheke_comicscout_social_share_image_add_metabox()
+            {
+                add_meta_box(
+                    'comicscout-social-share-image-metabox',
+                    __('ComicScout Social Share Image', 'toocheke-companion'),
+                    [
+                        $this,
+                        'toocheke_comicscout_social_share_image_display_metabox'
+                    ],
+                    'comic',
+                    'side',
+                    'high'
+                );
+            }
 
+            public function toocheke_comicscout_social_share_image_display_metabox($post)
+            {
+                $this->toocheke_render_image_metabox(
+                    $post,
+                    'comicscout_social_share_image_id',
+                    'comicscout_social_share_image',
+                    'upload_comicscout_social_share_image_button',
+                    'remove_comicscout_social_share_image_button',
+                    __('Upload social share image for ComicScout', 'toocheke-companion'),
+                    __('Remove social share image for ComicScout', 'toocheke-companion'),
+                    '⭐ <strong>Promoted by <a href="https://www.thecomicscout.com/" target="_blank">ComicScout</a>!</strong><br>This image will be used by ComicScout when promoting your comic updates to social media platforms.<br><strong>Recommended size: 1200 × 630px</strong>.<br>If no image is uploaded, the <strong>Featured Image (Comic Thumbnail)</strong> will be used as a fallback.',
+                    '1.91/1'
+                );
+            }
+
+            public function toocheke_comicscout_social_share_image_save($post_id)
+            {
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                    return;
+                }
+
+                if (wp_is_post_revision($post_id)) {
+                    return;
+                }
+
+                if (isset($_POST['comicscout_social_share_image'])) {
+                    update_post_meta($post_id, 'comicscout_social_share_image_id', (int) $_POST['comicscout_social_share_image']);
+                }
+            }
             /**
              * Series Hero Metabox
              */
@@ -5976,13 +6024,15 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
            public function toocheke_comic_thumbnail_metabox($post)
 {
     echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
-        Recommended size for social media: <strong>1200 × 630px</strong>.
-    </p>';
+Used for comic listings in Toocheke (homepage, archives, and comic carousel).<br>
+Displayed as a square thumbnail in listings.<br>
+<strong>Recommended size: 300 × 300px or larger</strong>.
+</p>';
 
     // Add an ID so JS can hide/show it
     echo '<div id="toocheke-featured-image-ratio-guide" style="
         width:100%;
-        aspect-ratio:1.91/1;
+        aspect-ratio:1/1;
         background:#f6f7f7;
         border:2px dashed #ccd0d4;
         display:flex;
@@ -6007,9 +6057,10 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             }
              public function toocheke_series_thumbnail_metabox($post)
             {
-                echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
-                    Recommended size for social media: <strong>1200 × 630px</strong>.
-                </p>';
+                 echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
+Used for series listings in Toocheke.<br>
+<strong>Recommended size: at least 300px wide</strong>.
+</p>';
 
                 // Add an ID so JS can hide/show it
                 echo '<div id="toocheke-featured-image-ratio-guide" style="
@@ -8751,51 +8802,70 @@ public function toocheke_enqueue_manga_filter_script()
                 }
 
                 /*
-                * Featured image
+                * Social Share Image (preferred) or Featured Image fallback
                 */
-                $thumbnail_id        = get_post_thumbnail_id($post->ID);
-                $featured_image_url  = $thumbnail_id ? wp_get_attachment_image_url($thumbnail_id, 'full') : '';
-                $featured_meta       = $thumbnail_id ? wp_get_attachment_metadata($thumbnail_id) : [];
-                $featured_mime_type  = $thumbnail_id ? get_post_mime_type($thumbnail_id) : '';
-                $featured_file_path  = $thumbnail_id ? get_attached_file($thumbnail_id) : '';
-                $featured_length     = ($featured_file_path && file_exists($featured_file_path)) ? filesize($featured_file_path) : 0;
 
-                if ($featured_image_url && $thumbnail_id) {
-                    $featured_width  = !empty($featured_meta['width']) ? (int) $featured_meta['width'] : 0;
-                    $featured_height = !empty($featured_meta['height']) ? (int) $featured_meta['height'] : 0;
-                    $featured_aspect = ($featured_width > 0 && $featured_height > 0)
-                        ? round($featured_width / $featured_height, 4)
-                        : '';
+                $thumbnail_id = get_post_thumbnail_id($post->ID);
 
-                    echo '<enclosure url="' . esc_url($featured_image_url) . '" length="' . esc_attr($featured_length) . '" type="' . esc_attr($featured_mime_type) . '" />' . "\n";
+                $raw_social_id = get_post_meta($post->ID, 'comicscout_social_share_image_id', true);
+                $social_is_fallback = empty($raw_social_id);
 
-                    echo '<toocheke:featured_image'
-                        . ' url="' . esc_url($featured_image_url) . '"'
-                        . ' type="' . esc_attr($featured_mime_type) . '"'
-                        . ' width="' . esc_attr($featured_width) . '"'
-                        . ' height="' . esc_attr($featured_height) . '"'
-                        . ' aspect_ratio="' . esc_attr($featured_aspect) . '"'
-                        . ' />' . "\n";
+                $social_share_image_id = $raw_social_id ? $raw_social_id : $thumbnail_id;
+                $social_source = $social_is_fallback ? 'featured' : 'social_share';
+
+                if ($social_share_image_id) {
+
+                    $image_url  = wp_get_attachment_image_url($social_share_image_id, 'full');
+                    $image_meta = wp_get_attachment_metadata($social_share_image_id);
+                    $mime_type  = get_post_mime_type($social_share_image_id);
+
+                    $file_path  = get_attached_file($social_share_image_id);
+                    $length     = ($file_path && file_exists($file_path)) ? filesize($file_path) : 0;
+
+                    if ($image_url) {
+
+                        $width  = !empty($image_meta['width']) ? (int) $image_meta['width'] : 0;
+                        $height = !empty($image_meta['height']) ? (int) $image_meta['height'] : 0;
+
+                        $aspect = ($width > 0 && $height > 0)
+                            ? round($width / $height, 4)
+                            : '';
+
+                        echo '<enclosure url="' . esc_url($image_url) . '" length="' . esc_attr($length) . '" type="' . esc_attr($mime_type) . '" />' . "\n";
+
+                        echo '<toocheke:featured_image'
+                            . ' url="' . esc_url($image_url) . '"'
+                            . ' type="' . esc_attr($mime_type) . '"'
+                            . ' width="' . esc_attr($width) . '"'
+                            . ' height="' . esc_attr($height) . '"'
+                            . ' aspect_ratio="' . esc_attr($aspect) . '"'
+                            . ' fallback="' . esc_attr($social_is_fallback ? 'true' : 'false') . '"'
+                            . ' source="' . esc_attr($social_source) . '"'
+                            . ' />' . "\n";
+                    }
                 }
 
                 /*
-                * ComicScout image
-                * Falls back to featured image if no custom ComicScout image is set
+                * ComicScout Thumbnail
                 */
-                $comicscout_image_id = get_post_meta($post->ID, 'comicscout_image_id', true);
 
-                if (!$comicscout_image_id) {
-                    $comicscout_image_id = $thumbnail_id;
-                }
+                $raw_comicscout_id = get_post_meta($post->ID, 'comicscout_image_id', true);
+                $comicscout_is_fallback = empty($raw_comicscout_id);
+
+                $comicscout_image_id = $raw_comicscout_id ? $raw_comicscout_id : $thumbnail_id;
+                $comicscout_source = $comicscout_is_fallback ? 'featured' : 'comicscout';
 
                 if ($comicscout_image_id) {
+
                     $comicscout_image_url  = wp_get_attachment_image_url($comicscout_image_id, 'full');
                     $comicscout_meta       = wp_get_attachment_metadata($comicscout_image_id);
                     $comicscout_mime_type  = get_post_mime_type($comicscout_image_id);
 
                     if ($comicscout_image_url) {
+
                         $comicscout_width  = !empty($comicscout_meta['width']) ? (int) $comicscout_meta['width'] : 0;
                         $comicscout_height = !empty($comicscout_meta['height']) ? (int) $comicscout_meta['height'] : 0;
+
                         $comicscout_aspect = ($comicscout_width > 0 && $comicscout_height > 0)
                             ? round($comicscout_width / $comicscout_height, 4)
                             : '';
@@ -8806,6 +8876,8 @@ public function toocheke_enqueue_manga_filter_script()
                             . ' width="' . esc_attr($comicscout_width) . '"'
                             . ' height="' . esc_attr($comicscout_height) . '"'
                             . ' aspect_ratio="' . esc_attr($comicscout_aspect) . '"'
+                            . ' fallback="' . esc_attr($comicscout_is_fallback ? 'true' : 'false') . '"'
+                            . ' source="' . esc_attr($comicscout_source) . '"'
                             . ' />' . "\n";
                     }
                 }

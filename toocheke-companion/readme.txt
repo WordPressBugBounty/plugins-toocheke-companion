@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.206
+Stable tag: 1.207
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -37,7 +37,7 @@ Comics published with Toocheke Companion can also be discovered through **[Comic
 - Top ten comics based on post views
 - Infinite scroll for archive display
 - Bilingual/multilingual comic and manga support
-- ★ **ComicScout integration** — get your comic listed on [ComicScout](https://www.thecomicscout.com/), a curated discovery platform built specifically for independent comic websites to help readers discover new comics
+- ⭐ **ComicScout integration** — get your comic listed on [ComicScout](https://www.thecomicscout.com/), a curated discovery platform built specifically for independent comic websites to help readers discover new comics
 
 == Installation == 
 
@@ -143,6 +143,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.207 =
+* NEW: Added a **ComicScout Social Share Image** field for comic posts, allowing creators to define the image used when ComicScout promotes comic updates on social media.
+* UPDATE: Enhanced the comic RSS feed with ComicScout discovery thumbnails, social share images, and additional image metadata.
 
 = 1.206 =
 * NEW: Added a ComicScout Thumbnail Image field for comic posts, allowing creators to upload a vertical thumbnail optimized for ComicScout listings (recommended 1000×1500).

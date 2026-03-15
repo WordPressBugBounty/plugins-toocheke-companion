@@ -321,7 +321,54 @@ jQuery(function ($) {
 		}
 	});
 
+var toocheke_comicscout_global_social_share_image_frame;
 
+jQuery(document).on('click', '#upload_toocheke_comicscout_global_social_share_image_button', function (event) {
+    event.preventDefault();
+
+    if (toocheke_comicscout_global_social_share_image_frame) {
+        toocheke_comicscout_global_social_share_image_frame.open();
+        return;
+    }
+
+    toocheke_comicscout_global_social_share_image_frame = wp.media({
+        title: jQuery(this).data('uploader_title'),
+        button: {
+            text: jQuery(this).data('uploader_button_text')
+        },
+        multiple: false
+    });
+
+    toocheke_comicscout_global_social_share_image_frame.on('select', function () {
+        var attachment = toocheke_comicscout_global_social_share_image_frame.state().get('selection').first().toJSON();
+
+        jQuery('#toocheke_comicscout_global_social_share_image').val(attachment.id);
+
+        jQuery('#toocheke_comicscout_global_social_share_image_preview')
+            .attr('src', attachment.url)
+            .show();
+
+        jQuery('#toocheke_comicscout_global_social_share_image_ratio_guide').hide();
+
+        if (!jQuery('#remove_toocheke_comicscout_global_social_share_image_button').length) {
+            jQuery('#upload_toocheke_comicscout_global_social_share_image_button')
+                .before('<a href="javascript:;" id="remove_toocheke_comicscout_global_social_share_image_button">Remove global ComicScout social share image</a><br>');
+        }
+    });
+
+    toocheke_comicscout_global_social_share_image_frame.open();
+});
+
+jQuery(document).on('click', '#remove_toocheke_comicscout_global_social_share_image_button', function (event) {
+    event.preventDefault();
+
+    jQuery('#toocheke_comicscout_global_social_share_image').val('');
+    jQuery('#toocheke_comicscout_global_social_share_image_preview')
+        .attr('src', '')
+        .hide();
+
+    jQuery('#toocheke_comicscout_global_social_share_image_ratio_guide').show();
+});
 
 
 });

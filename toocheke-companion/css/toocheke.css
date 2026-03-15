@@ -248,6 +248,15 @@ Universal theme styles
   color: #fff;
 }
 
+#adminmenu .toocheke-comicscout-link > a {
+    background-color: #10ae98 !important;
+    color: #fff !important;
+}
+#adminmenu .toocheke-comicscout-link > a:hover {
+    background-color: #00555a !important;
+    color: #fff !important;
+}
+
 @media (max-width: 1023px) {
   .toocheke-hub-grid {
     grid-template-columns: repeat(3, 1fr);

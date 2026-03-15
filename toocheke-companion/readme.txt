@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.207
+Stable tag: 1.208
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -128,7 +128,7 @@ You can also display Manga features with the following shortcodes
 
 = The comic permalinks are not working. How do I fix them? =
 
-Go to **Settings > Permalinks** and click **Save**. This will refresh your permalink settings.
+Go to **Settings → Permalinks** and click **Save**. This will refresh your permalink settings.
 
 = What images should I upload for ComicScout listings? =
 
@@ -137,12 +137,30 @@ To optimize how your comic appears on ComicScout, upload the following images wh
 * Comic Thumbnail – Recommended size: 1200 × 630 px. This image is used for social sharing and general previews.
 * ComicScout Thumbnail – Recommended size: 1000 × 1500 px. This vertical image is used for ComicScout listings.
 
+= My Manga Chapter updates are not appearing on ComicScout. What should I do? =
+
+This usually means ComicScout cannot access your Manga Chapter updates.
+
+After installing or updating the Toocheke Companion plugin, you may need to refresh your permalink settings.
+
+To fix this:
+
+1. Go to **Settings → Permalinks** in your WordPress dashboard.
+2. Click the **Save Changes** button.
+
+This will flush your permalink rules and allow ComicScout to correctly detect your manga chapter updates.
+
 = Where can I get support? =
 
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+== Changelog ==
+
+= 1.208 =
+* NEW: Added a **Default ComicScout Social Share Image** setting for defining a fallback image used when ComicScout promotes comic updates and no post-specific image is provided.
 
 = 1.207 =
 * NEW: Added a **ComicScout Social Share Image** field for comic posts, allowing creators to define the image used when ComicScout promotes comic updates on social media.

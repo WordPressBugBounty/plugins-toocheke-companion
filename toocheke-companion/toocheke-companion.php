@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.207
+ * Version:     1.208
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.207');
+    define('TOOCHEKE_COMPANION_VERSION', '1.208');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -127,10 +127,14 @@ class Toocheke_Companion_Comic_Features
 
         add_action('admin_init', [$this, 'toocheke_audio_meta_box']);
         add_action('admin_init', [$this, 'toocheke_add_comic_series_meta_box']);
-         add_action('add_meta_boxes', [$this, 'toocheke_comicscout_image_add_metabox'], 11);
+        // Actions
+        add_action('add_meta_boxes', [$this, 'toocheke_comicscout_image_add_metabox'], 11);
         add_action('save_post_comic', [$this, 'toocheke_comicscout_image_save']);
+        add_action('save_post_manga_chapter', [$this, 'toocheke_comicscout_image_save']);
+
         add_action('add_meta_boxes', [$this, 'toocheke_comicscout_social_share_image_add_metabox'], 12);
         add_action('save_post_comic', [$this, 'toocheke_comicscout_social_share_image_save']);
+        add_action('save_post_manga_chapter', [$this, 'toocheke_comicscout_social_share_image_save']);
         add_action('save_post', [$this, 'toocheke_comic_audio_save_postdata']);
         add_action('post_edit_form_tag', [$this, 'toocheke_update_edit_form']);
         add_action('admin_init', [$this, 'toocheke_replace_term_description_field']);
@@ -296,6 +300,9 @@ class Toocheke_Companion_Comic_Features
         add_filter('manage_edit-manga_series_sortable_columns', [$this, 'toocheke_manga_series_sortable_columns']);
         add_filter('manage_edit-manga_volume_sortable_columns', [$this, 'toocheke_manga_volume_sortable_columns']);
         add_filter('manage_edit-manga_chapter_sortable_columns', [$this, 'toocheke_manga_chapter_sortable_columns']);
+
+        //Manga RSS
+        add_action('template_redirect', [$this, 'toocheke_block_manga_chapter_archive']);
 
         //Upgrade functions
         add_action('admin_init', [$this, 'toocheke_companion_upgrade_check']);
@@ -563,11 +570,16 @@ class Toocheke_Companion_Comic_Features
             'show_in_rest'        => false,
             'menu_position'       => 7,
             'can_export'          => true,
-            'has_archive'         => false,
+            'has_archive'         => 'manga',
             'exclude_from_search' => false,
             'publicly_queryable'  => true,
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
+            'rewrite'             => [
+                'slug'  => 'manga',
+                'with_front' => false,
+                'feeds' => true,
+            ],
         ];
 
         // Registering your Custom Post Type
@@ -2572,6 +2584,10 @@ class Toocheke_Companion_Comic_Features
                 class="nav-tab <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">
                     RSS
                 </a>
+                <a href="?page=toocheke-options-page&tab=comicscout_options"
+                class="nav-tab <?php echo $active_tab == 'comicscout_options' ? 'nav-tab-active' : ''; ?>">
+                    ComicScout
+                </a>
 
                 <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
                     <a href="?page=toocheke-options-page&tab=buy_options"
@@ -3025,6 +3041,22 @@ class Toocheke_Companion_Comic_Features
                         add_settings_field("toocheke-comics-to-main-rss", "Do you want to add comic posts to the main feed?", [$this, 'toocheke_comics_to_main_rss_checkbox'], "toocheke-options-page", "toocheke_comics_to_main_rss_section");
                         register_setting("toocheke-settings", "toocheke-comics-to-main-rss");
                         break;
+                    case 'comicscout_options':
+                        //Option for determining whether to add comics to main RSS feed
+                        add_settings_section("toocheke_comicscout_section", "ComicScout", [$this, 'toocheke_comicscout_message'], "toocheke-options-page");
+                        add_settings_field(
+                            "toocheke-comicscout-global-social-share-image",
+                            "Default ComicScout Social Share Image",
+                            [$this, 'toocheke_comicscout_global_social_share_image_field'],
+                            "toocheke-options-page",
+                            "toocheke_comicscout_section"
+                        );
+
+                        register_setting(
+                            "toocheke-settings",
+                            "toocheke-comicscout-global-social-share-image"
+                        );
+                        break;
                     //Options for sponsoring a comic
                     case 'sponsor_options':
                         if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
@@ -3414,6 +3446,133 @@ class Toocheke_Companion_Comic_Features
             {
                 echo 'This determines whether the comic posts will be added to the main feed: ' . esc_url(get_bloginfo('url') . '/feed');
             }
+            public function toocheke_comicscout_message()
+            {
+                echo '
+                <p>
+                    <strong>ComicScout</strong> is a curated discovery platform designed to help readers find great independent comics across the web.
+                </p>
+
+                <p>
+                    If your comic uses the <strong>Toocheke Companion</strong> plugin, your updates can be automatically discovered and promoted to new readers.
+                </p>
+
+                <p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:10px;margin:10px 0;">
+                    ⭐ <strong>Learn more about ComicScout:</strong><br>
+                    <a href="https://www.thecomicscout.com/" target="_blank">https://www.thecomicscout.com/</a>
+                </p>
+
+                <p>
+                    The settings below allow you to configure how your comic appears when shared and promoted through ComicScout.
+                </p>
+                ';
+            }
+            public function toocheke_comicscout_global_social_share_image_field()
+            {
+                $image_id = get_option('toocheke-comicscout-global-social-share-image');
+                $image_id = $image_id ? (int) $image_id : 0;
+
+                $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'full') : '';
+
+                echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
+                    ⭐ <strong>Used by <a href="https://www.thecomicscout.com/" target="_blank">ComicScout</a> for social promotion.</strong><br>
+                    This image will be used as the default social share image for ComicScout when no ComicScout Social Share Image is set on an individual post.<br>
+                    <strong>Recommended size: 1200 × 630px</strong>.
+                </p>';
+
+                if ($image_url) {
+                    echo '<img id="toocheke_comicscout_global_social_share_image_preview" src="' . esc_url($image_url) . '" style="width:100%;height:auto;border:0;display:block;margin-bottom:10px;" />';
+
+                    echo '<p class="hide-if-no-js">
+                        <a href="javascript:;" id="remove_toocheke_comicscout_global_social_share_image_button">'
+                        . esc_html__('Remove global ComicScout social share image', 'toocheke-companion') .
+                        '</a>
+                    </p>';
+                } else {
+                    echo '<div id="toocheke_comicscout_global_social_share_image_ratio_guide" style="
+                        width:100%;
+                        max-width:254px;
+                        aspect-ratio:1.91/1;
+                        background:#f6f7f7;
+                        border:2px dashed #ccd0d4;
+                        display:flex;
+                        flex-direction:column;
+                        align-items:center;
+                        justify-content:center;
+                        text-align:center;
+                        font-size:12px;
+                        color:#646970;
+                        margin-bottom:10px;">
+
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            width="40"
+                            height="40"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            style="display:block">
+
+                            <rect x="3" y="5"
+                                width="18"
+                                height="14"
+                                rx="2"
+                                stroke="currentColor"
+                                stroke-width="1"/>
+
+                            <circle cx="9"
+                                    cy="10"
+                                    r="1.5"
+                                    stroke="currentColor"
+                                    stroke-width="1"/>
+
+                            <path d="M4.5 16l4.5-3.5a2 2 0 0 1 2.5 0l2.2 1.8"
+                                stroke="currentColor"
+                                stroke-width="1"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"/>
+
+                            <path d="M10.8 16l4-3a2 2 0 0 1 2.5.1L19.5 15"
+                                stroke="currentColor"
+                                stroke-width="1"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"/>
+                        </svg>
+
+                        <span>Image Preview</span>
+                    </div>';
+
+                    echo '<img id="toocheke_comicscout_global_social_share_image_preview" src="" style="width:100%;height:auto;border:0;display:none;margin-bottom:10px;" />';
+
+                    echo '<p class="hide-if-no-js">
+                        <a title="' . esc_attr__('Upload global ComicScout social share image', 'toocheke-companion') . '"
+                        href="javascript:;"
+                        id="upload_toocheke_comicscout_global_social_share_image_button"
+                        data-uploader_title="' . esc_attr__('Choose an image', 'toocheke-companion') . '"
+                        data-uploader_button_text="' . esc_attr__('Use this image', 'toocheke-companion') . '">'
+                        . esc_html__('Upload global ComicScout social share image', 'toocheke-companion') .
+                        '</a>
+                    </p>';
+                }
+
+                // Always output hidden input
+                echo '<input type="hidden"
+                    id="toocheke_comicscout_global_social_share_image"
+                    name="toocheke-comicscout-global-social-share-image"
+                    value="' . esc_attr($image_id) . '" />';
+
+                // If image exists, still show upload link for replacing it
+                if ($image_url) {
+                    echo '<p class="hide-if-no-js">
+                        <a title="' . esc_attr__('Replace global ComicScout social share image', 'toocheke-companion') . '"
+                        href="javascript:;"
+                        id="upload_toocheke_comicscout_global_social_share_image_button"
+                        data-uploader_title="' . esc_attr__('Choose an image', 'toocheke-companion') . '"
+                        data-uploader_button_text="' . esc_attr__('Use this image', 'toocheke-companion') . '">'
+                        . esc_html__('Replace global ComicScout social share image', 'toocheke-companion') .
+                        '</a>
+                    </p>';
+                }
+            }
+            
             public function toocheke_comic_analytics_message()
             {
                 echo 'This determines which comic analytics your want to display for each comic.';
@@ -5324,10 +5483,22 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
              */
             public function toocheke_comicscout_image_add_metabox()
             {
-                add_meta_box('comicscout-image-metabox', __('ComicScout Thumbnail', 'toocheke-companion'), [
-                    $this,
-                    'toocheke_comicscout_image_display_metabox'
-                ], 'comic', 'side', 'high');
+                 add_meta_box(
+                'comicscout-image-metabox',
+                __('ComicScout Thumbnail', 'toocheke-companion'),
+                [$this, 'toocheke_comicscout_image_display_metabox'],
+                'comic',
+                'side',
+                'high'
+                );
+                add_meta_box(
+                'comicscout-image-metabox',
+                __('ComicScout Thumbnail', 'toocheke-companion'),
+                [$this, 'toocheke_comicscout_image_display_metabox'],
+                'manga_chapter',
+                'side',
+                'core' // 👈 different priority for manga_chapter
+                );
             }
             public function toocheke_comicscout_image_display_metabox($post)
             {
@@ -5368,6 +5539,17 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                     'comic',
                     'side',
                     'high'
+                );
+                add_meta_box(
+                    'comicscout-social-share-image-metabox',
+                    __('ComicScout Social Share Image', 'toocheke-companion'),
+                    [
+                        $this,
+                        'toocheke_comicscout_social_share_image_display_metabox'
+                    ],
+                    'manga_chapter',
+                    'side',
+                    'core'
                 );
             }
 
@@ -6036,13 +6218,48 @@ Displayed as a square thumbnail in listings.<br>
         background:#f6f7f7;
         border:2px dashed #ccd0d4;
         display:flex;
+         flex-direction:column;
         align-items:center;
         justify-content:center;
         text-align:center;
         font-size:12px;
         color:#646970;
         margin-bottom:10px;">
-        Image Preview
+        <svg xmlns="http://www.w3.org/2000/svg"
+     width="40"
+     height="40"
+     viewBox="0 0 24 24"
+     fill="none"
+     style="display:block">
+
+    <rect x="3" y="5"
+          width="18"
+          height="14"
+          rx="2"
+          stroke="currentColor"
+          stroke-width="1"/>
+
+    <circle cx="9"
+            cy="10"
+            r="1.5"
+            stroke="currentColor"
+            stroke-width="1"/>
+
+    <path d="M4.5 16l4.5-3.5a2 2 0 0 1 2.5 0l2.2 1.8"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <path d="M10.8 16l4-3a2 2 0 0 1 2.5.1L19.5 15"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+</svg>
+
+<span>Image Preview</span>
     </div>';
 
     post_thumbnail_meta_box($post);
@@ -6069,13 +6286,48 @@ Used for series listings in Toocheke.<br>
                     background:#f6f7f7;
                     border:2px dashed #ccd0d4;
                     display:flex;
+                    flex-direction:column;
                     align-items:center;
                     justify-content:center;
                     text-align:center;
                     font-size:12px;
                     color:#646970;
                     margin-bottom:10px;">
-                    Image Preview
+                    <svg xmlns="http://www.w3.org/2000/svg"
+     width="40"
+     height="40"
+     viewBox="0 0 24 24"
+     fill="none"
+     style="display:block">
+
+    <rect x="3" y="5"
+          width="18"
+          height="14"
+          rx="2"
+          stroke="currentColor"
+          stroke-width="1"/>
+
+    <circle cx="9"
+            cy="10"
+            r="1.5"
+            stroke="currentColor"
+            stroke-width="1"/>
+
+    <path d="M4.5 16l4.5-3.5a2 2 0 0 1 2.5 0l2.2 1.8"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <path d="M10.8 16l4-3a2 2 0 0 1 2.5.1L19.5 15"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+</svg>
+
+<span>Image Preview</span>
                 </div>';
 
                 post_thumbnail_meta_box($post);
@@ -6627,6 +6879,11 @@ Used for series listings in Toocheke.<br>
 
                 //enqueue wordpress js media library.
                 wp_enqueue_media();
+                wp_enqueue_script('toocheke-admin-script', plugins_url('toocheke-companion' . '/js/toocheke.js'), ['jquery'], TOOCHEKE_COMPANION_VERSION, true);
+                wp_enqueue_script('toocheke-admin-script');
+
+                //enqueue wordpress js media library.
+                wp_enqueue_media();
                 wp_enqueue_script('toocheke-media-library-script', plugins_url('toocheke-companion' . '/js/media.js'), ['jquery'], TOOCHEKE_COMPANION_VERSION, true);
                 wp_enqueue_script('toocheke-media-library-script');
 
@@ -6871,6 +7128,7 @@ Used for series listings in Toocheke.<br>
              */
             public function toocheke_add_plugin_main_menu()
             {
+                global $submenu;
                 $theme = wp_get_theme(); // gets the current theme
                 add_menu_page('Toocheke', 'Toocheke', 'edit_posts', 'toocheke-menu', [$this, 'toocheke_dashboard_hub_page'], 'dashicons-toocheke-companion', 2);
                 add_submenu_page('toocheke-menu', 'Dashboard', 'Dashboard', 'edit_posts', 'toocheke-menu', [$this, 'toocheke_dashboard_hub_page'], 1);
@@ -6894,6 +7152,9 @@ Used for series listings in Toocheke.<br>
                 add_submenu_page('toocheke-menu', 'Options', 'Options', 'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page'], 16);
                 add_submenu_page('toocheke-menu', 'Import From Comic Easel', 'Import From Comic Easel', 'edit_posts', 'toocheke-import-comic-easel', [$this, 'toocheke_include_import_comic_easel_page'], 17);
                 add_submenu_page('toocheke-menu', 'Import From Webcomic', 'Import From Webcomic', 'edit_posts', 'toocheke-import-webcomic', [$this, 'toocheke_include_import_webcomic_page'], 18);
+
+                // ComicScout promoted link — directly inject external URL via $submenu global
+                $submenu['toocheke-menu'][9999] = ['Promote on <b>ComicScout</b>', 'edit_posts', 'https://www.thecomicscout.com/', '', 'toocheke-comicscout-link'];
             }
 
             // Include hub methods here
@@ -8797,21 +9058,38 @@ public function toocheke_enqueue_manga_filter_script()
             {
                 global $post;
 
-                if ('comic' !== get_post_type($post)) {
+                if (!in_array(get_post_type($post), ['comic', 'manga_chapter'])) {
                     return;
                 }
 
                 /*
-                * Social Share Image (preferred) or Featured Image fallback
+                * Social Share Image (preferred) or Global Social Share fallback, then Featured Image fallback
                 */
 
                 $thumbnail_id = get_post_thumbnail_id($post->ID);
 
                 $raw_social_id = get_post_meta($post->ID, 'comicscout_social_share_image_id', true);
-                $social_is_fallback = empty($raw_social_id);
 
-                $social_share_image_id = $raw_social_id ? $raw_social_id : $thumbnail_id;
-                $social_source = $social_is_fallback ? 'featured' : 'social_share';
+                // Determine image ID and source
+                if (!empty($raw_social_id)) {
+                    $social_share_image_id = $raw_social_id;
+                    $social_source         = 'social_share';
+                    $social_is_fallback    = false;
+                } else {
+                    // Check for global social share image
+                    $global_social_id = get_option('toocheke-comicscout-global-social-share-image');
+                    $global_social_id = $global_social_id ? (int) $global_social_id : 0;
+
+                    if (!empty($global_social_id)) {
+                        $social_share_image_id = $global_social_id;
+                        $social_source         = 'default_social_share';
+                        $social_is_fallback    = false;
+                    } else {
+                        $social_share_image_id = $thumbnail_id;
+                        $social_source         = 'featured';
+                        $social_is_fallback    = true;
+                    }
+                }
 
                 if ($social_share_image_id) {
 
@@ -8819,12 +9097,12 @@ public function toocheke_enqueue_manga_filter_script()
                     $image_meta = wp_get_attachment_metadata($social_share_image_id);
                     $mime_type  = get_post_mime_type($social_share_image_id);
 
-                    $file_path  = get_attached_file($social_share_image_id);
-                    $length     = ($file_path && file_exists($file_path)) ? filesize($file_path) : 0;
+                    $file_path = get_attached_file($social_share_image_id);
+                    $length    = ($file_path && file_exists($file_path)) ? filesize($file_path) : 0;
 
                     if ($image_url) {
 
-                        $width  = !empty($image_meta['width']) ? (int) $image_meta['width'] : 0;
+                        $width  = !empty($image_meta['width'])  ? (int) $image_meta['width']  : 0;
                         $height = !empty($image_meta['height']) ? (int) $image_meta['height'] : 0;
 
                         $aspect = ($width > 0 && $height > 0)
@@ -8834,13 +9112,13 @@ public function toocheke_enqueue_manga_filter_script()
                         echo '<enclosure url="' . esc_url($image_url) . '" length="' . esc_attr($length) . '" type="' . esc_attr($mime_type) . '" />' . "\n";
 
                         echo '<toocheke:featured_image'
-                            . ' url="' . esc_url($image_url) . '"'
-                            . ' type="' . esc_attr($mime_type) . '"'
-                            . ' width="' . esc_attr($width) . '"'
-                            . ' height="' . esc_attr($height) . '"'
-                            . ' aspect_ratio="' . esc_attr($aspect) . '"'
-                            . ' fallback="' . esc_attr($social_is_fallback ? 'true' : 'false') . '"'
-                            . ' source="' . esc_attr($social_source) . '"'
+                            . ' url="'          . esc_url($image_url)                              . '"'
+                            . ' type="'         . esc_attr($mime_type)                             . '"'
+                            . ' width="'        . esc_attr($width)                                 . '"'
+                            . ' height="'       . esc_attr($height)                                . '"'
+                            . ' aspect_ratio="' . esc_attr($aspect)                                . '"'
+                            . ' fallback="'     . esc_attr($social_is_fallback ? 'true' : 'false') . '"'
+                            . ' source="'       . esc_attr($social_source)                         . '"'
                             . ' />' . "\n";
                     }
                 }
@@ -8849,21 +9127,21 @@ public function toocheke_enqueue_manga_filter_script()
                 * ComicScout Thumbnail
                 */
 
-                $raw_comicscout_id = get_post_meta($post->ID, 'comicscout_image_id', true);
+                $raw_comicscout_id      = get_post_meta($post->ID, 'comicscout_image_id', true);
                 $comicscout_is_fallback = empty($raw_comicscout_id);
 
                 $comicscout_image_id = $raw_comicscout_id ? $raw_comicscout_id : $thumbnail_id;
-                $comicscout_source = $comicscout_is_fallback ? 'featured' : 'comicscout';
+                $comicscout_source   = $comicscout_is_fallback ? 'featured' : 'comicscout';
 
                 if ($comicscout_image_id) {
 
-                    $comicscout_image_url  = wp_get_attachment_image_url($comicscout_image_id, 'full');
-                    $comicscout_meta       = wp_get_attachment_metadata($comicscout_image_id);
-                    $comicscout_mime_type  = get_post_mime_type($comicscout_image_id);
+                    $comicscout_image_url = wp_get_attachment_image_url($comicscout_image_id, 'full');
+                    $comicscout_meta      = wp_get_attachment_metadata($comicscout_image_id);
+                    $comicscout_mime_type = get_post_mime_type($comicscout_image_id);
 
                     if ($comicscout_image_url) {
 
-                        $comicscout_width  = !empty($comicscout_meta['width']) ? (int) $comicscout_meta['width'] : 0;
+                        $comicscout_width  = !empty($comicscout_meta['width'])  ? (int) $comicscout_meta['width']  : 0;
                         $comicscout_height = !empty($comicscout_meta['height']) ? (int) $comicscout_meta['height'] : 0;
 
                         $comicscout_aspect = ($comicscout_width > 0 && $comicscout_height > 0)
@@ -8871,13 +9149,13 @@ public function toocheke_enqueue_manga_filter_script()
                             : '';
 
                         echo '<toocheke:comicscout_thumbnail'
-                            . ' url="' . esc_url($comicscout_image_url) . '"'
-                            . ' type="' . esc_attr($comicscout_mime_type) . '"'
-                            . ' width="' . esc_attr($comicscout_width) . '"'
-                            . ' height="' . esc_attr($comicscout_height) . '"'
-                            . ' aspect_ratio="' . esc_attr($comicscout_aspect) . '"'
-                            . ' fallback="' . esc_attr($comicscout_is_fallback ? 'true' : 'false') . '"'
-                            . ' source="' . esc_attr($comicscout_source) . '"'
+                            . ' url="'          . esc_url($comicscout_image_url)                          . '"'
+                            . ' type="'         . esc_attr($comicscout_mime_type)                         . '"'
+                            . ' width="'        . esc_attr($comicscout_width)                             . '"'
+                            . ' height="'       . esc_attr($comicscout_height)                            . '"'
+                            . ' aspect_ratio="' . esc_attr($comicscout_aspect)                            . '"'
+                            . ' fallback="'     . esc_attr($comicscout_is_fallback ? 'true' : 'false')    . '"'
+                            . ' source="'       . esc_attr($comicscout_source)                            . '"'
                             . ' />' . "\n";
                     }
                 }
@@ -9302,6 +9580,15 @@ public function toocheke_enqueue_manga_filter_script()
                     }
                 }
             }
+            public function toocheke_block_manga_chapter_archive(){
+                   if (is_post_type_archive('manga_chapter') && !is_feed()) {
+                        global $wp_query;
+                        $wp_query->set_404();
+                        status_header(404);
+                        nocache_headers();
+                        return;
+                    }
+            }
             public function toocheke_companion_upgrade_check(){
                  $installed_version = get_option('toocheke_companion_version');
 
@@ -9604,13 +9891,48 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
         background:#f6f7f7;
         border:2px dashed #ccd0d4;
         display:flex;
+         flex-direction:column;
         align-items:center;
         justify-content:center;
         text-align:center;
         font-size:12px;
         color:#646970;
         margin-bottom:10px;">
-        Image Preview
+        <svg xmlns="http://www.w3.org/2000/svg"
+     width="40"
+     height="40"
+     viewBox="0 0 24 24"
+     fill="none"
+     style="display:block">
+
+    <rect x="3" y="5"
+          width="18"
+          height="14"
+          rx="2"
+          stroke="currentColor"
+          stroke-width="1"/>
+
+    <circle cx="9"
+            cy="10"
+            r="1.5"
+            stroke="currentColor"
+            stroke-width="1"/>
+
+    <path d="M4.5 16l4.5-3.5a2 2 0 0 1 2.5 0l2.2 1.8"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <path d="M10.8 16l4-3a2 2 0 0 1 2.5.1L19.5 15"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+</svg>
+
+<span>Image Preview</span>
         </div>';
 
         // IMPORTANT: Keep the IMG element for JS preview

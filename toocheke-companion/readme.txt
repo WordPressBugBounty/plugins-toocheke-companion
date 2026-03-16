@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.208
+Stable tag: 1.209
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,7 +157,8 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
 
-== Changelog ==
+= 1.209 =
+* NEW: Added an **Image Optimization on Upload** option that converts uploaded images to AVIF when supported, or WebP as a fallback, reducing file sizes, saving server space, and improving page load times.
 
 = 1.208 =
 * NEW: Added a **Default ComicScout Social Share Image** setting for defining a fallback image used when ComicScout promotes comic updates and no post-specific image is provided.

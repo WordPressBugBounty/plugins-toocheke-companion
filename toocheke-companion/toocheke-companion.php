@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.208
+ * Version:     1.209
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.208');
+    define('TOOCHEKE_COMPANION_VERSION', '1.209');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -3024,12 +3024,42 @@ class Toocheke_Companion_Comic_Features
                         add_settings_field("toocheke-image-click", "Do you want to enable the click to enlarge feature for comic images?", [$this, 'toocheke_image_click_checkbox'], "toocheke-options-page", "toocheke_image_click_section");
                         register_setting("toocheke-settings", "toocheke-image-click");
 
+                        //Options for optimizing images
+                        add_settings_section("toocheke_image_optimization_section", "Optimizaton of Images", [$this, 'toocheke_image_optimization_message'], "toocheke-options-page");
+                        add_settings_field("toocheke-image-optimization", "Do you want to optimize images?", [$this, 'toocheke_image_optimization_checkbox'], "toocheke-options-page", "toocheke_image_optimization_section");
+                        register_setting("toocheke-settings", "toocheke-image-optimization", ['sanitize_callback' => 'absint',]);
+
+                        add_settings_field(
+                            "toocheke-avif-quality",
+                            "AVIF Image Quality",
+                            [$this, 'toocheke_image_quality_number_field'],
+                            "toocheke-options-page",
+                            "toocheke_image_optimization_section",
+                            ['option_name' => 'toocheke-avif-quality', 'default' => 50]
+                        );
+                        register_setting("toocheke-settings", "toocheke-avif-quality", [
+                            'sanitize_callback' => [$this, 'toocheke_sanitize_image_quality'],
+                        ]);
+
+                        add_settings_field(
+                            "toocheke-webp-quality",
+                            "WebP Image Quality",
+                            [$this, 'toocheke_image_quality_number_field'],
+                            "toocheke-options-page",
+                            "toocheke_image_optimization_section",
+                            ['option_name' => 'toocheke-webp-quality', 'default' => 75]
+                        );
+                        register_setting("toocheke-settings", "toocheke-webp-quality", [
+                            'sanitize_callback' => [$this, 'toocheke_sanitize_image_quality'],
+                        ]);
+
                         //Option for determining whether to protect images
+                        
                         add_settings_section("toocheke_image_protect_section", "Protection of Comic Images", [$this, 'toocheke_image_protection_message'], "toocheke-options-page");
                         add_settings_field("toocheke-image-protection", "Do you want to protect the images in your comic post?", [$this, 'toocheke_image_protection_checkbox'], "toocheke-options-page", "toocheke_image_protect_section");
                         register_setting("toocheke-settings", "toocheke-image-protection");
 
-                        //Option for determining whether to protect images
+                        //Option for determining whether to protect images on future scheduled posts
                         add_settings_field("toocheke-future-post-image-protection", "Do you want to protect the images in future, scheduled comic posts?", [$this, 'toocheke_future_image_protection_checkbox'], "toocheke-options-page", "toocheke_image_protect_section");
                         register_setting("toocheke-settings", "toocheke-future-post-image-protection");
                         break;
@@ -3441,6 +3471,10 @@ class Toocheke_Companion_Comic_Features
             public function toocheke_image_protection_message()
             {
                 echo 'Helps prevent other websites from displaying your comic images by blocking direct access (hotlink protection).';
+            }
+            public function toocheke_image_optimization_message()
+            {
+                echo 'Automatically optimize uploaded images by converting them to AVIF when supported, or WebP as a fallback. This reduces file sizes and saves server disk space while maintaining image quality.';
             }
             public function toocheke_rss_message()
             {
@@ -3877,6 +3911,63 @@ class Toocheke_Companion_Comic_Features
         <input type="checkbox" name="toocheke-image-protection" value="1"
             <?php checked(1, get_option('toocheke-image-protection'), true); ?> /> Check for Yes
     <?php
+            }
+             public function toocheke_image_optimization_checkbox()
+            {
+    ?>
+        <input type="checkbox" name="toocheke-image-optimization" value="1"
+            <?php checked(1, get_option('toocheke-image-optimization'), true); ?> /> Check for Yes
+            <p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:10px;margin:10px 0;">
+        For best results, use a quality range of 50–60 for AVIF and 75–85 for WebP.
+        These ranges provide strong compression while maintaining good visual quality.
+        Higher values may reduce the benefits of image optimization.
+    </p>
+    <?php
+            }
+            /**
+             * Shared callback for rendering a number input field.
+             *
+             * @param array $args  Must contain 'option_name' (string) and 'default' (int).
+             */
+            public function toocheke_image_quality_number_field(array $args)
+            {
+                $option_name = sanitize_key($args['option_name']);
+                $default     = isset($args['default']) ? absint($args['default']) : 75;
+                $value       = get_option($option_name, $default);
+                ?>
+                <input
+                    type="number"
+                    name="<?php echo esc_attr($option_name); ?>"
+                    value="<?php echo esc_attr($value); ?>"
+                    min="1"
+                    max="100"
+                    step="1"
+                />
+                <span class="description"><?php esc_html_e('Enter a value between 1 and 100.', 'toocheke'); ?></span>
+                <?php
+            }
+
+            /**
+             * Sanitize image quality: clamps the value to 1–100, falls back to 75.
+             *
+             * @param  mixed $value  Raw input from the settings form.
+             * @return int           Sanitized integer between 1 and 100.
+             */
+            public function toocheke_sanitize_image_quality($value)
+            {
+                $int = absint($value);
+
+                if ($int < 1 || $int > 100) {
+                    add_settings_error(
+                        'toocheke-settings',
+                        'invalid-quality',
+                        __('Image quality must be between 1 and 100. The value has been reset to 75.', 'toocheke'),
+                        'error'
+                    );
+                    return 75;
+                }
+
+                return $int;
             }
             public function toocheke_future_image_protection_checkbox()
             {
@@ -10876,6 +10967,465 @@ class Toocheke_Future_Comic_Image_Protection {
 }
 
 
+
+/**
+ * Class Toocheke_Image_Optimization
+ *
+ * Handles automatic image conversion to AVIF or WebP on upload,
+ * with proportional resizing to a maximum width of 1920px.
+ * Only instantiated when the toocheke-image-optimization option is enabled.
+ */
+class Toocheke_Image_Optimization {
+
+    /**
+     * Maximum image width in pixels.
+     */
+    private const MAX_WIDTH = 1920;
+
+    /**
+     * AVIF quality (1–100). Loaded from saved option, defaults to 50.
+     *
+     * @var int
+     */
+    private int $avif_quality;
+
+    /**
+     * WebP quality (1–100). Loaded from saved option, defaults to 75.
+     *
+     * @var int
+     */
+    private int $webp_quality;
+
+    /**
+     * Whether the server supports AVIF encoding via GD or Imagick.
+     *
+     * @var bool
+     */
+    private bool $avif_supported;
+
+    /**
+     * Constructor — loads options, detects format support, registers hooks.
+     */
+    public function __construct() {
+        $this->avif_quality   = absint( get_option( 'toocheke-avif-quality', 50 ) );
+        $this->webp_quality   = absint( get_option( 'toocheke-webp-quality', 75 ) );
+        $this->avif_supported = $this->toocheke_server_supports_avif();
+
+        add_filter( 'wp_handle_upload',                [ $this, 'toocheke_process_uploaded_image' ],  10, 2 );
+        add_filter( 'wp_generate_attachment_metadata', [ $this, 'toocheke_fix_attachment_metadata' ], 10, 2 );
+    }
+
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
+
+    /**
+     * Hooked to wp_handle_upload.
+     * Converts and resizes any uploaded image, then rewrites the upload data
+     * so WordPress stores and registers the converted file instead.
+     *
+     * @param  array  $upload  { 'file' => string, 'url' => string, 'type' => string }
+     * @param  string $context 'upload' | 'sideload'
+     * @return array           Possibly-modified upload array.
+     */
+    public function toocheke_process_uploaded_image( array $upload, string $context ): array {
+        if ( ! isset( $upload['type'] ) || ! str_starts_with( $upload['type'], 'image/' ) ) {
+            return $upload;
+        }
+
+        $skipped_types = [ 'image/svg+xml', 'image/gif' ];
+        if ( in_array( $upload['type'], $skipped_types, true ) ) {
+            return $upload;
+        }
+
+        // Normalise path separators — on Windows (LocalWP) WordPress mixes
+        // backslashes and forward slashes, which breaks Imagick's writeImage().
+        $upload['file'] = str_replace( '\\', '/', $upload['file'] );
+        $source_path    = $upload['file'];
+
+        if ( ! file_exists( $source_path ) || ! is_readable( $source_path ) ) {
+            error_log( 'Toocheke: Source file not found or not readable: ' . $source_path );
+            return $upload;
+        }
+
+        if ( filesize( $source_path ) === 0 ) {
+            error_log( 'Toocheke: Source file is empty: ' . $source_path );
+            return $upload;
+        }
+
+        $converted = $this->toocheke_convert_image( $source_path );
+
+        if ( $converted === null ) {
+            error_log( 'Toocheke: Conversion returned null for: ' . $source_path );
+            return $upload;
+        }
+
+        if ( $converted['path'] !== $source_path ) {
+            @unlink( $source_path );
+        }
+
+        $upload['file'] = $converted['path'];
+        $upload['url']  = str_replace(
+            wp_basename( $source_path ),
+            wp_basename( $converted['path'] ),
+            $upload['url']
+        );
+        $upload['type'] = $converted['mime'];
+
+        return $upload;
+    }
+
+    /**
+     * Hooked to wp_generate_attachment_metadata.
+     * Ensures the file path, URL, and MIME type stored in the database
+     * match the converted file after WordPress has processed the upload.
+     *
+     * @param  array $metadata      Attachment metadata array.
+     * @param  int   $attachment_id Attachment post ID.
+     * @return array
+     */
+    public function toocheke_fix_attachment_metadata( array $metadata, int $attachment_id ): array {
+        $attached_file = get_post_meta( $attachment_id, '_wp_attached_file', true );
+
+        if ( empty( $attached_file ) ) {
+            return $metadata;
+        }
+
+        $upload_dir = wp_upload_dir();
+
+        // Normalise all paths to forward slashes for Windows compatibility.
+        $base_dir   = str_replace( '\\', '/', trailingslashit( $upload_dir['basedir'] ) );
+        $abs_path   = str_replace( '\\', '/', $base_dir . $attached_file );
+        $avif_path  = $this->toocheke_swap_extension( $abs_path, 'avif' );
+        $webp_path  = $this->toocheke_swap_extension( $abs_path, 'webp' );
+
+        if ( file_exists( $avif_path ) ) {
+            $new_ext  = 'avif';
+            $new_mime = 'image/avif';
+            $new_abs  = $avif_path;
+        } elseif ( file_exists( $webp_path ) ) {
+            $new_ext  = 'webp';
+            $new_mime = 'image/webp';
+            $new_abs  = $webp_path;
+        } else {
+            // No converted file found — nothing to fix.
+            return $metadata;
+        }
+
+        // Update the stored relative path (e.g. 2024/03/photo.jpg → 2024/03/photo.avif).
+        $new_relative = $this->toocheke_swap_extension( $attached_file, $new_ext );
+        update_post_meta( $attachment_id, '_wp_attached_file', $new_relative );
+
+        // Update the MIME type on the attachment post itself.
+        wp_update_post( [
+            'ID'             => $attachment_id,
+            'post_mime_type' => $new_mime,
+        ] );
+
+        // Update the file key in the metadata array WordPress is about to store.
+        if ( isset( $metadata['file'] ) ) {
+            $metadata['file'] = $new_relative;
+        }
+
+        // Update width/height in metadata if available.
+        if ( isset( $metadata['width'], $metadata['height'] ) ) {
+            $size = @getimagesize( $new_abs );
+            if ( $size ) {
+                $metadata['width']  = $size[0];
+                $metadata['height'] = $size[1];
+            }
+        }
+
+        // Update sub-size paths in metadata if any were generated from the original.
+        if ( ! empty( $metadata['sizes'] ) ) {
+            foreach ( $metadata['sizes'] as $size_key => $size_data ) {
+                if ( isset( $size_data['file'] ) ) {
+                    $size_abs       = trailingslashit( dirname( $new_abs ) ) . $size_data['file'];
+                    $size_converted = $this->toocheke_swap_extension( $size_abs, $new_ext );
+
+                    if ( file_exists( $size_converted ) ) {
+                        $metadata['sizes'][ $size_key ]['file']      = wp_basename( $size_converted );
+                        $metadata['sizes'][ $size_key ]['mime-type'] = $new_mime;
+                    }
+                }
+            }
+        }
+
+        return $metadata;
+    }
+
+    // -------------------------------------------------------------------------
+    // Core conversion logic
+    // -------------------------------------------------------------------------
+
+    /**
+     * Resize (if necessary) and convert an image to AVIF or WebP.
+     *
+     * @param  string     $source_path  Absolute path to the source image.
+     * @return array|null               [ 'path' => string, 'mime' => string ] or null on failure.
+     */
+    private function toocheke_convert_image( string $source_path ): ?array {
+        if ( extension_loaded( 'imagick' ) ) {
+            return $this->toocheke_convert_with_imagick( $source_path );
+        }
+
+        if ( extension_loaded( 'gd' ) ) {
+            return $this->toocheke_convert_with_gd( $source_path );
+        }
+
+        return null;
+    }
+
+    /**
+     * Convert using the Imagick extension.
+     *
+     * @param  string     $source_path
+     * @return array|null
+     */
+    private function toocheke_convert_with_imagick( string $source_path ): ?array {
+        try {
+            $imagick = new \Imagick( $source_path );
+
+            // Flatten layers/frames (handles PNGs with transparency, PSDs, etc.)
+            // Note: do NOT reassign — mergeImageLayers() modifies in place.
+            $imagick->mergeImageLayers( \Imagick::LAYERMETHOD_FLATTEN );
+
+            // Strip unnecessary metadata to keep file size down.
+            $imagick->stripImage();
+
+            // Proportional resize if wider than MAX_WIDTH.
+            $this->toocheke_maybe_resize_imagick( $imagick );
+
+            // Attempt AVIF first if the server supports it.
+            if ( $this->avif_supported ) {
+                $output_path = $this->toocheke_swap_extension( $source_path, 'avif' );
+                $imagick->setImageFormat( 'avif' );
+                $imagick->setImageCompressionQuality( $this->avif_quality );
+
+                $written = $imagick->writeImage( $output_path );
+
+                // Verify the file was actually written and is not empty.
+                if ( $written && file_exists( $output_path ) && filesize( $output_path ) > 0 ) {
+                    $imagick->clear();
+                    return [ 'path' => $output_path, 'mime' => 'image/avif' ];
+                }
+
+                // Clean up the bad/empty file before falling through to WebP.
+                if ( file_exists( $output_path ) ) {
+                    @unlink( $output_path );
+                }
+            }
+
+            // Fallback: WebP.
+            $output_path = $this->toocheke_swap_extension( $source_path, 'webp' );
+            $imagick->setImageFormat( 'webp' );
+            $imagick->setImageCompressionQuality( $this->webp_quality );
+
+            $written = $imagick->writeImage( $output_path );
+
+            if ( $written && file_exists( $output_path ) && filesize( $output_path ) > 0 ) {
+                $imagick->clear();
+                return [ 'path' => $output_path, 'mime' => 'image/webp' ];
+            }
+
+            $imagick->clear();
+            return null;
+
+        } catch ( \ImagickException $e ) {
+            error_log( 'Toocheke_Image_Optimization (Imagick): ' . $e->getMessage() );
+            return null;
+        }
+    }
+
+    /**
+     * Convert using the GD extension.
+     * Note: GD supports WebP on most hosts; AVIF support was added in PHP 8.1 + libgd 2.3.
+     *
+     * @param  string     $source_path
+     * @return array|null
+     */
+    private function toocheke_convert_with_gd( string $source_path ): ?array {
+        $image = $this->toocheke_gd_create_from_file( $source_path );
+
+        if ( $image === null ) {
+            return null;
+        }
+
+        // Proportional resize if wider than MAX_WIDTH.
+        $image = $this->toocheke_maybe_resize_gd( $image );
+
+        // Attempt AVIF first if the server supports it.
+        if ( $this->avif_supported && function_exists( 'imageavif' ) ) {
+            $output_path = $this->toocheke_swap_extension( $source_path, 'avif' );
+
+            if ( imageavif( $image, $output_path, $this->avif_quality )
+                && file_exists( $output_path )
+                && filesize( $output_path ) > 0
+            ) {
+                imagedestroy( $image );
+                return [ 'path' => $output_path, 'mime' => 'image/avif' ];
+            }
+
+            // Clean up the bad/empty file before falling through to WebP.
+            if ( file_exists( $output_path ) ) {
+                @unlink( $output_path );
+            }
+        }
+
+        // Fallback: WebP.
+        if ( function_exists( 'imagewebp' ) ) {
+            $output_path = $this->toocheke_swap_extension( $source_path, 'webp' );
+
+            if ( imagewebp( $image, $output_path, $this->webp_quality )
+                && file_exists( $output_path )
+                && filesize( $output_path ) > 0
+            ) {
+                imagedestroy( $image );
+                return [ 'path' => $output_path, 'mime' => 'image/webp' ];
+            }
+        }
+
+        imagedestroy( $image );
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Resize helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Resize an Imagick object in-place if its width exceeds MAX_WIDTH.
+     * Height is calculated proportionally; upscaling is never applied.
+     *
+     * @param \Imagick $imagick
+     */
+    private function toocheke_maybe_resize_imagick( \Imagick $imagick ): void {
+        $width  = $imagick->getImageWidth();
+        $height = $imagick->getImageHeight();
+
+        if ( $width <= self::MAX_WIDTH ) {
+            return;
+        }
+
+        $new_height = (int) round( $height * ( self::MAX_WIDTH / $width ) );
+
+        // LANCZOS gives the best downscale quality.
+        $imagick->resizeImage( self::MAX_WIDTH, $new_height, \Imagick::FILTER_LANCZOS, 1 );
+    }
+
+    /**
+     * Resize a GD image resource if its width exceeds MAX_WIDTH.
+     *
+     * @param  \GdImage  $image
+     * @return \GdImage         Original or newly resampled resource.
+     */
+    private function toocheke_maybe_resize_gd( \GdImage $image ): \GdImage {
+        $width  = imagesx( $image );
+        $height = imagesy( $image );
+
+        if ( $width <= self::MAX_WIDTH ) {
+            return $image;
+        }
+
+        $new_height = (int) round( $height * ( self::MAX_WIDTH / $width ) );
+        $resized    = imagecreatetruecolor( self::MAX_WIDTH, $new_height );
+
+        // Preserve alpha channel for PNG sources.
+        imagealphablending( $resized, false );
+        imagesavealpha( $resized, true );
+
+        imagecopyresampled(
+            $resized, $image,
+            0, 0, 0, 0,
+            self::MAX_WIDTH, $new_height,
+            $width, $height
+        );
+
+        imagedestroy( $image );
+
+        return $resized;
+    }
+
+    // -------------------------------------------------------------------------
+    // GD factory
+    // -------------------------------------------------------------------------
+
+    /**
+     * Create a GD image resource from any supported file type.
+     *
+     * @param  string         $path  Absolute file path.
+     * @return \GdImage|null
+     */
+    private function toocheke_gd_create_from_file( string $path ): ?\GdImage {
+        $mime = mime_content_type( $path );
+
+        $map = [
+            'image/jpeg' => 'imagecreatefromjpeg',
+            'image/png'  => 'imagecreatefrompng',
+            'image/webp' => 'imagecreatefromwebp',
+            'image/avif' => 'imagecreatefromavif',
+            'image/bmp'  => 'imagecreatefrombmp',
+        ];
+
+        if ( ! isset( $map[ $mime ] ) || ! function_exists( $map[ $mime ] ) ) {
+            return null;
+        }
+
+        $image = @$map[ $mime ]( $path );
+
+        return ( $image instanceof \GdImage ) ? $image : null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Server capability detection
+    // -------------------------------------------------------------------------
+
+    /**
+     * Determine whether the server can encode AVIF images.
+     *
+     * Imagick: checks that the 'avif' format is in the list of supported formats.
+     * GD:      checks for the imageavif() function (PHP 8.1+ with libgd 2.3+).
+     *
+     * @return bool
+     */
+    private function toocheke_server_supports_avif(): bool {
+        if ( extension_loaded( 'imagick' ) ) {
+            try {
+                $formats = \Imagick::queryFormats( 'AVIF' );
+                return ! empty( $formats );
+            } catch ( \ImagickException $e ) {
+                return false;
+            }
+        }
+
+        if ( extension_loaded( 'gd' ) ) {
+            return function_exists( 'imageavif' );
+        }
+
+        return false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Path utilities
+    // -------------------------------------------------------------------------
+
+    /**
+     * Replace the extension of a file path with a new one.
+     *
+     * @param  string $path       e.g. /var/www/uploads/photo.jpg
+     * @param  string $extension  e.g. 'avif'
+     * @return string             e.g. /var/www/uploads/photo.avif
+     */
+    private function toocheke_swap_extension( string $path, string $extension ): string {
+        // Normalise to forward slashes before processing — critical on Windows.
+        $path     = str_replace( '\\', '/', $path );
+        $dir      = dirname( $path );
+        $basename = pathinfo( $path, PATHINFO_FILENAME );
+
+        return $dir . '/' . $basename . '.' . $extension;
+    }
+}
+
         /**
          * Template loader.
          *
@@ -10899,6 +11449,10 @@ class Toocheke_Future_Comic_Image_Protection {
         }
         if (get_option('toocheke-future-post-image-protection') == 1) {
             Toocheke_Future_Comic_Image_Protection::get_instance();
+        }
+        // Initialize the optimizer when the option is active.
+        if ( get_option( 'toocheke-image-optimization' ) ) {
+            new Toocheke_Image_Optimization();
         }
 
         // Now, include your block registration file

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.209
+Stable tag: 1.210
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -37,6 +37,7 @@ Comics published with Toocheke Companion can also be discovered through **[Comic
 - Top ten comics based on post views
 - Infinite scroll for archive display
 - Bilingual/multilingual comic and manga support
+- Optimize your comic images by reducing file sizes, saving server space, and improving page load times.
 - ⭐ **ComicScout integration** — get your comic listed on [ComicScout](https://www.thecomicscout.com/), a curated discovery platform built specifically for independent comic websites to help readers discover new comics
 
 == Installation == 
@@ -156,6 +157,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.210 =
+* IMPROVEMENT: Enhanced image optimization for better performance.
+* FIX: Resolved an issue with image protection not working as expected.
 
 = 1.209 =
 * NEW: Added an **Image Optimization on Upload** option that converts uploaded images to AVIF when supported, or WebP as a fallback, reducing file sizes, saving server space, and improving page load times.

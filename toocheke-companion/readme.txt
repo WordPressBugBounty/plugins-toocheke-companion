@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.210
+Stable tag: 1.211
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.211 =
+* FIX: Resolved an issue where RTL manga reader could not be swiped past the second page on mobile devices.
 
 = 1.210 =
 * IMPROVEMENT: Enhanced image optimization for better performance.

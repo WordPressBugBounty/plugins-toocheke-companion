@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.211
+Stable tag: 1.212
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.212 =
+* NEW: Comic links in feeds now include a series reference, so readers open comics in the correct series.
+* NEW: Added a series-specific feed (`/series/{series-slug}/feed/`) that shows updates from just that series, including images, thumbnails, and creator notes.
 
 = 1.211 =
 * FIX: Resolved an issue where RTL manga reader could not be swiped past the second page on mobile devices.

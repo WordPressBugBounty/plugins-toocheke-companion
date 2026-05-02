@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.212
+Stable tag: 1.213
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.213 =
+* FIX: Chapters in the All Chapters shortcode are now correctly ordered by their chapter order number.
 
 = 1.212 =
 * NEW: Comic links in feeds now include a series reference, so readers open comics in the correct series.

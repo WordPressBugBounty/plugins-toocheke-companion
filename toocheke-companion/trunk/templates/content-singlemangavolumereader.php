@@ -79,8 +79,20 @@
         <div id="swiper-loader-container">
     <div class="spinner"></div>
 </div>
-<div dir="<?php echo $rtl ? 'rtl' : 'ltr'; ?>">
-            <swiper-container id="manga-swiper" class="swiper" pagination="true" pagination-type="progressbar" navigation="true" space-between="0" slides-per-view="<?php echo esc_attr($slides_per_view); ?>" slides-per-group="<?php echo esc_attr($slides_per_view); ?>"  keyboard="true" events-prefix="swiper-"  breakpoints='{"0":{"direction":"vertical","slidesPerView":1},"768":{"direction":"horizontal","slidesPerView":<?php echo esc_attr($slides_per_view); ?>}}'>
+<div id="manga-swiper-wrapper">
+    <swiper-container
+        id="manga-swiper"
+        class="swiper"
+        init="false"
+        data-rtl="<?php echo $rtl ? '1' : '0'; ?>"
+        data-desktop-slides="<?php echo esc_attr($slides_per_view); ?>"
+        zoom="true"
+        pagination="true"
+        pagination-type="progressbar"
+        navigation="true"
+        space-between="0"
+        keyboard="true"
+        events-prefix="swiper-">
 
                     <?php foreach ($all_images as $img_id): 
                         $img_url = wp_get_attachment_image_url($img_id, 'full'); ?>

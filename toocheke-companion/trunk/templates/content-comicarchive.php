@@ -33,6 +33,12 @@ switch ($comic_archive_option) {
     case 'chapters-gallery':
         $templates->get_template_part('content', 'comicarchivechaptersgallery');
         break;
+    case 'collections-plain-text-list':
+        $templates->get_template_part('content', 'comicarchivecollectionstext');
+        break;
+    case 'collections-gallery':
+        $templates->get_template_part('content', 'comicarchivecollectionsgallery');
+        break;
     case 'series-plain-text-list':
         $templates->get_template_part('content', 'comicarchiveseriestext');
         break;

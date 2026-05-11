@@ -31,25 +31,37 @@ if ($comics_query->have_posts()):
 
 endif;
 
-$chapters = wp_get_object_terms($comic_ids, 'chapters');
-if (!empty($chapters)) {
-    if (!is_wp_error($chapters)) {
-        /*
-        foreach( $chapters as $chapter ) {
-        ?><pre><?php var_dump($chapter); ?></pre><?php
-        }
-         */
-        $total_active_chapters = count($chapters);
-    }
+
+$chapter_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+$chapters_per_page = 60;
+
+$all_chapters = get_terms(array(
+    'taxonomy'   => 'chapters',
+    'object_ids' => $comic_ids,
+    'hide_empty' => true,
+    'orderby'    => 'order_clause',
+    'order'      => 'ASC',
+    'meta_query' => array(
+        'relation'     => 'OR',
+        'order_clause' => array(
+            'key'  => 'chapter-order',
+            'type' => 'NUMERIC',
+        ),
+        array(
+            'key'     => 'chapter-order',
+            'compare' => 'NOT EXISTS',
+        ),
+    ),
+));
+
+if (is_wp_error($all_chapters)) {
+    $all_chapters = array();
 }
 
-//start paging
-$chapter_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-
-$chapters_per_page = 60;
+$total_active_chapters = count($all_chapters);
 $total_number_of_pages = ceil($total_active_chapters / $chapters_per_page);
 $paged_offset = ($chapter_paged - 1) * $chapters_per_page;
-$chapters = array_slice($chapters, $paged_offset, $chapters_per_page);
+$chapters = array_slice($all_chapters, $paged_offset, $chapters_per_page);
 
 //display chapters with link to first comic
 if ($chapters) {

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.201
+Stable tag: 1.214
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -18,6 +18,8 @@ Transform your WordPress theme into a platform for publishing your webcomics.
 **Toocheke Companion Website:** [Toocheke Companion](https://leetoo.net/toocheke-companion/ "Toocheke Companion - Plugin for publishing your webcomic")
 
 Looking to publish your comics or manga on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic and manga posts. While it works best with the **Toocheke WordPress theme**, it is compatible with most modern WordPress themes.
+
+Comics published with Toocheke Companion can also be discovered through **[ComicScout](https://www.thecomicscout.com/)** — a curated discovery platform built specifically for independent comic websites designed to help readers discover new comics and drive traffic back to creators' sites.
 
 ### Key Features
 
@@ -35,6 +37,8 @@ Looking to publish your comics or manga on your WordPress website? **Toocheke Co
 - Top ten comics based on post views
 - Infinite scroll for archive display
 - Bilingual/multilingual comic and manga support
+- Optimize your comic images by reducing file sizes, saving server space, and improving page load times.
+- ⭐ **ComicScout integration** — get your comic listed on [ComicScout](https://www.thecomicscout.com/), a curated discovery platform built specifically for independent comic websites to help readers discover new comics
 
 == Installation == 
 
@@ -125,13 +129,83 @@ You can also display Manga features with the following shortcodes
 
 = The comic permalinks are not working. How do I fix them? =
 
-Go to **Settings > Permalinks** and click **Save**. This will refresh your permalink settings.
+Go to **Settings → Permalinks** and click **Save**. This will refresh your permalink settings.
+
+= What images should I upload for ComicScout listings? =
+
+To optimize how your comic appears on ComicScout, upload the following images when publishing a comic post:
+
+* Comic Thumbnail – Recommended size: 1200 × 630 px. This image is used for social sharing and general previews.
+* ComicScout Thumbnail – Recommended size: 1000 × 1500 px. This vertical image is used for ComicScout listings.
+
+= My Manga Chapter updates are not appearing on ComicScout. What should I do? =
+
+This usually means ComicScout cannot access your Manga Chapter updates.
+
+After installing or updating the Toocheke Companion plugin, you may need to refresh your permalink settings.
+
+To fix this:
+
+1. Go to **Settings → Permalinks** in your WordPress dashboard.
+2. Click the **Save Changes** button.
+
+This will flush your permalink rules and allow ComicScout to correctly detect your manga chapter updates.
 
 = Where can I get support? =
 
 Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
+
 == Changelog ==
+
+= 1.214 =
+* NEW: Added a per-series Comic Ordering override metabox on the Series post type. 
+  When set, this overrides the global "How would you like to order your comics?" 
+  option for that specific series. Leave set to "Use Global Setting" to inherit 
+  the default ordering.
+* NEW: Added a manga series-specific feed (`/manga_series/{series-slug}/feed/`) that shows chapters from just that manga series, including images, thumbnails, and creator notes.
+  
+  = 1.213 =
+* FIX: Chapters in the All Chapters shortcode are now correctly ordered by their chapter order number.
+
+= 1.212 =
+* NEW: Comic links in feeds now include a series reference, so readers open comics in the correct series.
+* NEW: Added a series-specific feed (`/series/{series-slug}/feed/`) that shows updates from just that series, including images, thumbnails, and creator notes.
+
+= 1.211 =
+* FIX: Resolved an issue where RTL manga reader could not be swiped past the second page on mobile devices.
+
+= 1.210 =
+* IMPROVEMENT: Enhanced image optimization for better performance.
+* FIX: Resolved an issue with image protection not working as expected.
+
+= 1.209 =
+* NEW: Added an **Image Optimization on Upload** option that converts uploaded images to AVIF when supported, or WebP as a fallback, reducing file sizes, saving server space, and improving page load times.
+
+= 1.208 =
+* NEW: Added a **Default ComicScout Social Share Image** setting for defining a fallback image used when ComicScout promotes comic updates and no post-specific image is provided.
+
+= 1.207 =
+* NEW: Added a **ComicScout Social Share Image** field for comic posts, allowing creators to define the image used when ComicScout promotes comic updates on social media.
+* UPDATE: Enhanced the comic RSS feed with ComicScout discovery thumbnails, social share images, and additional image metadata.
+
+= 1.206 =
+* NEW: Added a ComicScout Thumbnail Image field for comic posts, allowing creators to upload a vertical thumbnail optimized for ComicScout listings (recommended 1000×1500).
+* UPDATE: Improved the comic RSS feed to include both the featured image and ComicScout Thumbnail Image
+
+= 1.205 =
+* UPDATE: Thumbnails now have a fixed size, regardless of the original image dimensions. This ensures consistency in layout across your site.
+* NEW: Added an option to include featured images as enclosures in RSS feeds
+
+= 1.204 =
+* UPDATE: Added image protection option for comics scheduled in the future.
+
+= 1.203 =
+* UPDATE: Updated series archive layouts so comic navigation is now restricted to the current series.
+* NEW: Added two new archive layout options for collections.
+
+= 1.202 =
+* UPDATE: Enabled navigation within a collection when using the [toocheke-collection-archive] shortcode
 
 = 1.201 =
 * NEW: Added shortcodes to display first and latest Manga Series:

@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.213
+ * Version:     1.214
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.213');
+    define('TOOCHEKE_COMPANION_VERSION', '1.214');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -201,6 +201,8 @@ class Toocheke_Companion_Comic_Features
         add_action('save_post_series', [$this, 'toocheke_series_bg_color_save']);
         add_action('add_meta_boxes', [$this, 'toocheke_series_sidebar_content_meta_box'], 15);
         add_action('save_post_series', [$this, 'toocheke_series_sidebar_content_save_postdata']);
+        add_action('add_meta_boxes', [$this, 'toocheke_series_comic_order_add_metabox'], 16);
+        add_action('save_post_series', [$this, 'toocheke_series_comic_order_save']);
 
         add_filter('pre_get_posts', [$this, 'toocheke_companion_comics_sort']);
         /* patreon functions */
@@ -276,6 +278,11 @@ class Toocheke_Companion_Comic_Features
         add_action('init', [$this, 'toocheke_series_feed_rewrite_rule']);
         add_filter('query_vars', [$this, 'toocheke_series_feed_query_vars']);
         add_action('template_redirect', [$this, 'toocheke_series_feed_redirect']);
+
+        //MANGA SERIES RSS
+        add_action('init', [$this, 'toocheke_manga_series_feed_rewrite_rule']);
+        add_filter('query_vars', [$this, 'toocheke_manga_series_feed_query_vars']);
+        add_action('template_redirect', [$this, 'toocheke_manga_series_feed_redirect']);
 
         //Manga functions
         add_filter('manage_edit-manga_series_columns', [$this, 'toocheke_companion_add_manga_series_columns']);
@@ -5887,6 +5894,69 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                     update_post_meta($post_id, 'series_sidebar_content', $data);
                 }
             }
+            /**
+             * Series Comic Order Override Metabox
+             */
+            public function toocheke_series_comic_order_add_metabox()
+            {
+                add_meta_box(
+                    'series-comic-order-metabox',
+                    __('Comic Ordering', 'toocheke-companion'),
+                    [$this, 'toocheke_series_comic_order_display_metabox'],
+                    'series',
+                    'side',
+                    'core'
+                );
+            }
+
+            public function toocheke_series_comic_order_display_metabox($post)
+            {
+                wp_nonce_field('toocheke_series_comic_order_meta_box', 'toocheke_series_comic_order_nonce');
+                $current = get_post_meta($post->ID, 'series_comic_order_override', true);
+                ?>
+                <p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
+                    Override the global Comics Ordering setting for this series only.<br>
+                    Leave as <strong>Use Global Setting</strong> to inherit the default.
+                </p>
+                <p>
+                    <label for="series_comic_order_override">
+                        <strong><?php _e('Comic Order for this Series', 'toocheke-companion'); ?></strong>
+                    </label>
+                </p>
+                <select name="series_comic_order_override" id="series_comic_order_override" style="width:100%">
+                    <option value="" <?php selected($current, ''); ?>><?php _e('Use Global Setting', 'toocheke-companion'); ?></option>
+                    <option value="ASC"  <?php selected($current, 'ASC');  ?>><?php _e('Ascending (oldest first)', 'toocheke-companion'); ?></option>
+                    <option value="DESC" <?php selected($current, 'DESC'); ?>><?php _e('Descending (newest first)', 'toocheke-companion'); ?></option>
+                </select>
+                <?php
+            }
+
+            public function toocheke_series_comic_order_save($post_id)
+            {
+                if (!isset($_POST['toocheke_series_comic_order_nonce'])) {
+                    return;
+                }
+                if (!wp_verify_nonce($_POST['toocheke_series_comic_order_nonce'], 'toocheke_series_comic_order_meta_box')) {
+                    return;
+                }
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                    return;
+                }
+                if (!current_user_can('edit_post', $post_id)) {
+                    return;
+                }
+
+                $value = isset($_POST['series_comic_order_override'])
+                    ? sanitize_text_field($_POST['series_comic_order_override'])
+                    : '';
+
+                // Only allow valid values
+                if (!in_array($value, ['ASC', 'DESC', ''], true)) {
+                    $value = '';
+                }
+
+                update_post_meta($post_id, 'series_comic_order_override', $value);
+            }
             /*Replace description text field with WYSIWYG*/
             public function toocheke_description_wysiwyg($term, $taxonomy)
             {
@@ -9394,6 +9464,202 @@ public function toocheke_enqueue_manga_filter_script()
             </rss>
                 <?php
                 exit;
+            }
+            
+            /**
+             * Register rewrite rule for manga series feed
+             */
+            public function toocheke_manga_series_feed_rewrite_rule() {
+                add_rewrite_rule(
+                    '^manga_series/([^/]+)/feed/?$',
+                    'index.php?post_type=manga_series&name=$matches[1]&manga_series_feed=1',
+                    'top'
+                );
+            }
+
+            /**
+             * Register manga_series_feed query var
+             */
+            public function toocheke_manga_series_feed_query_vars($vars) {
+                $vars[] = 'manga_series_feed';
+                return $vars;
+            }
+
+            /**
+             * Intercept the manga series feed and output RSS2
+             */
+            public function toocheke_manga_series_feed_redirect() {
+                if (!get_query_var('manga_series_feed')) {
+                    return;
+                }
+
+                $series_slug = get_query_var('name');
+                if (!$series_slug) {
+                    return;
+                }
+
+                $manga_series = get_page_by_path($series_slug, OBJECT, 'manga_series');
+                if (!$manga_series) {
+                    global $wp_query;
+                    $wp_query->set_404();
+                    status_header(404);
+                    return;
+                }
+
+                $series_id    = $manga_series->ID;
+                $series_title = get_the_title($series_id);
+                $series_url   = get_permalink($series_id);
+                $series_desc  = has_excerpt($series_id)
+                    ? get_the_excerpt($series_id)
+                    : get_bloginfo('description');
+
+                // Query manga chapters belonging to this series via series_id meta
+                $chapters = new WP_Query([
+                    'post_type'      => 'manga_chapter',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => get_option('posts_per_rss', 10),
+                    'orderby'        => 'post_date',
+                    'order'          => 'DESC',
+                    'meta_query'     => [
+                        [
+                            'key'     => 'series_id',
+                            'value'   => $series_id,
+                            'compare' => '=',
+                            'type'    => 'NUMERIC',
+                        ],
+                    ],
+                ]);
+
+                header('Content-Type: application/rss+xml; charset=' . get_bloginfo('charset'), true);
+                header('X-Robots-Tag: noindex, follow', true);
+                echo '<?xml version="1.0" encoding="' . esc_attr(get_bloginfo('charset')) . '"?>';
+                ?>
+            <rss version="2.0"
+                xmlns:content="http://purl.org/rss/1.0/modules/content/"
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:atom="http://www.w3.org/2005/Atom"
+                xmlns:toocheke="https://toocheke.com/rss/">
+            <channel>
+                <title><?php echo esc_html($series_title); ?> - <?php echo esc_html(get_bloginfo('name')); ?></title>
+                <atom:link href="<?php echo esc_url(home_url('/manga_series/' . $series_slug . '/feed/')); ?>" rel="self" type="application/rss+xml" />
+                <link><?php echo esc_url($series_url); ?></link>
+                <description><?php echo esc_html($series_desc); ?></description>
+                <lastBuildDate><?php echo esc_html(mysql2date('D, d M Y H:i:s +0000', get_lastpostdate('GMT', 'manga_chapter'), false)); ?></lastBuildDate>
+                <language><?php echo esc_html(get_bloginfo('language')); ?></language>
+                <?php
+                if ($chapters->have_posts()):
+                    while ($chapters->have_posts()):
+                        $chapters->the_post();
+                        $post_id      = get_the_ID();
+                        $chapter_url  = get_permalink($post_id);
+                        $pub_date     = mysql2date('D, d M Y H:i:s +0000', get_post_time('Y-m-d H:i:s', true), false);
+
+                        // manga_chapter has no editor support; use notes meta as content
+                        $notes   = get_post_meta($post_id, 'notes', true);
+                        $content = !empty($notes) ? '<p>' . nl2br(esc_html($notes)) . '</p>' : '';
+                        $excerpt = !empty($notes) ? wp_trim_words($notes, 55) : '';
+                        ?>
+                <item>
+                    <title><?php echo esc_html(get_the_title()); ?></title>
+                    <link><?php echo esc_url($chapter_url); ?></link>
+                    <guid isPermaLink="false"><?php echo esc_url(get_the_guid($post_id)); ?></guid>
+                    <dc:creator><?php echo esc_html(get_the_author()); ?></dc:creator>
+                    <pubDate><?php echo esc_html($pub_date); ?></pubDate>
+                    <description><![CDATA[<?php echo $excerpt; ?>]]></description>
+                    <content:encoded><![CDATA[<?php echo $content; ?>]]></content:encoded>
+                    <?php $this->toocheke_manga_series_feed_output_images($post_id); ?>
+                </item>
+                    <?php
+                    endwhile;
+                    wp_reset_postdata();
+                endif;
+                ?>
+            </channel>
+            </rss>
+                <?php
+                exit;
+            }
+
+            /**
+             * Output enclosure and toocheke image elements for a manga chapter in the manga series feed
+             */
+            private function toocheke_manga_series_feed_output_images($post_id) {
+                $thumbnail_id  = get_post_thumbnail_id($post_id);
+                $raw_social_id = get_post_meta($post_id, 'comicscout_social_share_image_id', true);
+
+                // Determine social share image — same fallback chain as comic feed
+                if (!empty($raw_social_id)) {
+                    $social_share_image_id = $raw_social_id;
+                    $social_source         = 'social_share';
+                    $social_is_fallback    = false;
+                } else {
+                    $global_social_id = get_option('toocheke-comicscout-global-social-share-image');
+                    $global_social_id = $global_social_id ? (int) $global_social_id : 0;
+
+                    if (!empty($global_social_id)) {
+                        $social_share_image_id = $global_social_id;
+                        $social_source         = 'default_social_share';
+                        $social_is_fallback    = false;
+                    } else {
+                        $social_share_image_id = $thumbnail_id;
+                        $social_source         = 'featured';
+                        $social_is_fallback    = true;
+                    }
+                }
+
+                if ($social_share_image_id) {
+                    $image_url  = wp_get_attachment_image_url($social_share_image_id, 'full');
+                    $image_meta = wp_get_attachment_metadata($social_share_image_id);
+                    $mime_type  = get_post_mime_type($social_share_image_id);
+                    $file_path  = get_attached_file($social_share_image_id);
+                    $length     = ($file_path && file_exists($file_path)) ? filesize($file_path) : 0;
+
+                    if ($image_url) {
+                        $width  = !empty($image_meta['width'])  ? (int) $image_meta['width']  : 0;
+                        $height = !empty($image_meta['height']) ? (int) $image_meta['height'] : 0;
+                        $aspect = ($width > 0 && $height > 0) ? round($width / $height, 4) : '';
+
+                        echo '<enclosure url="' . esc_url($image_url) . '" length="' . esc_attr($length) . '" type="' . esc_attr($mime_type) . '" />' . "\n";
+                        echo '<toocheke:featured_image'
+                            . ' url="'          . esc_url($image_url)                              . '"'
+                            . ' type="'         . esc_attr($mime_type)                             . '"'
+                            . ' width="'        . esc_attr($width)                                 . '"'
+                            . ' height="'       . esc_attr($height)                                . '"'
+                            . ' aspect_ratio="' . esc_attr($aspect)                                . '"'
+                            . ' fallback="'     . esc_attr($social_is_fallback ? 'true' : 'false') . '"'
+                            . ' source="'       . esc_attr($social_source)                         . '"'
+                            . ' />' . "\n";
+                    }
+                }
+
+                // ComicScout thumbnail
+                $raw_comicscout_id      = get_post_meta($post_id, 'comicscout_image_id', true);
+                $comicscout_is_fallback = empty($raw_comicscout_id);
+                $comicscout_image_id    = $raw_comicscout_id ? $raw_comicscout_id : $thumbnail_id;
+                $comicscout_source      = $comicscout_is_fallback ? 'featured' : 'comicscout';
+
+                if ($comicscout_image_id) {
+                    $comicscout_image_url = wp_get_attachment_image_url($comicscout_image_id, 'full');
+                    $comicscout_meta      = wp_get_attachment_metadata($comicscout_image_id);
+                    $comicscout_mime_type = get_post_mime_type($comicscout_image_id);
+
+                    if ($comicscout_image_url) {
+                        $comicscout_width  = !empty($comicscout_meta['width'])  ? (int) $comicscout_meta['width']  : 0;
+                        $comicscout_height = !empty($comicscout_meta['height']) ? (int) $comicscout_meta['height'] : 0;
+                        $comicscout_aspect = ($comicscout_width > 0 && $comicscout_height > 0)
+                            ? round($comicscout_width / $comicscout_height, 4) : '';
+
+                        echo '<toocheke:comicscout_thumbnail'
+                            . ' url="'          . esc_url($comicscout_image_url)                       . '"'
+                            . ' type="'         . esc_attr($comicscout_mime_type)                      . '"'
+                            . ' width="'        . esc_attr($comicscout_width)                          . '"'
+                            . ' height="'       . esc_attr($comicscout_height)                         . '"'
+                            . ' aspect_ratio="' . esc_attr($comicscout_aspect)                         . '"'
+                            . ' fallback="'     . esc_attr($comicscout_is_fallback ? 'true' : 'false') . '"'
+                            . ' source="'       . esc_attr($comicscout_source)                         . '"'
+                            . ' />' . "\n";
+                    }
+                }
             }
 
             /**

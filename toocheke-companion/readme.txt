@@ -158,7 +158,14 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
 
-= 1.213 =
+= 1.214 =
+* NEW: Added a per-series Comic Ordering override metabox on the Series post type. 
+  When set, this overrides the global "How would you like to order your comics?" 
+  option for that specific series. Leave set to "Use Global Setting" to inherit 
+  the default ordering.
+* NEW: Added a manga series-specific feed (`/manga_series/{series-slug}/feed/`) that shows chapters from just that manga series, including images, thumbnails, and creator notes.
+  
+  = 1.213 =
 * FIX: Chapters in the All Chapters shortcode are now correctly ordered by their chapter order number.
 
 = 1.212 =

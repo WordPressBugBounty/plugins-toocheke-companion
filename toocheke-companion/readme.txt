@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 6.9
-Stable tag: 1.213
+Stable tag: 1.215
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.215 =
+* FIX: Genre and publisher tag links now automatically apply filters when clicked, eliminating the need to manually click the Filter button after selecting from a tag.
+* IMPROVED: Filter state is now preserved in the URL, making filtered manga series views shareable and bookmarkable.
 
 = 1.214 =
 * NEW: Added a per-series Comic Ordering override metabox on the Series post type. 

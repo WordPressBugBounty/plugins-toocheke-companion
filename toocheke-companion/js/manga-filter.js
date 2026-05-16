@@ -18,6 +18,37 @@
     let activeFilters = { publisher: '', genre: '' };
 
     // -------------------------------------------------------------------------
+    // Get URL parameters and set initial filters
+    // -------------------------------------------------------------------------
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            publisher: params.get('publisher') || '',
+            genre: params.get('genre') || ''
+        };
+    }
+
+    // -------------------------------------------------------------------------
+    // Update URL without page reload
+    // -------------------------------------------------------------------------
+    function updateUrl(filters) {
+        const params = new URLSearchParams();
+        
+        if (filters.publisher) {
+            params.set('publisher', filters.publisher);
+        }
+        if (filters.genre) {
+            params.set('genre', filters.genre);
+        }
+
+        const newUrl = params.toString() 
+            ? `${window.location.pathname}?${params.toString()}`
+            : window.location.pathname;
+
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    // -------------------------------------------------------------------------
     // Render a single series card matching the theme's existing markup
     // -------------------------------------------------------------------------
     function renderCard(series) {
@@ -149,6 +180,9 @@
             genre:     form.querySelector('#genre').value,
         };
 
+        // Update URL to reflect current filters
+        updateUrl(activeFilters);
+
         // Reset pagination state for the new filter
         currentPage = 1;
         totalPages  = 1;
@@ -165,8 +199,34 @@
     });
 
     // -------------------------------------------------------------------------
-    // Initial load on page ready
+    // Initial load — check URL params and apply filters if present
     // -------------------------------------------------------------------------
-    fetchSeries(1, activeFilters, true);
+    function initialize() {
+        const urlParams = getUrlParams();
+        
+        // Set form values from URL params
+        if (urlParams.publisher) {
+            const publisherSelect = form.querySelector('#publisher');
+            if (publisherSelect) {
+                publisherSelect.value = urlParams.publisher;
+            }
+        }
+        
+        if (urlParams.genre) {
+            const genreSelect = form.querySelector('#genre');
+            if (genreSelect) {
+                genreSelect.value = urlParams.genre;
+            }
+        }
+
+        // Set active filters from URL
+        activeFilters = urlParams;
+
+        // Fetch with URL params if any exist
+        fetchSeries(1, activeFilters, true);
+    }
+
+    // Start the app
+    initialize();
 
 })();

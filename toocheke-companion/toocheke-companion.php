@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.215
+ * Version:     1.216
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.215');
+    define('TOOCHEKE_COMPANION_VERSION', '1.216');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -205,6 +205,10 @@ class Toocheke_Companion_Comic_Features
         add_action('save_post_series', [$this, 'toocheke_series_comic_order_save']);
 
         add_filter('pre_get_posts', [$this, 'toocheke_companion_comics_sort']);
+
+        //filter for series
+        add_action('restrict_manage_posts', [$this, 'toocheke_comic_series_filter_dropdown']);
+        add_filter('pre_get_posts', [$this, 'toocheke_comic_series_filter_query']);
         /* patreon functions */
 
         // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
@@ -9094,9 +9098,9 @@ public function toocheke_enqueue_manga_filter_script()
                     }
                 }
             }
-            /*
-     * Sorting comic columns
-     */
+                    /*
+            * Sorting comic columns
+            */
             //sort by views
             public function toocheke_companion_comics_sort($wp_query)
             {
@@ -9157,6 +9161,67 @@ public function toocheke_enqueue_manga_filter_script()
                     $wp_query->set('meta_type', 'NUMERIC');
                 }
                 return $wp_query;
+            }
+            /**
+             * Add a Series dropdown filter to the Comics list table
+             */
+            public function toocheke_comic_series_filter_dropdown($post_type)
+            {
+                if ($post_type !== 'comic') {
+                    return;
+                }
+
+                $selected = isset($_GET['post_parent']) ? absint($_GET['post_parent']) : 0;
+
+                $series_posts = get_posts([
+                    'post_type'      => 'series',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => -1,
+                    'orderby'        => 'title',
+                    'order'          => 'ASC',
+                ]);
+
+                if (empty($series_posts)) {
+                    return;
+                }
+
+                echo '<select name="post_parent" id="filter-by-series">';
+                echo '<option value="0">' . esc_html__('All Series', 'toocheke-companion') . '</option>';
+
+                foreach ($series_posts as $series) {
+                    printf(
+                        '<option value="%d"%s>%s</option>',
+                        $series->ID,
+                        selected($selected, $series->ID, false),
+                        esc_html($series->post_title)
+                    );
+                }
+
+                echo '</select>';
+            }
+
+            /**
+             * Apply the Series dropdown filter to the query
+             */
+            public function toocheke_comic_series_filter_query($query)
+            {
+                global $pagenow;
+
+                if (
+                    ! is_admin() ||
+                    $pagenow !== 'edit.php' ||
+                    ! $query->is_main_query() ||
+                    ! isset($_GET['post_type']) ||
+                    $_GET['post_type'] !== 'comic'
+                ) {
+                    return;
+                }
+
+                $series_id = isset($_GET['post_parent']) ? absint($_GET['post_parent']) : 0;
+
+                if ($series_id > 0) {
+                    $query->set('post_parent', $series_id);
+                }
             }
             public function toocheke_extend_search($search, $query)
             {

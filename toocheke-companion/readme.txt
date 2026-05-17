@@ -3,8 +3,8 @@ Author: LeeToo
 Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
-Tested up to: 6.9
-Stable tag: 1.215
+Tested up to: 7.0
+Stable tag: 1.216
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.216 =
+* UPDATE: Add sort by series filter in all comics page in the WordPress dashboard
 
 = 1.215 =
 * FIX: Genre and publisher tag links now automatically apply filters when clicked, eliminating the need to manually click the Filter button after selecting from a tag.

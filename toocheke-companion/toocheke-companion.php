@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.216
+ * Version:     1.218
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.216');
+    define('TOOCHEKE_COMPANION_VERSION', '1.218');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -60,8 +60,10 @@ class Toocheke_Companion_Comic_Features
         register_activation_hook(__FILE__, [$this, 'toocheke_rewrite_flush']);
         register_activation_hook(__FILE__, [$this, 'toocheke_set_default_options']);
         add_action('admin_menu', [$this, 'toocheke_add_plugin_main_menu'], 0);
-        add_action('admin_head', [$this, 'toocheke_manga_menu_highlighting'], 0);
+        add_action('admin_head', [$this, 'toocheke_admin_menu_highlighting'], 0);
         add_action('admin_head-post-new.php', [$this, 'toocheke_add_all_posts_button'], 0);
+        // Push WordPress Posts menu down so it doesn't interrupt Toocheke menus
+        add_action('admin_menu', [$this, 'toocheke_reorder_admin_menu'], 999);
         add_action('init', [$this, 'toocheke_companion_create_taxonomies'], 0);
         add_action('collections_add_form_fields', [$this, 'toocheke_companion_add_collection_image'], 10, 2);
         add_action('created_collections', [$this, 'toocheke_companion_save_collection_image'], 10, 2);
@@ -206,9 +208,9 @@ class Toocheke_Companion_Comic_Features
 
         add_filter('pre_get_posts', [$this, 'toocheke_companion_comics_sort']);
 
-        //filter for series
-        add_action('restrict_manage_posts', [$this, 'toocheke_comic_series_filter_dropdown']);
-        add_filter('pre_get_posts', [$this, 'toocheke_comic_series_filter_query']);
+        //filter for comics
+        add_action('restrict_manage_posts', [$this, 'toocheke_comic_filter_dropdown']);
+        add_filter('pre_get_posts', [$this, 'toocheke_comic_filter_query']);
         /* patreon functions */
 
         // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
@@ -325,7 +327,13 @@ class Toocheke_Companion_Comic_Features
 
         //Premium metaboxes
         add_action('add_meta_boxes', [$this, 'toocheke_add_buy_comic_metaboxes']);
-         add_action('save_post_comic', [$this, 'toocheke_save_comic_pricing_metabox']);
+        add_action('save_post_comic', [$this, 'toocheke_save_comic_pricing_metabox']);
+
+         //Manga filters
+        add_action('restrict_manage_posts', [$this, 'toocheke_manga_filter_dropdowns']);
+        add_filter('pre_get_posts', [$this, 'toocheke_manga_filter_query']);
+        // Manga admin AJAX
+        add_action('wp_ajax_toocheke_get_volumes_by_series', [$this, 'toocheke_get_volumes_by_series']);
     }
     /* Set default options */
     public function toocheke_set_default_options(){
@@ -7050,7 +7058,16 @@ Used for series listings in Toocheke.<br>
                 //enqueue wordpress js media library.
                 wp_enqueue_media();
                 wp_enqueue_script('toocheke-admin-script', plugins_url('toocheke-companion' . '/js/toocheke.js'), ['jquery'], TOOCHEKE_COMPANION_VERSION, true);
-                wp_enqueue_script('toocheke-admin-script');
+
+                // Localize for manga admin filters
+                $screen = get_current_screen();
+                if ($screen && $screen->base === 'edit' && $screen->post_type === 'manga_chapter') {
+                    wp_localize_script('toocheke-admin-script', 'toochekeMangaAdmin', [
+                        'ajaxUrl'    => admin_url('admin-ajax.php'),
+                        'nonce'      => wp_create_nonce('toocheke_manga_admin_nonce'),
+                        'allVolumes' => __('All Volumes', 'toocheke-companion'),
+                    ]);
+                }
 
                 //enqueue wordpress js media library.
                 wp_enqueue_media();
@@ -7299,32 +7316,68 @@ Used for series listings in Toocheke.<br>
             public function toocheke_add_plugin_main_menu()
             {
                 global $submenu;
-                $theme = wp_get_theme(); // gets the current theme
+                $theme = wp_get_theme();
+
+                $icon_comics = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="#a7aaad" d="M2 3a1 1 0 011-1h14a1 1 0 011 1v10a1 1 0 01-1 1H6l-4 3V3z"/><line x1="5" y1="7" x2="15" y2="7" stroke="#1d2327" stroke-width="1.2"/><line x1="5" y1="10" x2="11" y2="10" stroke="#1d2327" stroke-width="1.2"/></svg>');
+
+                $icon_series = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><rect fill="#a7aaad" x="2" y="3" width="10" height="14" rx="1"/><rect fill="#a7aaad" x="13" y="3" width="3" height="14" rx="1" opacity=".55"/><rect fill="#a7aaad" x="17" y="4" width="1.5" height="12" rx=".5" opacity=".3"/></svg>');
+
+                $icon_manga_series = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><rect fill="#a7aaad" x="3" y="2" width="11" height="16" rx="1"/><rect fill="#a7aaad" x="14" y="2" width="3" height="16" rx="1" opacity=".5"/><line x1="6" y1="6" x2="11" y2="6" stroke="#1d2327" stroke-width="1"/><line x1="6" y1="9" x2="11" y2="9" stroke="#1d2327" stroke-width="1"/><line x1="6" y1="12" x2="9" y2="12" stroke="#1d2327" stroke-width="1"/></svg>');
+
+                $icon_manga_volume = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="#a7aaad" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h9l5-5V4a2 2 0 00-2-2H4z"/><path fill="#a7aaad" d="M13 14v4.5L18 14h-5z" opacity=".6"/><line x1="5" y1="7" x2="13" y2="7" stroke="#1d2327" stroke-width="1"/><line x1="5" y1="10" x2="13" y2="10" stroke="#1d2327" stroke-width="1"/><line x1="5" y1="13" x2="9" y2="13" stroke="#1d2327" stroke-width="1"/></svg>');
+
+                $icon_manga_chapter = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="#a7aaad" d="M2 3a1 1 0 011-1h6v16H3a1 1 0 01-1-1V3z"/><path fill="#a7aaad" d="M11 2h6a1 1 0 011 1v14a1 1 0 01-1 1h-6V2z" opacity=".7"/><line x1="4" y1="6" x2="7" y2="6" stroke="#1d2327" stroke-width=".9"/><line x1="4" y1="9" x2="7" y2="9" stroke="#1d2327" stroke-width=".9"/><line x1="4" y1="12" x2="7" y2="12" stroke="#1d2327" stroke-width=".9"/><line x1="12" y1="6" x2="15" y2="6" stroke="#1d2327" stroke-width=".9"/><line x1="12" y1="9" x2="15" y2="9" stroke="#1d2327" stroke-width=".9"/><line x1="12" y1="12" x2="15" y2="12" stroke="#1d2327" stroke-width=".9"/></svg>');
+
+                // ── 1. TOOCHEKE (position 2) ────────────────────────────────────
                 add_menu_page('Toocheke', 'Toocheke', 'edit_posts', 'toocheke-menu', [$this, 'toocheke_dashboard_hub_page'], 'dashicons-toocheke-companion', 2);
-                add_submenu_page('toocheke-menu', 'Dashboard', 'Dashboard', 'edit_posts', 'toocheke-menu', [$this, 'toocheke_dashboard_hub_page'], 1);
-                add_submenu_page('toocheke-menu', 'All Series', 'All Series', 'edit_posts', 'edit.php?post_type=series', null, 2);
-                add_submenu_page('toocheke-menu', 'Add New Series', 'Add New Series', 'edit_posts', 'post-new.php?post_type=series', null, 3);
-                add_submenu_page('toocheke-menu', 'Series Hub', 'Series Hub', 'edit_posts', 'toocheke-series-hub', [$this, 'toocheke_series_hub_page'], 4);
-                add_submenu_page('toocheke-menu', 'All Comics', 'All Comics', 'edit_posts', 'edit.php?post_type=comic', null, 5);
-                add_submenu_page('toocheke-menu', 'Add New Comic', 'Add New Comic', 'edit_posts', 'post-new.php?post_type=comic', null, 6);
-                add_submenu_page('toocheke-menu', 'Comics Hub', 'Comics Hub', 'edit_posts', 'toocheke-comics-hub', [$this, 'toocheke_comics_hub_page'], 7);
-                add_submenu_page('toocheke-menu', 'All Manga Series', 'All Manga Series', 'edit_posts', 'edit.php?post_type=manga_series', null, 8);
-                add_submenu_page('toocheke-menu', 'Add New Manga Series', 'Add New Manga Series', 'edit_posts', 'post-new.php?post_type=manga_series', null, 9);
-                add_submenu_page('toocheke-menu', 'All Manga Volumes', 'All Manga Volumes', 'edit_posts', 'edit.php?post_type=manga_volume', null, 10);
-                add_submenu_page('toocheke-menu', 'Add New Manga Volume', 'Add New Manga Volume', 'edit_posts', 'post-new.php?post_type=manga_volume', null, 11);
-                add_submenu_page('toocheke-menu', 'All Manga Chapters', 'All Manga Chapters', 'edit_posts', 'edit.php?post_type=manga_chapter', null, 12);
-                add_submenu_page('toocheke-menu', 'Add New Manga Chapter', 'Add New Manga Chapter', 'edit_posts', 'post-new.php?post_type=manga_chapter', null, 13);
-                add_submenu_page('toocheke-menu', 'Manga Hub', 'Manga Hub', 'edit_posts', 'toocheke-manga-hub', [$this, 'toocheke_manga_hub_page'], 14);
+                add_submenu_page('toocheke-menu', 'Dashboard', 'Dashboard', 'edit_posts', 'toocheke-menu',         [$this, 'toocheke_dashboard_hub_page']);
+                add_submenu_page('toocheke-menu', 'Options',   'Options',   'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page']);
 
                 if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
-                    add_submenu_page('toocheke-menu', 'Premium Hub', 'Premium Hub', 'manage_options', 'toocheke-premium-hub', [$this, 'toocheke_premium_hub_page'], 15);
+                    add_submenu_page('toocheke-menu', 'Premium Hub', 'Premium Hub', 'manage_options', 'toocheke-premium-hub', [$this, 'toocheke_premium_hub_page']);
                 }
-                add_submenu_page('toocheke-menu', 'Options', 'Options', 'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page'], 16);
-                add_submenu_page('toocheke-menu', 'Import From Comic Easel', 'Import From Comic Easel', 'edit_posts', 'toocheke-import-comic-easel', [$this, 'toocheke_include_import_comic_easel_page'], 17);
-                add_submenu_page('toocheke-menu', 'Import From Webcomic', 'Import From Webcomic', 'edit_posts', 'toocheke-import-webcomic', [$this, 'toocheke_include_import_webcomic_page'], 18);
 
-                // ComicScout promoted link — directly inject external URL via $submenu global
+                add_submenu_page('toocheke-menu', 'Import From Comic Easel', 'Import: Comic Easel', 'edit_posts', 'toocheke-import-comic-easel', [$this, 'toocheke_include_import_comic_easel_page']);
+                add_submenu_page('toocheke-menu', 'Import From Webcomic',    'Import: Webcomic',    'edit_posts', 'toocheke-import-webcomic',    [$this, 'toocheke_include_import_webcomic_page']);
+
                 $submenu['toocheke-menu'][9999] = ['Promote on <b>ComicScout</b>', 'edit_posts', 'https://www.thecomicscout.com/', '', 'toocheke-comicscout-link'];
+
+                // ── 2. COMICS (position 3) ──────────────────────────────────────
+                add_menu_page('Comics', 'Comics', 'edit_posts', 'toocheke-comics-hub', [$this, 'toocheke_comics_hub_page'], $icon_comics, 3);
+                add_submenu_page('toocheke-comics-hub', 'Comics Hub',    'Hub',        'edit_posts', 'toocheke-comics-hub',                                    [$this, 'toocheke_comics_hub_page']);
+                add_submenu_page('toocheke-comics-hub', 'All Comics',    'All Comics', 'edit_posts', 'edit.php?post_type=comic',                               null);
+                add_submenu_page('toocheke-comics-hub', 'Add New Comic', 'Add New',    'edit_posts', 'post-new.php?post_type=comic',                           null);
+                add_submenu_page('toocheke-comics-hub', 'Collections',   'Collections','edit_posts', 'edit-tags.php?taxonomy=collections&post_type=comic',     null);
+                add_submenu_page('toocheke-comics-hub', 'Chapters',      'Chapters',   'edit_posts', 'edit-tags.php?taxonomy=chapters&post_type=comic',        null);
+                add_submenu_page('toocheke-comics-hub', 'Tags',          'Tags',       'edit_posts', 'edit-tags.php?taxonomy=comic_tags&post_type=comic',      null);
+                add_submenu_page('toocheke-comics-hub', 'Locations',     'Locations',  'edit_posts', 'edit-tags.php?taxonomy=comic_locations&post_type=comic', null);
+                add_submenu_page('toocheke-comics-hub', 'Characters',    'Characters', 'edit_posts', 'edit-tags.php?taxonomy=comic_characters&post_type=comic',null);
+
+                // ── 3. SERIES (position 4) ──────────────────────────────────────
+                add_menu_page('Series', 'Series', 'edit_posts', 'toocheke-series-hub', [$this, 'toocheke_series_hub_page'], $icon_series, 4);
+                add_submenu_page('toocheke-series-hub', 'Series Hub',     'Hub',        'edit_posts', 'toocheke-series-hub',                                  [$this, 'toocheke_series_hub_page']);
+                add_submenu_page('toocheke-series-hub', 'All Series',     'All Series', 'edit_posts', 'edit.php?post_type=series',                            null);
+                add_submenu_page('toocheke-series-hub', 'Add New Series', 'Add New',    'edit_posts', 'post-new.php?post_type=series',                        null);
+                add_submenu_page('toocheke-series-hub', 'Genres',         'Genres',     'edit_posts', 'edit-tags.php?taxonomy=genres&post_type=series',       null);
+                add_submenu_page('toocheke-series-hub', 'Tags',           'Tags',       'edit_posts', 'edit-tags.php?taxonomy=series_tags&post_type=series',  null);
+
+                // ── 4. MANGA SERIES (position 5) ───────────────────────────────
+                add_menu_page('Manga Series', 'Manga Series', 'edit_posts', 'toocheke-manga-hub', [$this, 'toocheke_manga_hub_page'], $icon_manga_series, 5);
+                add_submenu_page('toocheke-manga-hub', 'Manga Hub',            'Hub',        'edit_posts', 'toocheke-manga-hub',                                              [$this, 'toocheke_manga_hub_page']);
+                add_submenu_page('toocheke-manga-hub', 'All Manga Series',     'All Series', 'edit_posts', 'edit.php?post_type=manga_series',                                 null);
+                add_submenu_page('toocheke-manga-hub', 'Add New Manga Series', 'Add New',    'edit_posts', 'post-new.php?post_type=manga_series',                             null);
+                add_submenu_page('toocheke-manga-hub', 'Manga Genres',         'Genres',     'edit_posts', 'edit-tags.php?taxonomy=manga_genre&post_type=manga_series',       null);
+                add_submenu_page('toocheke-manga-hub', 'Manga Publishers',     'Publishers', 'edit_posts', 'edit-tags.php?taxonomy=manga_publisher&post_type=manga_series',   null);
+
+                // ── 5. MANGA VOLUMES (position 6) ──────────────────────────────
+                add_menu_page('Manga Volumes', 'Manga Volumes', 'edit_posts', 'toocheke-manga-volumes', [$this, 'toocheke_manga_volumes_hub_page'], $icon_manga_volume, 6);
+                add_submenu_page('toocheke-manga-volumes', 'All Manga Volumes',    'All Volumes',    'edit_posts', 'edit.php?post_type=manga_volume',    null);
+                add_submenu_page('toocheke-manga-volumes', 'Add New Manga Volume', 'Add New Volume', 'edit_posts', 'post-new.php?post_type=manga_volume',null);
+
+                // ── 6. MANGA CHAPTERS (position 7) ─────────────────────────────
+                add_menu_page('Manga Chapters', 'Manga Chapters', 'edit_posts', 'toocheke-manga-chapters', [$this, 'toocheke_manga_chapters_hub_page'], $icon_manga_chapter, 7);
+                add_submenu_page('toocheke-manga-chapters', 'All Manga Chapters',    'All Chapters',    'edit_posts', 'edit.php?post_type=manga_chapter',    null);
+                add_submenu_page('toocheke-manga-chapters', 'Add New Manga Chapter', 'Add New Chapter', 'edit_posts', 'post-new.php?post_type=manga_chapter',null);
             }
 
             // Include hub methods here
@@ -7353,26 +7406,108 @@ Used for series listings in Toocheke.<br>
                 include plugin_dir_path(__FILE__) . 'inc/hubs/hub-tools.php';
             }
 
-            public function toocheke_manga_menu_highlighting()
+            public function toocheke_admin_menu_highlighting()
             {
                 global $parent_file, $submenu_file, $pagenow;
 
-                // Manga Series CPT pages
+                // ── COMICS ─────────────────────────────────────────────────────
+                if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'comic') {
+                    $parent_file  = 'toocheke-comics-hub';
+                    $submenu_file = 'edit.php?post_type=comic';
+                }
+                if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'comic') {
+                    $parent_file  = 'toocheke-comics-hub';
+                    $submenu_file = 'post-new.php?post_type=comic';
+                }
+                if ($pagenow === 'post.php' && get_post_type() === 'comic') {
+                    $parent_file  = 'toocheke-comics-hub';
+                    $submenu_file = 'edit.php?post_type=comic';
+                }
+                // Comic taxonomies (list screen)
+                if ($pagenow === 'edit-tags.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'comic') {
+                    $parent_file  = 'toocheke-comics-hub';
+                    $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=comic';
+                }
+                // Comic taxonomies (editing a single term)
+                if ($pagenow === 'term.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'comic') {
+                    $parent_file  = 'toocheke-comics-hub';
+                    $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=comic';
+                }
+
+                // ── SERIES ─────────────────────────────────────────────────────
+                if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'series') {
+                    $parent_file  = 'toocheke-series-hub';
+                    $submenu_file = 'edit.php?post_type=series';
+                }
+                if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'series') {
+                    $parent_file  = 'toocheke-series-hub';
+                    $submenu_file = 'post-new.php?post_type=series';
+                }
+                if ($pagenow === 'post.php' && get_post_type() === 'series') {
+                    $parent_file  = 'toocheke-series-hub';
+                    $submenu_file = 'edit.php?post_type=series';
+                }
+                // Series taxonomies (list screen)
+                if ($pagenow === 'edit-tags.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'series') {
+                    $parent_file  = 'toocheke-series-hub';
+                    $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=series';
+                }
+                // Series taxonomies (editing a single term)
+                if ($pagenow === 'term.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'series') {
+                    $parent_file  = 'toocheke-series-hub';
+                    $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=series';
+                }
+
+                // ── MANGA SERIES ───────────────────────────────────────────────
                 if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    $parent_file  = 'toocheke-menu';
+                    $parent_file  = 'toocheke-manga-hub';
                     $submenu_file = 'edit.php?post_type=manga_series';
                 }
                 if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    $parent_file  = 'toocheke-menu';
+                    $parent_file  = 'toocheke-manga-hub';
                     $submenu_file = 'post-new.php?post_type=manga_series';
                 }
+                if ($pagenow === 'post.php' && get_post_type() === 'manga_series') {
+                    $parent_file  = 'toocheke-manga-hub';
+                    $submenu_file = 'edit.php?post_type=manga_series';
+                }
+                // Manga Series taxonomies (list screen)
+                if ($pagenow === 'edit-tags.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
+                    $parent_file  = 'toocheke-manga-hub';
+                    $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=manga_series';
+                }
+                // Manga Series taxonomies (editing a single term)
+                if ($pagenow === 'term.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
+                    $parent_file  = 'toocheke-manga-hub';
+                    $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=manga_series';
+                }
 
-                // Manga Series taxonomies
-                if ($pagenow === 'edit-tags.php' && isset($_GET['taxonomy'], $_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    if (in_array($_GET['taxonomy'], ['manga_genre', 'manga_publisher'])) {
-                        $parent_file  = 'toocheke-menu';
-                        $submenu_file = 'edit-tags.php?taxonomy=' . $_GET['taxonomy'] . '&post_type=manga_series';
-                    }
+                // ── MANGA VOLUMES ──────────────────────────────────────────────
+                if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_volume') {
+                    $parent_file  = 'toocheke-manga-volumes';
+                    $submenu_file = 'edit.php?post_type=manga_volume';
+                }
+                if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_volume') {
+                    $parent_file  = 'toocheke-manga-volumes';
+                    $submenu_file = 'post-new.php?post_type=manga_volume';
+                }
+                if ($pagenow === 'post.php' && get_post_type() === 'manga_volume') {
+                    $parent_file  = 'toocheke-manga-volumes';
+                    $submenu_file = 'edit.php?post_type=manga_volume';
+                }
+
+                // ── MANGA CHAPTERS ─────────────────────────────────────────────
+                if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_chapter') {
+                    $parent_file  = 'toocheke-manga-chapters';
+                    $submenu_file = 'edit.php?post_type=manga_chapter';
+                }
+                if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_chapter') {
+                    $parent_file  = 'toocheke-manga-chapters';
+                    $submenu_file = 'post-new.php?post_type=manga_chapter';
+                }
+                if ($pagenow === 'post.php' && get_post_type() === 'manga_chapter') {
+                    $parent_file  = 'toocheke-manga-chapters';
+                    $submenu_file = 'edit.php?post_type=manga_chapter';
                 }
             }
             /**
@@ -7407,6 +7542,60 @@ Used for series listings in Toocheke.<br>
                     $(".wrap h1").after("<a href=\'' . esc_url($all_posts_url) . '\' class=\'page-title-action toocheke-all-posts-button\'>' . esc_html($button_label) . '</a>");
                 });
             </script>';
+                    }
+                }
+            }
+            public function toocheke_manga_volumes_hub_page()
+            {
+                ?>
+                <div class="wrap">
+                    <h1><?php esc_html_e('Manga Volumes', 'toocheke-companion'); ?></h1>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('All Manga Volumes', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('View and manage all manga volumes', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_volume')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+                        </div>
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('Add New Volume', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('Create a new manga volume', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_volume')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+
+            public function toocheke_manga_chapters_hub_page()
+            {
+                ?>
+                <div class="wrap">
+                    <h1><?php esc_html_e('Manga Chapters', 'toocheke-companion'); ?></h1>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('All Manga Chapters', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('View and manage all manga chapters', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_chapter')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+                        </div>
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('Add New Chapter', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('Create a new manga chapter', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_chapter')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+            public function toocheke_reorder_admin_menu()
+            {
+                global $menu;
+                // Find and remove the Posts menu entry, then re-add it at position 25
+                foreach ($menu as $position => $item) {
+                    if (isset($item[2]) && $item[2] === 'edit.php') {
+                        $posts_menu = $item;
+                        unset($menu[$position]);
+                        $menu[25] = $posts_menu;
+                        break;
                     }
                 }
             }
@@ -9163,15 +9352,16 @@ public function toocheke_enqueue_manga_filter_script()
                 return $wp_query;
             }
             /**
-             * Add a Series dropdown filter to the Comics list table
+             *  Dropdown filter for comics
              */
-            public function toocheke_comic_series_filter_dropdown($post_type)
+            public function toocheke_comic_filter_dropdown($post_type)
             {
                 if ($post_type !== 'comic') {
                     return;
                 }
 
-                $selected = isset($_GET['post_parent']) ? absint($_GET['post_parent']) : 0;
+                // Existing Series filter
+                $selected_series = isset($_GET['post_parent']) ? absint($_GET['post_parent']) : 0;
 
                 $series_posts = get_posts([
                     'post_type'      => 'series',
@@ -9181,29 +9371,63 @@ public function toocheke_enqueue_manga_filter_script()
                     'order'          => 'ASC',
                 ]);
 
-                if (empty($series_posts)) {
-                    return;
+                if (!empty($series_posts)) {
+                    echo '<select name="post_parent" id="filter-by-series">';
+                    echo '<option value="0">' . esc_html__('All Series', 'toocheke-companion') . '</option>';
+                    foreach ($series_posts as $series) {
+                        printf(
+                            '<option value="%d"%s>%s</option>',
+                            $series->ID,
+                            selected($selected_series, $series->ID, false),
+                            esc_html($series->post_title)
+                        );
+                    }
+                    echo '</select>';
                 }
 
-                echo '<select name="post_parent" id="filter-by-series">';
-                echo '<option value="0">' . esc_html__('All Series', 'toocheke-companion') . '</option>';
+                // Taxonomy filters
+                $taxonomy_filters = [
+                    'collections'     => __('All Collections', 'toocheke-companion'),
+                    'chapters'        => __('All Chapters', 'toocheke-companion'),
+                    'comic_tags'      => __('All Tags', 'toocheke-companion'),
+                    'comic_locations' => __('All Locations', 'toocheke-companion'),
+                    'comic_characters'=> __('All Characters', 'toocheke-companion'),
+                ];
 
-                foreach ($series_posts as $series) {
-                    printf(
-                        '<option value="%d"%s>%s</option>',
-                        $series->ID,
-                        selected($selected, $series->ID, false),
-                        esc_html($series->post_title)
-                    );
+                foreach ($taxonomy_filters as $taxonomy => $all_label) {
+                    $selected_term = isset($_GET[ $taxonomy ]) ? sanitize_text_field($_GET[ $taxonomy ]) : '';
+
+                    $terms = get_terms([
+                        'taxonomy'   => $taxonomy,
+                        'hide_empty' => true,
+                        'orderby'    => 'name',
+                        'order'      => 'ASC',
+                    ]);
+
+                    if (is_wp_error($terms) || empty($terms)) {
+                        continue;
+                    }
+
+                    echo '<select name="' . esc_attr($taxonomy) . '" id="filter-by-' . esc_attr($taxonomy) . '">';
+                    echo '<option value="">' . esc_html($all_label) . '</option>';
+
+                    foreach ($terms as $term) {
+                        printf(
+                            '<option value="%s"%s>%s</option>',
+                            esc_attr($term->slug),
+                            selected($selected_term, $term->slug, false),
+                            esc_html($term->name)
+                        );
+                    }
+
+                    echo '</select>';
                 }
-
-                echo '</select>';
             }
 
             /**
              * Apply the Series dropdown filter to the query
              */
-            public function toocheke_comic_series_filter_query($query)
+            public function toocheke_comic_filter_query($query)
             {
                 global $pagenow;
 
@@ -9217,10 +9441,33 @@ public function toocheke_enqueue_manga_filter_script()
                     return;
                 }
 
+                // Series (post_parent) filter
                 $series_id = isset($_GET['post_parent']) ? absint($_GET['post_parent']) : 0;
-
                 if ($series_id > 0) {
                     $query->set('post_parent', $series_id);
+                } else {
+                    // Explicitly clear post_parent so WordPress doesn't filter
+                    // to "no parent" comics when post_parent=0 is in the URL
+                    $query->set('post_parent', '');
+                }
+
+                // Taxonomy filters
+                $taxonomies = ['collections', 'chapters', 'comic_tags', 'comic_locations', 'comic_characters'];
+                $tax_query  = [];
+
+                foreach ($taxonomies as $taxonomy) {
+                    if (!empty($_GET[$taxonomy])) {
+                        $tax_query[] = [
+                            'taxonomy' => $taxonomy,
+                            'field'    => 'slug',
+                            'terms'    => sanitize_text_field($_GET[$taxonomy]),
+                        ];
+                    }
+                }
+
+                if (!empty($tax_query)) {
+                    $tax_query['relation'] = 'AND';
+                    $query->set('tax_query', $tax_query);
                 }
             }
             public function toocheke_extend_search($search, $query)
@@ -10234,6 +10481,277 @@ public function toocheke_enqueue_manga_filter_script()
                         nocache_headers();
                         return;
                     }
+            }
+            /**
+             * Dropdown filters for Manga post types
+             */
+            public function toocheke_manga_filter_dropdowns($post_type)
+            {
+                // --- Manga Series: filter by Genre and Publisher ---
+                if ($post_type === 'manga_series') {
+
+                    $selected_genre = isset($_GET['manga_genre']) ? sanitize_text_field($_GET['manga_genre']) : '';
+                    $genres = get_terms(['taxonomy' => 'manga_genre', 'hide_empty' => true, 'orderby' => 'name', 'order' => 'ASC']);
+
+                    if (!is_wp_error($genres) && !empty($genres)) {
+                        echo '<select name="manga_genre" id="filter-by-manga-genre">';
+                        echo '<option value="">' . esc_html__('All Genres', 'toocheke-companion') . '</option>';
+                        foreach ($genres as $term) {
+                            printf(
+                                '<option value="%s"%s>%s</option>',
+                                esc_attr($term->slug),
+                                selected($selected_genre, $term->slug, false),
+                                esc_html($term->name)
+                            );
+                        }
+                        echo '</select>';
+                    }
+
+                    $selected_publisher = isset($_GET['manga_publisher']) ? sanitize_text_field($_GET['manga_publisher']) : '';
+                    $publishers = get_terms(['taxonomy' => 'manga_publisher', 'hide_empty' => true, 'orderby' => 'name', 'order' => 'ASC']);
+
+                    if (!is_wp_error($publishers) && !empty($publishers)) {
+                        echo '<select name="manga_publisher" id="filter-by-manga-publisher">';
+                        echo '<option value="">' . esc_html__('All Publishers', 'toocheke-companion') . '</option>';
+                        foreach ($publishers as $term) {
+                            printf(
+                                '<option value="%s"%s>%s</option>',
+                                esc_attr($term->slug),
+                                selected($selected_publisher, $term->slug, false),
+                                esc_html($term->name)
+                            );
+                        }
+                        echo '</select>';
+                    }
+                }
+
+                // --- Manga Volumes: filter by Manga Series ---
+                if ($post_type === 'manga_volume') {
+
+                    $selected_series = isset($_GET['manga_series_id']) ? absint($_GET['manga_series_id']) : 0;
+
+                    $series_posts = get_posts([
+                        'post_type'      => 'manga_series',
+                        'post_status'    => 'publish',
+                        'posts_per_page' => -1,
+                        'orderby'        => 'title',
+                        'order'          => 'ASC',
+                    ]);
+
+                    if (!empty($series_posts)) {
+                        echo '<select name="manga_series_id" id="filter-by-manga-series">';
+                        echo '<option value="0">' . esc_html__('All Series', 'toocheke-companion') . '</option>';
+                        foreach ($series_posts as $series) {
+                            printf(
+                                '<option value="%d"%s>%s</option>',
+                                $series->ID,
+                                selected($selected_series, $series->ID, false),
+                                esc_html($series->post_title)
+                            );
+                        }
+                        echo '</select>';
+                    }
+                }
+
+                // --- Manga Chapters: filter by Manga Series and Manga Volume ---
+                if ($post_type === 'manga_chapter') {
+
+                    $selected_series = isset($_GET['manga_series_id']) ? absint($_GET['manga_series_id']) : 0;
+
+                    $series_posts = get_posts([
+                        'post_type'      => 'manga_series',
+                        'post_status'    => 'publish',
+                        'posts_per_page' => -1,
+                        'orderby'        => 'title',
+                        'order'          => 'ASC',
+                    ]);
+
+                    if (!empty($series_posts)) {
+                        echo '<select name="manga_series_id" id="filter-by-manga-series">';
+                        echo '<option value="0">' . esc_html__('All Series', 'toocheke-companion') . '</option>';
+                        foreach ($series_posts as $series) {
+                            printf(
+                                '<option value="%d"%s>%s</option>',
+                                $series->ID,
+                                selected($selected_series, $series->ID, false),
+                                esc_html($series->post_title)
+                            );
+                        }
+                        echo '</select>';
+                    }
+
+                    $selected_volume = isset($_GET['manga_volume_id']) ? absint($_GET['manga_volume_id']) : 0;
+
+                    // If a series is selected, only show volumes for that series
+                    $volume_query_args = [
+                        'post_type'      => 'manga_volume',
+                        'post_status'    => 'publish',
+                        'posts_per_page' => -1,
+                        'orderby'        => 'title',
+                        'order'          => 'ASC',
+                    ];
+
+                    if ($selected_series > 0) {
+                        $volume_query_args['meta_query'] = [
+                            [
+                                'key'     => 'series_id',
+                                'value'   => $selected_series,
+                                'compare' => '=',
+                                'type'    => 'NUMERIC',
+                            ],
+                        ];
+                    }
+
+                    $volume_posts = get_posts($volume_query_args);
+
+                    if (!empty($volume_posts)) {
+                        echo '<select name="manga_volume_id" id="filter-by-manga-volume">';
+                        echo '<option value="0">' . esc_html__('All Volumes', 'toocheke-companion') . '</option>';
+                        foreach ($volume_posts as $volume) {
+                            printf(
+                                '<option value="%d"%s>%s</option>',
+                                $volume->ID,
+                                selected($selected_volume, $volume->ID, false),
+                                esc_html($volume->post_title)
+                            );
+                        }
+                        echo '</select>';
+                    }
+                }
+            }
+
+            /**
+             * Apply filters for Manga post types
+             */
+            public function toocheke_manga_filter_query($query)
+            {
+                global $pagenow;
+
+                if (
+                    ! is_admin() ||
+                    $pagenow !== 'edit.php' ||
+                    ! $query->is_main_query() ||
+                    ! isset($_GET['post_type'])
+                ) {
+                    return;
+                }
+
+                $post_type = $_GET['post_type'];
+
+                // --- Manga Series: taxonomy filters ---
+                if ($post_type === 'manga_series') {
+                    $tax_query = [];
+
+                    if (!empty($_GET['manga_genre'])) {
+                        $tax_query[] = [
+                            'taxonomy' => 'manga_genre',
+                            'field'    => 'slug',
+                            'terms'    => sanitize_text_field($_GET['manga_genre']),
+                        ];
+                    }
+
+                    if (!empty($_GET['manga_publisher'])) {
+                        $tax_query[] = [
+                            'taxonomy' => 'manga_publisher',
+                            'field'    => 'slug',
+                            'terms'    => sanitize_text_field($_GET['manga_publisher']),
+                        ];
+                    }
+
+                    if (!empty($tax_query)) {
+                        $tax_query['relation'] = 'AND';
+                        $query->set('tax_query', $tax_query);
+                    }
+                }
+
+                // --- Manga Volumes: filter by series_id meta ---
+                if ($post_type === 'manga_volume') {
+                    $series_id = isset($_GET['manga_series_id']) ? absint($_GET['manga_series_id']) : 0;
+
+                    if ($series_id > 0) {
+                        $query->set('meta_query', [
+                            [
+                                'key'     => 'series_id',
+                                'value'   => $series_id,
+                                'compare' => '=',
+                                'type'    => 'NUMERIC',
+                            ],
+                        ]);
+                    }
+                }
+
+                // --- Manga Chapters: filter by series_id and/or volume_id meta ---
+                if ($post_type === 'manga_chapter') {
+                    $series_id = isset($_GET['manga_series_id']) ? absint($_GET['manga_series_id']) : 0;
+                    $volume_id = isset($_GET['manga_volume_id']) ? absint($_GET['manga_volume_id']) : 0;
+
+                    $meta_query = [];
+
+                    if ($series_id > 0) {
+                        $meta_query[] = [
+                            'key'     => 'series_id',
+                            'value'   => $series_id,
+                            'compare' => '=',
+                            'type'    => 'NUMERIC',
+                        ];
+                    }
+
+                    if ($volume_id > 0) {
+                        $meta_query[] = [
+                            'key'     => 'volume_id',
+                            'value'   => $volume_id,
+                            'compare' => '=',
+                            'type'    => 'NUMERIC',
+                        ];
+                    }
+
+                    if (!empty($meta_query)) {
+                        $meta_query['relation'] = 'AND';
+                        $query->set('meta_query', $meta_query);
+                    }
+                }
+            }
+            /**
+             * AJAX: return volumes belonging to a manga series
+             */
+            public function toocheke_get_volumes_by_series()
+            {
+                check_ajax_referer('toocheke_manga_admin_nonce', 'nonce');
+
+                if (! current_user_can('edit_posts')) {
+                    wp_send_json_error('Unauthorized');
+                }
+
+                $series_id = isset($_GET['series_id']) ? absint($_GET['series_id']) : 0;
+
+                if (! $series_id) {
+                    wp_send_json_success([]);
+                }
+
+                $volumes = get_posts([
+                    'post_type'      => 'manga_volume',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => -1,
+                    'orderby'        => 'title',
+                    'order'          => 'ASC',
+                    'meta_query'     => [
+                        [
+                            'key'     => 'series_id',
+                            'value'   => $series_id,
+                            'compare' => '=',
+                            'type'    => 'NUMERIC',
+                        ],
+                    ],
+                ]);
+
+                $data = array_map(function($v) {
+                    return [
+                        'id'    => $v->ID,
+                        'title' => $v->post_title,
+                    ];
+                }, $volumes);
+
+                wp_send_json_success($data);
             }
             public function toocheke_companion_upgrade_check(){
                  $installed_version = get_option('toocheke_companion_version');

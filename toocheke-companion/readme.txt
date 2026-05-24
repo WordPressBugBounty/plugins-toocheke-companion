@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 1.216
+Stable tag: 1.218
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,16 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.218 =
+* FIX: Resolved an issue where clicking on taxonomy pages (Collections, Chapters, Tags, Locations, Characters under Comics and Genres, Tags under Series) was incorrectly expanding the Toocheke menu instead of keeping the correct parent menu open and highlighted.
+
+= 1.217 =
+* IMPROVED: Streamlined the WordPress admin menu — Comics, Series, Manga Series, Manga Volumes, and Manga Chapters now each have their own dedicated top-level menu, making it faster to navigate between content types without extra clicks.
+* NEW: Added admin list filters for Comics — filter by series, collections, chapters, tags, locations, and characters directly from the All Comics screen.
+* NEW: Added admin list filters for Manga Series — filter by genre and publisher from the All Manga Series screen.
+* NEW: Added admin list filters for Manga Volumes — filter by manga series from the All Manga Volumes screen.
+* NEW: Added admin list filters for Manga Chapters — filter by manga series and manga volume from the All Manga Chapters screen.
 
 = 1.216 =
 * UPDATE: Add sort by series filter in all comics page in the WordPress dashboard

@@ -3,71 +3,55 @@ jQuery(document).ready(function ($) {
         var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
         return results[1] || 0;
     }
-    $(".menu-icon-genres#menu-posts-genres")
-        .removeClass("wp-not-current-submenu")
-        .addClass("wp-has-current-submenu wp-menu-open")
 
-    $("#menu-posts-genres a.wp-not-current-submenu")
-        .removeClass("wp-not-current-submenu")
-        .addClass("wp-has-current-submenu wp-menu-open")
+    function openMenu(menuClass, taxonomyHref) {
+        $('.' + menuClass)
+            .removeClass('wp-not-current-submenu')
+            .addClass('wp-has-current-submenu wp-menu-open');
 
-    //console.log($.urlParam('taxonomy'));
-    switch ($.urlParam('taxonomy')) {
-        case 'series_tags':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=series_tags"]')
+        if (taxonomyHref) {
+            $('.' + menuClass)
+                .find('li').has('a[href*="' + taxonomyHref + '"]')
                 .addClass('current');
+        }
+    }
+
+    switch ($.urlParam('taxonomy')) {
+
+        // Series taxonomies → toocheke-series-hub
+        case 'series_tags':
+            openMenu('toplevel_page_toocheke-series-hub', 'edit-tags.php?taxonomy=series_tags');
             break;
         case 'genres':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=genres"]')
-                .addClass('current');
+            openMenu('toplevel_page_toocheke-series-hub', 'edit-tags.php?taxonomy=genres');
             break;
+
+        // Comic taxonomies → toocheke-comics-hub
         case 'collections':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=collections"]')
-                .addClass('current');
+            openMenu('toplevel_page_toocheke-comics-hub', 'edit-tags.php?taxonomy=collections');
             break;
         case 'chapters':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=chapters"]')
-                .addClass('current');
+            openMenu('toplevel_page_toocheke-comics-hub', 'edit-tags.php?taxonomy=chapters');
             break;
         case 'comic_tags':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=comic_tags"]')
-                .addClass('current');
+            openMenu('toplevel_page_toocheke-comics-hub', 'edit-tags.php?taxonomy=comic_tags');
             break;
         case 'comic_locations':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=comic_locations"]')
-                .addClass('current');
+            openMenu('toplevel_page_toocheke-comics-hub', 'edit-tags.php?taxonomy=comic_locations');
             break;
         case 'comic_characters':
-            $('.toplevel_page_toocheke-menu')
-                .removeClass('wp-not-current-submenu')
-                .addClass('wp-has-current-submenu wp-menu-open')
-                .find('li').has('a[href*="edit-tags.php?taxonomy=comic_characters"]')
-                .addClass('current');
+            openMenu('toplevel_page_toocheke-comics-hub', 'edit-tags.php?taxonomy=comic_characters');
+            break;
+
+        // Manga Series taxonomies → toocheke-manga-hub
+        case 'manga_genre':
+            openMenu('toplevel_page_toocheke-manga-hub', 'edit-tags.php?taxonomy=manga_genre');
+            break;
+        case 'manga_publisher':
+            openMenu('toplevel_page_toocheke-manga-hub', 'edit-tags.php?taxonomy=manga_publisher');
             break;
 
         default:
-        // code block
+            break;
     }
-
-
-
-
 });

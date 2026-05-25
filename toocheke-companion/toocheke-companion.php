@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.218
+ * Version:     1.219
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.218');
+    define('TOOCHEKE_COMPANION_VERSION', '1.219');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -61,6 +61,8 @@ class Toocheke_Companion_Comic_Features
         register_activation_hook(__FILE__, [$this, 'toocheke_set_default_options']);
         add_action('admin_menu', [$this, 'toocheke_add_plugin_main_menu'], 0);
         add_action('admin_head', [$this, 'toocheke_admin_menu_highlighting'], 0);
+        add_filter('custom_menu_order', '__return_true');
+        add_filter('menu_order', [$this, 'toocheke_force_menu_order']);
         add_action('admin_head-post-new.php', [$this, 'toocheke_add_all_posts_button'], 0);
         // Push WordPress Posts menu down so it doesn't interrupt Toocheke menus
         add_action('admin_menu', [$this, 'toocheke_reorder_admin_menu'], 999);
@@ -7318,6 +7320,9 @@ Used for series listings in Toocheke.<br>
                 global $submenu;
                 $theme = wp_get_theme();
 
+                // Add separator before Toocheke menus 
+                $menu[] = ['', 'read', 'separator-toocheke', '', 'wp-menu-separator'];
+
                 $icon_comics = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="#a7aaad" d="M2 3a1 1 0 011-1h14a1 1 0 011 1v10a1 1 0 01-1 1H6l-4 3V3z"/><line x1="5" y1="7" x2="15" y2="7" stroke="#1d2327" stroke-width="1.2"/><line x1="5" y1="10" x2="11" y2="10" stroke="#1d2327" stroke-width="1.2"/></svg>');
 
                 $icon_series = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><rect fill="#a7aaad" x="2" y="3" width="10" height="14" rx="1"/><rect fill="#a7aaad" x="13" y="3" width="3" height="14" rx="1" opacity=".55"/><rect fill="#a7aaad" x="17" y="4" width="1.5" height="12" rx=".5" opacity=".3"/></svg>');
@@ -7509,6 +7514,34 @@ Used for series listings in Toocheke.<br>
                     $parent_file  = 'toocheke-manga-chapters';
                     $submenu_file = 'edit.php?post_type=manga_chapter';
                 }
+            }
+            public function toocheke_force_menu_order($menu_order)
+            {
+                $toocheke_menus = [
+                    'separator-toocheke',
+                    'toocheke-menu',
+                    'toocheke-comics-hub',
+                    'toocheke-series-hub',
+                    'toocheke-manga-hub',
+                    'toocheke-manga-volumes',
+                    'toocheke-manga-chapters',
+                ];
+
+                // Remove Toocheke menus from wherever they currently are
+                $menu_order = array_filter($menu_order, function($item) use ($toocheke_menus) {
+                    return !in_array($item, $toocheke_menus);
+                });
+                $menu_order = array_values($menu_order);
+
+                // Insert Toocheke block immediately after Dashboard
+                $dashboard_pos = array_search('index.php', $menu_order);
+                if ($dashboard_pos !== false) {
+                    array_splice($menu_order, $dashboard_pos + 1, 0, $toocheke_menus);
+                } else {
+                    array_splice($menu_order, 1, 0, $toocheke_menus);
+                }
+
+                return $menu_order;
             }
             /**
              * Add "All [Post Type]" button to Add New CPT pages

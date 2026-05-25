@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 1.219
+Stable tag: 1.220
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.220 =
+* FNEW: Added top-level menus for Toocheke Premium
 
 = 1.219 =
 * FIX: Resolved an issue where other plugins could interrupt the Toocheke admin menus, causing them to appear out of order in the WordPress sidebar. Toocheke menus now always appear grouped together directly below the Dashboard, regardless of what other plugins are installed.

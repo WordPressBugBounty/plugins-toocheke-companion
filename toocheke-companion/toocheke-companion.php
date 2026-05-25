@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.219
+ * Version:     1.220
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.219');
+    define('TOOCHEKE_COMPANION_VERSION', '1.220');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -7339,7 +7339,36 @@ Used for series listings in Toocheke.<br>
                 add_submenu_page('toocheke-menu', 'Options',   'Options',   'edit_posts', 'toocheke-options-page', [$this, 'toocheke_display_options_page']);
 
                 if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
-                    add_submenu_page('toocheke-menu', 'Premium Hub', 'Premium Hub', 'manage_options', 'toocheke-premium-hub', [$this, 'toocheke_premium_hub_page']);
+
+                    $icon_slides = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><rect fill="#a7aaad" x="1" y="3" width="18" height="14" rx="1"/><rect fill="#1d2327" x="3" y="5" width="14" height="10" rx=".5" opacity=".4"/><polygon fill="#a7aaad" points="8,7 14,10 8,13"/></svg>');
+
+                    $icon_sponsorships = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="#a7aaad" d="M10 2l2.4 4.8 5.3.8-3.8 3.7.9 5.2L10 14l-4.8 2.5.9-5.2L2.3 7.6l5.3-.8z"/></svg>');
+
+                    // ── SLIDES (Premium only) ───────────────────────────────────
+                    add_menu_page(
+                        'Slides',
+                        'Slides',
+                        'edit_posts',
+                        'toocheke-slides',
+                        [$this, 'toocheke_slides_hub_page'],
+                        $icon_slides,
+                        8
+                    );
+                    add_submenu_page('toocheke-slides', 'All Slides',    'All Slides', 'edit_posts', 'edit.php?post_type=slide',     null);
+                    add_submenu_page('toocheke-slides', 'Add New Slide', 'Add New',    'edit_posts', 'post-new.php?post_type=slide', null);
+
+                    // ── SPONSORSHIPS (Premium only) ─────────────────────────────
+                    add_menu_page(
+                        'Sponsorships',
+                        'Sponsorships',
+                        'edit_posts',
+                        'toocheke-sponsorships',
+                        [$this, 'toocheke_sponsorships_hub_page'],
+                        $icon_sponsorships,
+                        9
+                    );
+                    add_submenu_page('toocheke-sponsorships', 'All Sponsorships',    'All Sponsorships', 'edit_posts', 'edit.php?post_type=comic_sponsorship',     null);
+                    add_submenu_page('toocheke-sponsorships', 'Add New Sponsorship', 'Add New',          'edit_posts', 'post-new.php?post_type=comic_sponsorship', null);
                 }
 
                 add_submenu_page('toocheke-menu', 'Import From Comic Easel', 'Import: Comic Easel', 'edit_posts', 'toocheke-import-comic-easel', [$this, 'toocheke_include_import_comic_easel_page']);
@@ -7514,6 +7543,33 @@ Used for series listings in Toocheke.<br>
                     $parent_file  = 'toocheke-manga-chapters';
                     $submenu_file = 'edit.php?post_type=manga_chapter';
                 }
+                // Slides (Premium) — under toocheke-slides
+                if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'slide') {
+                    $parent_file  = 'toocheke-slides';
+                    $submenu_file = 'edit.php?post_type=slide';
+                }
+                if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'slide') {
+                    $parent_file  = 'toocheke-slides';
+                    $submenu_file = 'post-new.php?post_type=slide';
+                }
+                if ($pagenow === 'post.php' && get_post_type() === 'slide') {
+                    $parent_file  = 'toocheke-slides';
+                    $submenu_file = 'edit.php?post_type=slide';
+                }
+
+                // Sponsorships (Premium) — under toocheke-sponsorships
+                if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'comic_sponsorship') {
+                    $parent_file  = 'toocheke-sponsorships';
+                    $submenu_file = 'edit.php?post_type=comic_sponsorship';
+                }
+                if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'comic_sponsorship') {
+                    $parent_file  = 'toocheke-sponsorships';
+                    $submenu_file = 'post-new.php?post_type=comic_sponsorship';
+                }
+                if ($pagenow === 'post.php' && get_post_type() === 'comic_sponsorship') {
+                    $parent_file  = 'toocheke-sponsorships';
+                    $submenu_file = 'edit.php?post_type=comic_sponsorship';
+                }
             }
             public function toocheke_force_menu_order($menu_order)
             {
@@ -7525,6 +7581,8 @@ Used for series listings in Toocheke.<br>
                     'toocheke-manga-hub',
                     'toocheke-manga-volumes',
                     'toocheke-manga-chapters',
+                    'toocheke-slides',
+                    'toocheke-sponsorships',
                 ];
 
                 // Remove Toocheke menus from wherever they currently are
@@ -7614,6 +7672,47 @@ Used for series listings in Toocheke.<br>
                             <h2><?php esc_html_e('Add New Chapter', 'toocheke-companion'); ?></h2>
                             <p><?php esc_html_e('Create a new manga chapter', 'toocheke-companion'); ?></p>
                             <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_chapter')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+            public function toocheke_slides_hub_page()
+            {
+                ?>
+                <div class="wrap">
+                    <h1><?php esc_html_e('Slides', 'toocheke-companion'); ?></h1>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('All Slides', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('View and manage all slides', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('edit.php?post_type=slide')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+                        </div>
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('Add New Slide', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('Create a new slide', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('post-new.php?post_type=slide')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+
+            public function toocheke_sponsorships_hub_page()
+            {
+                ?>
+                <div class="wrap">
+                    <h1><?php esc_html_e('Sponsorships', 'toocheke-companion'); ?></h1>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('All Sponsorships', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('View and manage all comic sponsorships', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('edit.php?post_type=comic_sponsorship')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+                        </div>
+                        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                            <h2><?php esc_html_e('Add New Sponsorship', 'toocheke-companion'); ?></h2>
+                            <p><?php esc_html_e('Create a new comic sponsorship', 'toocheke-companion'); ?></p>
+                            <a href="<?php echo esc_url(admin_url('post-new.php?post_type=comic_sponsorship')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
                         </div>
                     </div>
                 </div>

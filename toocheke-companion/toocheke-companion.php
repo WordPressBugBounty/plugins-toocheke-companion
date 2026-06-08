@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.220
+ * Version:     1.221
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.220');
+    define('TOOCHEKE_COMPANION_VERSION', '1.221');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -64,8 +64,6 @@ class Toocheke_Companion_Comic_Features
         add_filter('custom_menu_order', '__return_true');
         add_filter('menu_order', [$this, 'toocheke_force_menu_order']);
         add_action('admin_head-post-new.php', [$this, 'toocheke_add_all_posts_button'], 0);
-        // Push WordPress Posts menu down so it doesn't interrupt Toocheke menus
-        add_action('admin_menu', [$this, 'toocheke_reorder_admin_menu'], 999);
         add_action('init', [$this, 'toocheke_companion_create_taxonomies'], 0);
         add_action('collections_add_form_fields', [$this, 'toocheke_companion_add_collection_image'], 10, 2);
         add_action('created_collections', [$this, 'toocheke_companion_save_collection_image'], 10, 2);
@@ -7414,32 +7412,234 @@ Used for series listings in Toocheke.<br>
                 add_submenu_page('toocheke-manga-chapters', 'Add New Manga Chapter', 'Add New Chapter', 'edit_posts', 'post-new.php?post_type=manga_chapter',null);
             }
 
-            // Include hub methods here
-            public function toocheke_dashboard_hub_page()
-            {
-                include plugin_dir_path(__FILE__) . 'inc/hubs/hub-dashboard.php';
-            }
-            public function toocheke_series_hub_page()
-            {
-                include plugin_dir_path(__FILE__) . 'inc/hubs/hub-series.php';
-            }
-            public function toocheke_comics_hub_page()
-            {
-                include plugin_dir_path(__FILE__) . 'inc/hubs/hub-comics.php';
-            }
-            public function toocheke_manga_hub_page()
-            {
-                include plugin_dir_path(__FILE__) . 'inc/hubs/hub-manga.php';
-            }
-            public function toocheke_premium_hub_page()
-            {
-                include plugin_dir_path(__FILE__) . 'inc/hubs/hub-premium.php';
-            }
-            public function toocheke_tools_hub_page()
-            {
-                include plugin_dir_path(__FILE__) . 'inc/hubs/hub-tools.php';
-            }
+           public function toocheke_dashboard_hub_page()
+{
+    $theme = wp_get_theme();
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e('Welcome to Toocheke!', 'toocheke-companion'); ?></h1>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
 
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=series')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=series')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Comics', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all comics', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add Comic', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new comic', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Manga Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all manga series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_series')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add Manga Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new manga series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_series')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Manga Volumes', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all manga volumes', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_volume')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Manga Chapters', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all manga chapters', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_chapter')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Options', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Configure theme & plugin settings', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=toocheke-options-page')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Comic Easel Import', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Import comics from the Comic Easel plugin', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=toocheke-import-comic-easel')); ?>" class="button button-primary"><?php esc_html_e('Import', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Webcomic Import', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Import comics from the Webcomic plugin', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=toocheke-import-webcomic')); ?>" class="button button-primary"><?php esc_html_e('Import', 'toocheke-companion'); ?></a>
+            </div>
+
+        </div>
+    </div>
+    <?php
+}
+
+public function toocheke_comics_hub_page()
+{
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e('Comic Management', 'toocheke-companion'); ?></h1>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Comics', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all comics', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add New Comic', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new comic', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Comic Collections', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage comic collections', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=collections&post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Comic Chapters', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage comic chapters', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=chapters&post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Comic Tags', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage comic tags', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=comic_tags&post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Comic Locations', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage comic locations', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=comic_locations&post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Comic Characters', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage comic characters', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=comic_characters&post_type=comic')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+        </div>
+    </div>
+    <?php
+}
+
+public function toocheke_series_hub_page()
+{
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e('Series Management', 'toocheke-companion'); ?></h1>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=series')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add New Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=series')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Series Genres', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage genres for series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=genres&post_type=series')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Series Tags', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage tags for series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=series_tags&post_type=series')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+        </div>
+    </div>
+    <?php
+}
+
+public function toocheke_manga_hub_page()
+{
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e('Manga Management', 'toocheke-companion'); ?></h1>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Manga Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all manga series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_series')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add Manga Series', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new manga series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_series')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Manga Series Genres', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage genres for manga series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=manga_genre&post_type=manga_series')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Manga Series Publishers', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Manage publishers for manga series', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=manga_publisher&post_type=manga_series')); ?>" class="button button-primary"><?php esc_html_e('Manage', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Manga Volumes', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all manga volumes', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_volume')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add Manga Volume', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new manga volume', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_volume')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('All Manga Chapters', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('View and manage all manga chapters', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('edit.php?post_type=manga_chapter')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Add Manga Chapter', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Create a new manga chapter', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('post-new.php?post_type=manga_chapter')); ?>" class="button button-primary"><?php esc_html_e('Add', 'toocheke-companion'); ?></a>
+            </div>
+
+        </div>
+    </div>
+    <?php
+}
             public function toocheke_admin_menu_highlighting()
             {
                 global $parent_file, $submenu_file, $pagenow;
@@ -7573,6 +7773,8 @@ Used for series listings in Toocheke.<br>
             }
             public function toocheke_force_menu_order($menu_order)
             {
+                $theme = wp_get_theme();
+
                 $toocheke_menus = [
                     'separator-toocheke',
                     'toocheke-menu',
@@ -7581,22 +7783,26 @@ Used for series listings in Toocheke.<br>
                     'toocheke-manga-hub',
                     'toocheke-manga-volumes',
                     'toocheke-manga-chapters',
-                    'toocheke-slides',
-                    'toocheke-sponsorships',
                 ];
 
-                // Remove Toocheke menus from wherever they currently are
-                $menu_order = array_filter($menu_order, function($item) use ($toocheke_menus) {
-                    return !in_array($item, $toocheke_menus);
-                });
-                $menu_order = array_values($menu_order);
+                // Add Premium menus only if Toocheke Premium is active
+                if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
+                    $toocheke_menus[] = 'toocheke-slides';
+                    $toocheke_menus[] = 'toocheke-sponsorships';
+                }
 
-                // Insert Toocheke block immediately after Dashboard
+                // Remove Toocheke menus from wherever they currently sit
+                $menu_order = array_values(array_filter($menu_order, function($item) use ($toocheke_menus) {
+                    return !in_array($item, $toocheke_menus);
+                }));
+
+                // Find Dashboard and insert Toocheke block right after it
                 $dashboard_pos = array_search('index.php', $menu_order);
+
                 if ($dashboard_pos !== false) {
                     array_splice($menu_order, $dashboard_pos + 1, 0, $toocheke_menus);
                 } else {
-                    array_splice($menu_order, 1, 0, $toocheke_menus);
+                    array_splice($menu_order, 0, 0, $toocheke_menus);
                 }
 
                 return $menu_order;
@@ -7718,19 +7924,7 @@ Used for series listings in Toocheke.<br>
                 </div>
                 <?php
             }
-            public function toocheke_reorder_admin_menu()
-            {
-                global $menu;
-                // Find and remove the Posts menu entry, then re-add it at position 25
-                foreach ($menu as $position => $item) {
-                    if (isset($item[2]) && $item[2] === 'edit.php') {
-                        $posts_menu = $item;
-                        unset($menu[$position]);
-                        $menu[25] = $posts_menu;
-                        break;
-                    }
-                }
-            }
+
 
             /**
              * Modify excerpt length

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 1.220
+Stable tag: 1.221
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -158,8 +158,12 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
 
+= 1.221 =
+* FIX: Resolved an issue where activating Toocheke Companion caused WordPress core admin menu items (such as Comments) to disappear. Core WordPress menus are now fully preserved regardless of the Toocheke menu ordering.
+* IMPROVED: Hub pages for Comics, Series, Manga Series and the Toocheke Dashboard are now built directly into the plugin, removing the dependency on external hub template files. This makes the plugin more self-contained and easier to maintain.
+
 = 1.220 =
-* FNEW: Added top-level menus for Toocheke Premium
+* NEW: Added top-level menus for Toocheke Premium
 
 = 1.219 =
 * FIX: Resolved an issue where other plugins could interrupt the Toocheke admin menus, causing them to appear out of order in the WordPress sidebar. Toocheke menus now always appear grouped together directly below the Dashboard, regardless of what other plugins are installed.

@@ -8,15 +8,15 @@ Universal theme styles
 }
 
 .grid-four-cols {
-	grid-template-columns: auto auto auto auto;
+	grid-template-columns: repeat(4, 1fr);
 }
 
 .grid-three-cols {
-	grid-template-columns: auto auto auto;
+	grid-template-columns: repeat(3, 1fr);
 }
 
 .grid-two-cols {
-	grid-template-columns: auto auto;
+	grid-template-columns: repeat(2, 1fr);
 }
 
 #comic-list {
@@ -496,7 +496,7 @@ Universal theme styles
 
 @media only screen and (max-width: 1023px) {
 	.grid-container {
-		grid-template-columns: auto auto;
+		grid-template-columns: repeat(2, 1fr);
 	}
 
 }
@@ -510,6 +510,25 @@ Universal theme styles
 /*--------------------------------------------------------------
 ## Chapters navigation
 --------------------------------------------------------------*/
+.chapter-thumbnail {
+	text-align: center;
+}
+
+.chapter-thumbnail img {
+	max-width: 100%;
+	height: auto;
+	 transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.chapter-thumbnail a:hover img {
+	opacity: 0.7;
+	filter: alpha(opacity=70);
+}
+
+.chapter-thumbnail a:focus img {
+	opacity: 0.7;
+	filter: alpha(opacity=70);
+}
 #chapters-drodpown {
 	padding: 0px 5px;
 	font-size: 14px;
@@ -588,4 +607,20 @@ Universal theme styles
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+}
+/* Characters template */
+.character-thumb-link {
+  display: block;
+}
+
+.character-thumb-link img {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.character-thumb-link:hover img {
+  opacity: 0.75;
+  transform: scale(1.03);
+}
+.collection-thumbnail, .chapter-thumbnail{
+		line-height: 1.35em;
 }

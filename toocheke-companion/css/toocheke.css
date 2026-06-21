@@ -268,3 +268,42 @@ Universal theme styles
     grid-template-columns: 1fr;
   }
 }
+/* Dismissible info notice (matches WP core .notice-dismiss styling) */
+.toocheke-info-notice {
+  position: relative;
+  padding-right: 38px !important;
+}
+
+.toocheke-dismiss-notice {
+  position: absolute;
+  top: 0;
+  right: 1px;
+  border: none;
+  margin: 0;
+  padding: 9px;
+  background: 0 0;
+  cursor: pointer;
+}
+
+.toocheke-dismiss-notice:before {
+  background: 0 0;
+  color: #787c82;
+  content: "\f335";
+  display: block;
+  font: normal 20px/20px dashicons;
+  height: 20px;
+  width: 20px;
+  text-align: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.toocheke-dismiss-notice:hover:before,
+.toocheke-dismiss-notice:focus:before {
+  color: #d63638;
+}
+
+.toocheke-dismiss-notice:focus {
+  outline: 1px solid #4f94d4;
+  box-shadow: 0 0 3px rgba(8, 80, 142, .8);
+}

@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
     // Open ComicScout link in new tab
     $('.toocheke-comicscout-link > a').attr('target', '_blank');
 
@@ -8,7 +8,7 @@ jQuery(document).ready(function($) {
 
     if ($seriesSelect.length && $volumeSelect.length) {
 
-        $seriesSelect.on('change', function() {
+        $seriesSelect.on('change', function () {
             var seriesId = $(this).val();
             var currentVolume = $volumeSelect.val();
 
@@ -31,12 +31,12 @@ jQuery(document).ready(function($) {
                     series_id: seriesId,
                     nonce: toochekeMangaAdmin.nonce,
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success && response.data.length > 0) {
-                        $.each(response.data, function(i, volume) {
+                        $.each(response.data, function (i, volume) {
                             var $option = $('<option>', {
                                 value: volume.id,
-                                text:  volume.title,
+                                text: volume.title,
                             });
                             if (volume.id == currentVolume) {
                                 $option.prop('selected', true);
@@ -45,13 +45,26 @@ jQuery(document).ready(function($) {
                         });
                     }
                 },
-                error: function() {
+                error: function () {
                     // Silent fail — dropdown stays with just "All Volumes"
                 },
-                complete: function() {
+                complete: function () {
                     $volumeSelect.prop('disabled', false);
                 }
             });
         });
     }
+    $(document).on('click', '.toocheke-dismiss-notice', function (e) {
+        e.preventDefault();
+        var $notice = $(this).closest('.toocheke-info-notice');
+        var noticeId = $(this).data('notice-id');
+
+        $notice.fadeOut(150, function () { $notice.remove(); });
+
+        $.post(toochekeNotices.ajaxUrl, {
+            action: 'toocheke_dismiss_notice',
+            notice_id: noticeId,
+            nonce: toochekeNotices.nonce
+        });
+    });
 });

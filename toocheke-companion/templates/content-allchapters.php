@@ -76,56 +76,69 @@ if ($chapters) {
 
     foreach ($chapters as $chapter) {
 
-        /**
-         * Get latest post for this chapter
-         */
-        $link_to_first_comic = '';
-        $args = array(
-            'post_parent' => $series_id,
-            'posts_per_page' => 1,
-            'post_type' => 'comic',
-            'orderby' => 'post_date',
-            'order' => $comic_order,
-            "tax_query" => array(
-                array(
-                    'taxonomy' => "chapters", // use the $tax you define at the top of your script
-                    'field' => 'term_id',
-                    'terms' => $chapter->term_id, // use the current term in your foreach loop
-                ),
+    /**
+     * Get latest/first post for this chapter
+     */
+    $args = array(
+        'post_parent' => $series_id,
+        'posts_per_page' => 1,
+        'post_type' => 'comic',
+        'orderby' => 'post_date',
+        'order' => $comic_order,
+        "tax_query" => array(
+            array(
+                'taxonomy' => "chapters",
+                'field' => 'term_id',
+                'terms' => $chapter->term_id,
             ),
-            'no_found_rows' => true,
-            'update_post_meta_cache' => false,
-            'update_post_term_cache' => false,
-        );
-        $first_comic_query = new WP_Query($args);
-        // The Loop
-        while ($first_comic_query->have_posts()): $first_comic_query->the_post();
-            $link_to_first_comic = get_post_permalink(); // Display the image of the first post in category
-            if ($series_id) {
-                $link_to_first_comic = add_query_arg('sid', $series_id, $link_to_first_comic);
-            }
-            wp_reset_postdata();
-            printf(wp_kses_data('%1$s'), '<div class="chapter-thumbnail">');
-            printf(wp_kses_data('%1$s'), '<a href="' . esc_url($link_to_first_comic) . '">');
-            $term_id = absint($chapter->term_id);
-            $thumb_id = get_term_meta($term_id, 'chapter-image-id', true);
+        ),
+        'no_found_rows' => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+    );
+    $first_comic_query = new WP_Query($args);
 
-            if (!empty($thumb_id)) {
-                $term_img = wp_get_attachment_url($thumb_id);
-                printf(wp_kses_data('%1$s'), '<img src="' . esc_url($term_img) . '" /><br/>');
+    if ($first_comic_query->have_posts()) {
+        $first_comic_query->the_post();
+        $first_comic_link = get_post_permalink();
+        if ($series_id) {
+            $first_comic_link = add_query_arg('sid', $series_id, $first_comic_link);
+        }
+        wp_reset_postdata();
+
+        // Decide where this chapter thumbnail should link to
+        $link_to_archive = get_option('toocheke-chapter-archive-link') && 1 == get_option('toocheke-chapter-archive-link');
+
+        if ($link_to_archive) {
+            $archive_link = get_term_link($chapter);
+            if (!is_wp_error($archive_link)) {
+                $link_url = $series_id ? add_query_arg('sid', $series_id, $archive_link) : $archive_link;
             } else {
-                ?>
-		                                            <img
-		                                            src="<?php echo esc_attr(plugins_url('toocheke-companion' . '/img/default-thumbnail-image.png')); ?>" />
-		                                            <?php
-    }
-            echo wp_kses_data($chapter->name);
-            echo '</a></div>';
-        endwhile;
+                $link_url = $first_comic_link;
+            }
+        } else {
+            $link_url = $first_comic_link;
+        }
 
+        printf(wp_kses_data('%1$s'), '<div class="chapter-thumbnail">');
+        printf(wp_kses_data('%1$s'), '<a href="' . esc_url($link_url) . '">');
+        $term_id = absint($chapter->term_id);
+        $thumb_id = get_term_meta($term_id, 'chapter-image-id', true);
+
+        if (!empty($thumb_id)) {
+            $term_img = wp_get_attachment_url($thumb_id);
+            printf(wp_kses_data('%1$s'), '<img src="' . esc_url($term_img) . '" /><br/>');
+        } else {
+            ?>
+            <img src="<?php echo esc_attr(plugins_url('toocheke-companion' . '/img/default-thumbnail-image.png')); ?>" />
+            <?php
+        }
+        echo wp_kses_data($chapter->name);
+        echo '</a></div>';
     }
+}
 // Reset Post Data
-    wp_reset_postdata();
+wp_reset_postdata();
 
     ?>
 

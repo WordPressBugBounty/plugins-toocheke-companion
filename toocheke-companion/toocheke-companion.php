@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     1.221
+ * Version:     1.222
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv2 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '1.221');
+    define('TOOCHEKE_COMPANION_VERSION', '1.222');
 }
 class Toocheke_Companion_Comic_Features
 {
@@ -334,6 +334,9 @@ class Toocheke_Companion_Comic_Features
         add_filter('pre_get_posts', [$this, 'toocheke_manga_filter_query']);
         // Manga admin AJAX
         add_action('wp_ajax_toocheke_get_volumes_by_series', [$this, 'toocheke_get_volumes_by_series']);
+
+        //Admin Dismiss
+        add_action('wp_ajax_toocheke_dismiss_notice', [$this, 'toocheke_dismiss_notice_handler']);
     }
     /* Set default options */
     public function toocheke_set_default_options(){
@@ -2837,7 +2840,17 @@ class Toocheke_Companion_Comic_Features
                             register_setting("toocheke-settings", "toocheke-early-access");
                         }
 
-                        //Option for determining whether to use the defaul comic navigation buttons
+                        //Chapter Navigation section
+                        add_settings_section("toocheke_chapter_navigation_section", "Chapter Navigation", [$this, 'toocheke_display_chapter_navigation_message'], "toocheke-options-page");
+                        add_settings_field("toocheke-chapter-archive-link", "Do you want to link to Chapter archive page?", [$this, 'toocheke_chapter_archive_link_checkbox'], "toocheke-options-page", "toocheke_chapter_navigation_section");
+                        register_setting("toocheke-settings", "toocheke-chapter-archive-link");
+
+                        //Collection Navigation section
+                        add_settings_section("toocheke_collection_navigation_section", "Collection Navigation", [$this, 'toocheke_display_collection_navigation_message'], "toocheke-options-page");
+                        add_settings_field("toocheke-collection-archive-link", "Do you want to link to Collection archive page?", [$this, 'toocheke_collection_archive_link_checkbox'], "toocheke-options-page", "toocheke_collection_navigation_section");
+                        register_setting("toocheke-settings", "toocheke-collection-archive-link");
+
+                        //Option for determining whether to use the default comic navigation buttons
                         add_settings_field("toocheke-comics-navigation", "Do you want to use the default navigation buttons?", [$this, 'toocheke_comics_navigation_checkbox'], "toocheke-options-page", "toocheke_custom_comic_navigation_section");
                         register_setting("toocheke-settings", "toocheke-comics-navigation");
 
@@ -3420,6 +3433,14 @@ class Toocheke_Companion_Comic_Features
             {
                 echo 'Customize your comic\'s navigation options. You can upload your own navigation button images to replace the default buttons.';
             }
+            public function toocheke_display_chapter_navigation_message()
+            {
+                echo 'Customize chapter-related navigation options. By default, chapter links point to the first or latest comic in the chapter (depending on your Comic Ordering settings) rather than the chapter archive page.';
+            }
+            public function toocheke_display_collection_navigation_message()
+            {
+                echo 'Customize collection-related navigation options. By default, collection links point to the first or latest comic in the collection (depending on your Comic Ordering settings) rather than the collection archive page.';
+            }
             public function toocheke_multiple_series_display_message()
             {
                 echo 'This sets whether you will display a single or multiple comic series on your website.';
@@ -3532,11 +3553,7 @@ class Toocheke_Companion_Comic_Features
 
                 $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'full') : '';
 
-                echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
-                    ⭐ <strong>Used by <a href="https://www.thecomicscout.com/" target="_blank">ComicScout</a> for social promotion.</strong><br>
-                    This image will be used as the default social share image for ComicScout when no ComicScout Social Share Image is set on an individual post.<br>
-                    <strong>Recommended size: 1200 × 630px</strong>.
-                </p>';
+                $this->toocheke_render_dismissible_info('comicscout_global_social_share', '⭐ <strong>Used by <a href="https://www.thecomicscout.com/" target="_blank">ComicScout</a> for social promotion.</strong><br>This image will be used as the default social share image for ComicScout when no ComicScout Social Share Image is set on an individual post.<br><strong>Recommended size: 1200 × 630px</strong>.');
 
                 if ($image_url) {
                     echo '<img id="toocheke_comicscout_global_social_share_image_preview" src="' . esc_url($image_url) . '" style="width:100%;height:auto;border:0;display:block;margin-bottom:10px;" />';
@@ -4213,6 +4230,21 @@ class Toocheke_Companion_Comic_Features
         <input type="checkbox" id="toocheke-chapter-dropdown" name="toocheke-chapter-dropdown" value="1"
             <?php checked(1, get_option('toocheke-chapter-dropdown'), 1); ?> /> Check for Yes
     <?php
+            }
+            public function toocheke_chapter_archive_link_checkbox()
+            {
+            ?>
+                <input type="checkbox" id="toocheke-chapter-archive-link" name="toocheke-chapter-archive-link" value="1"
+                    <?php checked(1, get_option('toocheke-chapter-archive-link'), 1); ?> /> Check for Yes
+            <?php
+            }
+
+            public function toocheke_collection_archive_link_checkbox()
+            {
+            ?>
+                <input type="checkbox" id="toocheke-collection-archive-link" name="toocheke-collection-archive-link" value="1"
+                    <?php checked(1, get_option('toocheke-collection-archive-link'), 1); ?> /> Check for Yes
+            <?php
             }
             public function toocheke_keyboard_checkbox()
             {
@@ -4952,6 +4984,9 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
              */
             public function toocheke_comic_title_2nd_language_meta_box()
             {
+                if (! get_option('toocheke-bilingual-display')) {
+                    return;
+                }
                 add_meta_box(
                     'comic-title-2nd-language',
                     __('Comic Title for 2nd Language', 'toocheke-companion'),
@@ -5009,6 +5044,9 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             //This function initializes the meta box.
             public function toocheke_desktop_comic_editor_meta_box()
             {
+                if (! get_option('toocheke-comic-layout-devices')) {
+                    return;
+                }
                 add_meta_box(
                     'desktop-comic-editor',
                     __('Desktop Comic Editor', 'toocheke-companion'),
@@ -5126,6 +5164,9 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             //This function initializes the meta box.
             public function toocheke_2nd_language_mobile_comic_editor_meta_box()
             {
+                if (! get_option('toocheke-bilingual-display')) {
+                    return;
+                }
                 add_meta_box(
                     'mobile-comic-2nd-language-editor',
                     __('Mobile Comic Editor for 2nd Language', 'toocheke-companion'),
@@ -5185,6 +5226,9 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             //This function initializes the meta box.
             public function toocheke_2nd_language_comic_blog_post_editor_meta_box()
             {
+                if (! get_option('toocheke-bilingual-display')) {
+                    return;
+                }
                 add_meta_box(
                     'comic-2nd-language-blog-post-editor',
                     __("Comic's Blog Post Editor for 2nd Language", 'toocheke-companion'),
@@ -5243,6 +5287,12 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             //This function initializes the meta box.
             public function toocheke_2nd_language_desktop_comic_editor_meta_box()
             {
+                if (! get_option('toocheke-bilingual-display')) {
+                    return;
+                }
+                if (! get_option('toocheke-comic-layout-devices')) {
+                    return;
+                }
                 add_meta_box(
                     'desktop-comic-2nd-language-editor',
                     __('Desktop Comic Editor for 2nd Language', 'toocheke-companion'),
@@ -5926,10 +5976,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                 wp_nonce_field('toocheke_series_comic_order_meta_box', 'toocheke_series_comic_order_nonce');
                 $current = get_post_meta($post->ID, 'series_comic_order_override', true);
                 ?>
-                <p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
-                    Override the global Comics Ordering setting for this series only.<br>
-                    Leave as <strong>Use Global Setting</strong> to inherit the default.
-                </p>
+                <?php $this->toocheke_render_dismissible_info('series_comic_order', 'Override the global Comics Ordering setting for this series only.<br>Leave as <strong>Use Global Setting</strong> to inherit the default.'); ?>
                 <p>
                     <label for="series_comic_order_override">
                         <strong><?php _e('Comic Order for this Series', 'toocheke-companion'); ?></strong>
@@ -6383,11 +6430,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
             }
            public function toocheke_comic_thumbnail_metabox($post)
 {
-    echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
-Used for comic listings in Toocheke (homepage, archives, and comic carousel).<br>
-Displayed as a square thumbnail in listings.<br>
-<strong>Recommended size: 300 × 300px or larger</strong>.
-</p>';
+    $this->toocheke_render_dismissible_info('comic_thumbnail', 'Used for comic listings in Toocheke (homepage, archives, and comic carousel).<br>Displayed as a square thumbnail in listings.<br><strong>Recommended size: 300 × 300px or larger</strong>.');
 
     // Add an ID so JS can hide/show it
     echo '<div id="toocheke-featured-image-ratio-guide" style="
@@ -6452,10 +6495,7 @@ Displayed as a square thumbnail in listings.<br>
             }
              public function toocheke_series_thumbnail_metabox($post)
             {
-                 echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">
-Used for series listings in Toocheke.<br>
-<strong>Recommended size: at least 300px wide</strong>.
-</p>';
+                $this->toocheke_render_dismissible_info('series_thumbnail', 'Used for series listings in Toocheke.<br><strong>Recommended size: at least 300px wide</strong>.');
 
                 // Add an ID so JS can hide/show it
                 echo '<div id="toocheke-featured-image-ratio-guide" style="
@@ -7059,6 +7099,11 @@ Used for series listings in Toocheke.<br>
                 wp_enqueue_media();
                 wp_enqueue_script('toocheke-admin-script', plugins_url('toocheke-companion' . '/js/toocheke.js'), ['jquery'], TOOCHEKE_COMPANION_VERSION, true);
 
+               //Localize nonce JS for dismissing alerts
+               wp_localize_script('toocheke-admin-script', 'toochekeNotices', [
+    'ajaxUrl' => admin_url('admin-ajax.php'),
+    'nonce'   => wp_create_nonce('toocheke_dismiss_notice'),
+]);
                 // Localize for manga admin filters
                 $screen = get_current_screen();
                 if ($screen && $screen->base === 'edit' && $screen->post_type === 'manga_chapter') {
@@ -11346,10 +11391,8 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
     $old_content_width = $content_width;
     $content_width = 254;
 
-    if ($instruction) {
-        echo '<p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">'
-        . $instruction .
-        '</p>';
+   if ($instruction) {
+        $this->toocheke_render_dismissible_info($meta_key, $instruction);
     }
 
     if ($image_id && get_post($image_id)) {
@@ -11439,6 +11482,54 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
 
         echo '<input type="hidden" id="'.$input_name.'" name="'.$input_name.'" value="" />';
     }
+}
+private function toocheke_is_notice_dismissed($notice_id)
+{
+    $user_id = get_current_user_id();
+    if (! $user_id) {
+        return false;
+    }
+    $dismissed = get_user_meta($user_id, 'toocheke_dismissed_notices', true);
+    return is_array($dismissed) && in_array($notice_id, $dismissed, true);
+}
+
+private function toocheke_render_dismissible_info($notice_id, $html_content)
+{
+    if ($this->toocheke_is_notice_dismissed($notice_id)) {
+        return;
+    }
+    echo '<div class="toocheke-info-notice" data-notice-id="' . esc_attr($notice_id) . '" style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">';
+    echo $html_content;
+    echo '<button type="button" class="toocheke-dismiss-notice" data-notice-id="' . esc_attr($notice_id) . '">';
+    echo '<span class="screen-reader-text">' . esc_html__('Dismiss this tip', 'toocheke-companion') . '</span>';
+    echo '</button>';
+    echo '</div>';
+}
+
+public function toocheke_dismiss_notice_handler()
+{
+    check_ajax_referer('toocheke_dismiss_notice', 'nonce');
+
+    if (! current_user_can('edit_posts')) {
+        wp_send_json_error();
+    }
+
+    $notice_id = isset($_POST['notice_id']) ? sanitize_key($_POST['notice_id']) : '';
+    if (! $notice_id) {
+        wp_send_json_error();
+    }
+
+    $user_id   = get_current_user_id();
+    $dismissed = get_user_meta($user_id, 'toocheke_dismissed_notices', true);
+    if (! is_array($dismissed)) {
+        $dismissed = [];
+    }
+    if (! in_array($notice_id, $dismissed, true)) {
+        $dismissed[] = $notice_id;
+        update_user_meta($user_id, 'toocheke_dismissed_notices', $dismissed);
+    }
+
+    wp_send_json_success();
 }
 
         }

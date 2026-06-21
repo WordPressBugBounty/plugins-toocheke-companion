@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 1.221
+Stable tag: 1.222
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,14 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 1.222 =
+* NEW: Helpful tip boxes (shown above image upload fields for Comics, Series, and ComicScout settings) can now be dismissed with one click and will stay hidden for that user going forward.
+* IMPROVED: When Bilingual Display is turned off in Options > Language, the extra second-language fields no longer appear when adding or editing a comic, keeping the editor screen cleaner.
+* IMPROVED: When the two-version (Desktop/Mobile) comic layout option is turned off in Options > Display, the extra Desktop Comic Editor fields no longer appear when adding or editing a comic.
+* FIX - Corrected thumbnail grid layouts (used by Chapters, Series, Collections, etc.) so columns are evenly sized instead of stretching unevenly when image dimensions varied slightly.
+* NEW: Added "Chapter Navigation" and "Collection Navigation" sections (Options > Navigation) with options to link chapter and collection thumbnails to their archive page instead of the first/latest comic.
+* IMPROVED: The `[toocheke-all-chapters]` and `[toocheke-latest-chapters]` shortcodes were also updated to respect the new Chapter Navigation option (there's no equivalent shortcode for collections).
 
 = 1.221 =
 * FIX: Resolved an issue where activating Toocheke Companion caused WordPress core admin menu items (such as Comments) to disappear. Core WordPress menus are now fully preserved regardless of the Toocheke menu ordering.

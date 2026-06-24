@@ -33,7 +33,7 @@ function toocheke_companion_blocks_editor_assets() {
     wp_enqueue_script(
         'toocheke-companion-blocks-editor-script',
         plugins_url( 'build/index.js', TOOCHEKE_COMPANION_PLUGIN_DIR . 'toocheke-companion.php' ), // Use directory constant with main plugin file for URL
-        array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-i18n', 'wp-components', 'wp-data' ), // Added 'wp-data' explicitly
+        array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n', 'wp-components', 'wp-data' ), // Added 'wp-data' explicitly
         filemtime( TOOCHEKE_COMPANION_PLUGIN_DIR . 'build/index.js' ), // Use directory constant for file path
         true
     );
@@ -42,7 +42,7 @@ function toocheke_companion_blocks_editor_assets() {
     wp_enqueue_style(
         'toocheke-companion-blocks-editor-style',
         plugins_url( 'build/index.css', TOOCHEKE_COMPANION_PLUGIN_DIR . 'toocheke-companion.php' ), // Corrected typo here
-        array( 'wp-editor' ),
+        array( 'wp-block-editor' ),
         filemtime( TOOCHEKE_COMPANION_PLUGIN_DIR . 'build/index.css' ) // Corrected typo here
     );
 }

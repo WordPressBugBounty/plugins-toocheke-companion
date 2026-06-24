@@ -30,7 +30,7 @@ $chapters_list = get_categories($chapter_args);
 if ($chapters_list) {
     ?>
                 <!-- START COMIC CHAPTER LIST-->
-                <div id="chapter-wrapper" class="grid-container grid-three-cols">
+                <div id="latest-chapters-wrapper" class="grid-container grid-three-cols">
               
 
                      

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 1.222
+Stable tag: 2.0
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -157,6 +157,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.0 =
+* The plugin's code has been substantially refactored and reorganized for long-term maintainability and performance. This is an internal change only -- existing settings, shortcodes, and behavior are unchanged. Highlights: repetitive code was consolidated into shared functions, admin-only features no longer load on every front-end page view (improving front-end performance), and the codebase was reorganized into smaller, clearly-named files grouped by feature area. A few small bugs were also fixed along the way.
+* FIX: Using Quick Edit on a Collection, Chapter, or Character term was deleting its image. This was a long-standing bug, Quick Edit was stripping out saved image. This is now resolved.
 
 = 1.222 =
 * NEW: Helpful tip boxes (shown above image upload fields for Comics, Series, and ComicScout settings) can now be dismissed with one click and will stay hidden for that user going forward.

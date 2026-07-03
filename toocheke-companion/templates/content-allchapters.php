@@ -14,22 +14,7 @@ $series_id = get_query_var('series_id');
 $chapter_comic_order = get_option('toocheke-chapter-first-comic') ? get_option('toocheke-chapter-first-comic') : 'DESC';
 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
 //Get total number of chapters
-$comic_ids = [];
-$comics_args = array(
-    'fields' => 'ids',
-    'post_parent' => $series_id,
-    'nopaging' => true,
-    'post_type' => 'comic',
-
-);
-$comics_query = new WP_Query($comics_args);
-if ($comics_query->have_posts()):
-    while ($comics_query->have_posts()): $comics_query->the_post();
-        $comic_ids[] = get_the_ID();
-    endwhile;
-    wp_reset_postdata();
-
-endif;
+$comic_ids = toocheke_get_chapter_comic_ids($series_id);
 
 
 $chapter_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;

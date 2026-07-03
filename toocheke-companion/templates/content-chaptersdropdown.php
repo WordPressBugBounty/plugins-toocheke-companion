@@ -17,6 +17,9 @@ if (get_query_var('series_id')) {
 if (is_singular('series') && !$series_id) {
     $series_id = get_the_ID();
 }
+
+// Same archive-link option used on the Chapters page template
+$link_to_archive = get_option('toocheke-chapter-archive-link') && 1 == get_option('toocheke-chapter-archive-link');
 ?>
 <?php
 if ($display_chapters_dropdown):
@@ -45,36 +48,53 @@ if ($display_chapters_dropdown):
 	<?php
 
         foreach ($chapters_list as $chapter) {
-            /**
-             * Get latest post for this chapter
-             */
-            $link_to_first_comic = '';
+
+            // Always check series membership first, regardless of link mode
             $args = array(
                 'posts_per_page' => 1,
                 'post_parent' => $series_id,
                 'post_type' => 'comic',
                 'orderby' => 'post_date',
                 'order' => 'ASC',
+                'fields' => 'ids',
                 "tax_query" => array(
                     array(
-                        'taxonomy' => "chapters", // use the $tax you define at the top of your script
+                        'taxonomy' => "chapters",
                         'field' => 'term_id',
-                        'terms' => $chapter->term_id, // use the current term in your foreach loop
+                        'terms' => $chapter->term_id,
                     ),
                 ),
                 'no_found_rows' => true,
                 'update_post_meta_cache' => false,
                 'update_post_term_cache' => false,
+                'ignore_sticky_posts' => true,
             );
             $first_comic_query = new WP_Query($args);
-            // The Loop
-            while ($first_comic_query->have_posts()): $first_comic_query->the_post();
-                $link_to_first_comic = add_query_arg('sid', $series_id, get_post_permalink()); // Display the image of the first post in category
-                wp_reset_postdata();
-                printf(wp_kses_data('%1$s'), '<option value="' . esc_url($link_to_first_comic) . '">');
-                echo wp_kses_data($chapter->name);
-                echo '</option>';
-            endwhile;
+
+            if (empty($first_comic_query->posts)) {
+                // No comics in this chapter for this series - skip it entirely
+                continue;
+            }
+
+            $first_comic_id = $first_comic_query->posts[0];
+
+            // Now decide which URL to actually use
+            $link_url = '';
+
+            if ($link_to_archive) {
+                $archive_link = get_term_link($chapter);
+                if (!is_wp_error($archive_link)) {
+                    $link_url = $series_id ? add_query_arg('sid', $series_id, $archive_link) : $archive_link;
+                }
+            }
+
+            if (empty($link_url)) {
+                $link_url = add_query_arg('sid', $series_id, get_permalink($first_comic_id));
+            }
+
+            printf(wp_kses_data('%1$s'), '<option value="' . esc_url($link_url) . '">');
+            echo wp_kses_data($chapter->name);
+            echo '</option>';
         }
         ?>
 	</select>

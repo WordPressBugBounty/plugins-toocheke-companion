@@ -710,3 +710,67 @@ if (! function_exists('toocheke_universal_get_next_chapter')):
         return false;
     }
 endif;
+
+/**
+ * Returns the IDs of all comics belonging to a series (or site-wide, if no
+ * series id is given), used by the "all chapters" shortcode to scope its
+ * chapter lookup. Cached as a transient, since on a site with a large back
+ * catalog this would otherwise mean fetching every comic ID in the series
+ * (or the whole site) on every single page view of that shortcode. The
+ * 1-hour expiry is a safety net for any case the invalidation hook below
+ * doesn't catch (e.g. a comic's series being reassigned); the hook handles
+ * the common cases (adding, editing, trashing, deleting a comic) instantly.
+ *
+ * @param int|string $series_id A series post ID, or '' for all comics site-wide.
+ * @return int[]
+ */
+if (! function_exists('toocheke_get_chapter_comic_ids')):
+    function toocheke_get_chapter_comic_ids($series_id = '')
+    {
+        $cache_key = 'toocheke_chptr_cids_' . ($series_id ?: 'all');
+        $comic_ids = get_transient($cache_key);
+
+        if (false === $comic_ids) {
+            $comics_query = new WP_Query([
+                'fields'      => 'ids',
+                'post_parent' => $series_id,
+                'nopaging'    => true,
+                'post_type'   => 'comic',
+            ]);
+            $comic_ids = $comics_query->posts;
+            set_transient($cache_key, $comic_ids, HOUR_IN_SECONDS);
+        }
+
+        return $comic_ids;
+    }
+endif;
+
+/**
+ * Clears the cached comic-id list(s) above whenever a Comic post is saved,
+ * trashed, restored, or permanently deleted, so the "all chapters" shortcode
+ * reflects changes immediately rather than waiting for the cache to expire.
+ * Clears both the comic's specific series cache and the site-wide cache,
+ * since adding/removing a comic affects both lists. Hooked (see init() in
+ * the main plugin file) to save_post_comic, trashed_post, untrashed_post,
+ * and before_delete_post.
+ *
+ * @param int $post_id
+ */
+if (! function_exists('toocheke_invalidate_chapter_comic_ids_cache')):
+    function toocheke_invalidate_chapter_comic_ids_cache($post_id)
+    {
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        if (get_post_type($post_id) !== 'comic') {
+            return;
+        }
+
+        $series_id = wp_get_post_parent_id($post_id);
+        if ($series_id) {
+            delete_transient('toocheke_chptr_cids_' . $series_id);
+        }
+        delete_transient('toocheke_chptr_cids_all');
+    }
+endif;
+

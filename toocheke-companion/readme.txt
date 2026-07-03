@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.0
+Stable tag: 2.1
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -24,8 +24,7 @@ Comics published with Toocheke Companion can also be discovered through **[Comic
 ### Key Features
 
 - Display comics and manga in nearly any WordPress theme
-- Full support for the WordPress Block Editor (Gutenberg)
-- Includes 15 blocks and matching shortcodes for flexible comic layouts
+- Includes shortcodes for flexible comic layouts
 - Easy customization with color schemes and layout options
 - **New: Dedicated Manga layout support** — organize and display manga with series, volumes, and chapters
 - Responsive layout optimized for mobile and desktop
@@ -50,7 +49,7 @@ Comics published with Toocheke Companion can also be discovered through **[Comic
 
 Toocheke Companion enables you to display comics using either shortcodes or the WordPress Block Editor. Create a page or post and insert the desired block or shortcode.
 
-### Available Blocks and Shortcodes
+### Available Shortcodes
 
 1. **Toocheke All Series**  
    `[toocheke-all-series comics_order="ASC/DESC" link_to="series/comic"]`
@@ -97,34 +96,6 @@ Toocheke Companion enables you to display comics using either shortcodes or the 
 15. **Toocheke Characters**  
     `[toocheke-characters]`
 
-All of the above are also available as Gutenberg blocks under the widgets category in the WordPress Block Editor. 
-
-You can also display Manga features with the following shortcodes
-
-1. **All Manga Series**  
-    `[toocheke-all-manga-series]` or `[toocheke-all-manga-series title="Your Title Here"]`
-
-2. **Popular Manga Series**  
-    `[toocheke-popular-manga-series]` or `[toocheke-popular-manga-series title="Your Title Here"]`
-
-3. **Popular Manga Volumes**  
-    `[toocheke-popular-manga-volumes]` or `[toocheke-popular-manga-volumes title="Your Title Here"]`
-
-4. **Popular Manga Chapters**  
-    `[toocheke-popular-manga-chapters]` or `[toocheke-popular-manga-chapters title="Your Title Here"]`
-    
-5. **First Manga Series**  
-    `[toocheke-first-manga-series]`
-
-6. **Latest Manga Series**  
-    `[toocheke-latest-manga-series]`
-
-7. **First Manga Volume**  
-    `[toocheke-first-manga-volume]` or `[toocheke-first-manga-volume sid="####"]`
-
-8. **Latest Manga Volume**  
-    `[toocheke-latest-manga-volume]` or `[toocheke-latest-manga-volume sid="####"]`
-
 == Frequently Asked Questions ==
 
 = The comic permalinks are not working. How do I fix them? =
@@ -157,6 +128,11 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.1 =
+* FIX: Resolved an issue where readers browsing many comics in one session could eventually see "431 Request Header Fields Too Large" errors.
+* NEW - Comic Chapters Dropdown template part now supports linking chapters to their archive page
+* PERFORMANCE: The "all chapters" shortcode no longer fetches every comic ID in a series (or site-wide) on every page view. That list is now cached and only recomputed when a comic is actually added, edited, trashed, restored, or deleted -- which matters most for sites with a large back catalog of comics.
 
 = 2.0 =
 * The plugin's code has been substantially refactored and reorganized for long-term maintainability and performance. This is an internal change only -- existing settings, shortcodes, and behavior are unchanged. Highlights: repetitive code was consolidated into shared functions, admin-only features no longer load on every front-end page view (improving front-end performance), and the codebase was reorganized into smaller, clearly-named files grouped by feature area. A few small bugs were also fixed along the way.

@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.0
+ * Version:     2.1
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.0');
+    define('TOOCHEKE_COMPANION_VERSION', '2.1');
 }
 
 /**
@@ -97,6 +97,15 @@ class Toocheke_Companion_Comic_Features
         add_action('init', [$this, 'toocheke_companion_create_comic_custom_post_type'], 0);
         register_activation_hook(__FILE__, [$this, 'toocheke_rewrite_flush']);
         register_activation_hook(__FILE__, [$this, 'toocheke_set_default_options']);
+
+        // Keep the cached comic-id list used by the "all chapters" shortcode
+        // (see toocheke_get_chapter_comic_ids() in inc/toocheke-companion-template-functions.php)
+        // in sync whenever a comic is added, edited, trashed, restored, or deleted.
+        add_action('save_post_comic', 'toocheke_invalidate_chapter_comic_ids_cache');
+        add_action('trashed_post', 'toocheke_invalidate_chapter_comic_ids_cache');
+        add_action('untrashed_post', 'toocheke_invalidate_chapter_comic_ids_cache');
+        add_action('before_delete_post', 'toocheke_invalidate_chapter_comic_ids_cache');
+
         if (is_admin()) { add_action('admin_menu', [$this, 'toocheke_add_plugin_main_menu'], 0); }
         if (is_admin()) { add_action('admin_head', [$this, 'toocheke_admin_menu_highlighting'], 0); }
         add_filter('custom_menu_order', '__return_true');
@@ -295,7 +304,9 @@ class Toocheke_Companion_Comic_Features
         add_filter('archive_template', [$this, 'toocheke_comic_archive_template'], 9999);
 
         /* Page View Count */
-        add_filter('template_redirect', [$this, 'toocheke_universal_set_post_views']);
+        add_action('wp_enqueue_scripts', [$this, 'toocheke_universal_set_post_views']);
+        if (is_admin()) { add_action('wp_ajax_toocheke_record_post_view', [$this, 'toocheke_ajax_record_post_view']); }
+        if (is_admin()) { add_action('wp_ajax_nopriv_toocheke_record_post_view', [$this, 'toocheke_ajax_record_post_view']); }
         // Remove issues with prefetching adding extra views
         remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
 

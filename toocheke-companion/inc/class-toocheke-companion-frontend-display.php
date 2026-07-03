@@ -690,54 +690,81 @@ trait Toocheke_Companion_Frontend_Display
                 return $count;
             }
 
+            /**
+             * Enqueue the view-tracking script on any page that should record a view.
+             *
+             * As of 2.2, view de-duplication no longer uses a cookie per post. Cookies
+             * named individually per post (toocheke_viewed_{ID}) accumulated without
+             * limit as a visitor browsed more comics, eventually growing the request
+             * header size past what many hosts allow and causing
+             * "431 Request Header Fields Too Large" errors. De-duplication is now
+             * handled client-side via a single localStorage entry, with the actual
+             * view recorded via a small async AJAX call. See
+             * toocheke_ajax_record_post_view() below.
+             */
             public function toocheke_universal_set_post_views()
             {
-                if (!is_singular(['comic', 'manga_chapter'])) {
-                    return; // Only run on comic or manga_chapter CPTs
+                $postID = null;
+
+                if (is_singular(['comic', 'manga_chapter'])) {
+                    $postID = get_the_ID();
+                } else {
+                    // Allows a theme to request view-tracking for a specific post ID
+                    // on a non-singular request -- for example, a homepage layout
+                    // that displays the latest comic.
+                    $postID = apply_filters('toocheke_companion_view_tracking_post_id', null);
                 }
 
-                $postID = get_the_ID();
                 if (! $postID) {
-                    return; // Safety check
-                }
-
-                // --- Theme exclusion ---
-                $theme = wp_get_theme();
-                $theme_names = ['Toocheke Premium', 'Toocheke'];
-                if (in_array($theme->name, $theme_names, true) || in_array($theme->parent_theme, $theme_names, true)) {
                     return;
                 }
 
-                // --- Bot check ---
-                $bots = ['bot', 'crawl', 'spider', 'slurp', 'facebookexternalhit', 'wget', 'curl'];
+                wp_enqueue_script(
+                    'toocheke-view-tracker',
+                    plugins_url('toocheke-companion' . '/js/view-tracker.js'),
+                    [],
+                    TOOCHEKE_COMPANION_VERSION,
+                    true
+                );
+
+                wp_localize_script('toocheke-view-tracker', 'toochekeViewTracker', [
+                    'ajaxurl'    => admin_url('admin-ajax.php'),
+                    'nonce'      => wp_create_nonce('toocheke-record-view'),
+                    'postId'     => (int) $postID,
+                    'windowDays' => 7,
+                ]);
+            }
+
+            /**
+             * AJAX handler that records a single post view. Called by
+             * js/view-tracker.js at most once per post per visitor per 7-day
+             * window, tracked client-side via localStorage rather than a cookie.
+             */
+            public function toocheke_ajax_record_post_view()
+            {
+                check_ajax_referer('toocheke-record-view', 'nonce');
+
+                $postID = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
+
+                if (! $postID || ! in_array(get_post_type($postID), ['comic', 'manga_chapter'], true)) {
+                    wp_send_json_error();
+                }
+
+                // --- Bot check (backstop) ---
+                $bots       = ['bot', 'crawl', 'spider', 'slurp', 'facebookexternalhit', 'wget', 'curl'];
                 $user_agent = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
                 foreach ($bots as $bot) {
                     if (strpos($user_agent, $bot) !== false) {
-                        return; // Detected bot — skip counting
+                        wp_send_json_error();
                     }
                 }
 
-                // --- Cookie setup ---
-                $cookie_name = 'toocheke_viewed_' . $postID;
+                $count_key = 'post_views_count';
+                $count     = (int) get_post_meta($postID, $count_key, true);
+                $count++;
+                update_post_meta($postID, $count_key, $count);
 
-                if (! isset($_COOKIE[$cookie_name])) {
-                    $count_key = 'post_views_count';
-                    $count     = (int) get_post_meta($postID, $count_key, true);
-
-                    $count++;
-                    update_post_meta($postID, $count_key, $count);
-
-                    // Set cookie to expire in 7 days
-                    setcookie(
-                        $cookie_name,
-                        '1',
-                        time() + (7 * DAY_IN_SECONDS),
-                        COOKIEPATH ?: '/',
-                        COOKIE_DOMAIN,
-                        is_ssl(),
-                        true
-                    );
-                }
+                wp_send_json_success(['count' => $count]);
             }
 
             public function toocheke_comic_archive_template($template)

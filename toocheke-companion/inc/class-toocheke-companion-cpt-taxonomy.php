@@ -159,6 +159,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'publicly_queryable'  => true,
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
+            'show_in_rest'        => true,
 
         ];
 
@@ -202,7 +203,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_in_menu'        => false,
             'show_in_nav_menus'   => true,
             'show_in_admin_bar'   => true,
-            'show_in_rest'        => false,
+            'show_in_rest'        => true,
             'menu_position'       => 7,
             'can_export'          => true,
             'has_archive'         => false,
@@ -251,7 +252,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_in_menu'        => false,
             'show_in_nav_menus'   => true,
             'show_in_admin_bar'   => true,
-            'show_in_rest'        => false,
+            'show_in_rest'        => true,
             'menu_position'       => 7,
             'can_export'          => true,
             'has_archive'         => false,
@@ -300,7 +301,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_in_menu'        => false,
             'show_in_nav_menus'   => true,
             'show_in_admin_bar'   => true,
-            'show_in_rest'        => false,
+            'show_in_rest'        => true,
             'menu_position'       => 7,
             'can_export'          => true,
             'has_archive'         => 'manga',
@@ -686,9 +687,23 @@ trait Toocheke_Companion_CPT_Taxonomy
 
             public function toocheke_companion_disable_block_editor_for_post_types($use_block_editor, $post_type)
             {
-                if ($post_type === 'series') {
-                    return false; // Disable block editor for 'series'
+                $classic_editor_post_types = [
+                    'series',
+                    'comic',
+                    'manga_series',
+                    'manga_volume',
+                    'manga_chapter',
+                ];
+
+                if (in_array($post_type, $classic_editor_post_types, true)) {
+                    // These post types keep REST access on (needed for
+                    // things like the Site Editor's Query Loop preview,
+                    // and any future block-editor feature that depends on
+                    // REST) but still use the classic editor for actual
+                    // editing, via this filter rather than show_in_rest.
+                    return false;
                 }
+
                 return $use_block_editor;
             }
 

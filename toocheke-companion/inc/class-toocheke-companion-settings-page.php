@@ -2561,22 +2561,24 @@ trait Toocheke_Companion_Settings_Page
                 add_submenu_page('toocheke-series-hub', 'Tags',           'Tags',       'edit_posts', 'edit-tags.php?taxonomy=series_tags&post_type=series',  null);
 
                 // ── 4. MANGA SERIES (position 5) ───────────────────────────────
-                add_menu_page('Manga Series', 'Manga Series', 'edit_posts', 'toocheke-manga-hub', [$this, 'toocheke_manga_hub_page'], $icon_manga_series, 5);
-                add_submenu_page('toocheke-manga-hub', 'Manga Hub',            'Hub',        'edit_posts', 'toocheke-manga-hub',                                              [$this, 'toocheke_manga_hub_page']);
-                add_submenu_page('toocheke-manga-hub', 'All Manga Series',     'All Series', 'edit_posts', 'edit.php?post_type=manga_series',                                 null);
-                add_submenu_page('toocheke-manga-hub', 'Add New Manga Series', 'Add New',    'edit_posts', 'post-new.php?post_type=manga_series',                             null);
-                add_submenu_page('toocheke-manga-hub', 'Manga Genres',         'Genres',     'edit_posts', 'edit-tags.php?taxonomy=manga_genre&post_type=manga_series',       null);
-                add_submenu_page('toocheke-manga-hub', 'Manga Publishers',     'Publishers', 'edit_posts', 'edit-tags.php?taxonomy=manga_publisher&post_type=manga_series',   null);
+                add_menu_page('Manga Series', 'Manga Series', 'edit_posts', 'toocheke-manga-series-hub', [$this, 'toocheke_manga_series_hub_page'], $icon_manga_series, 5);
+                add_submenu_page('toocheke-manga-series-hub', 'Manga Series Hub',            'Hub',        'edit_posts', 'toocheke-manga-series-hub',                                              [$this, 'toocheke_manga_series_hub_page']);
+                add_submenu_page('toocheke-manga-series-hub', 'All Manga Series',     'All Series', 'edit_posts', 'edit.php?post_type=manga_series',                                 null);
+                add_submenu_page('toocheke-manga-series-hub', 'Add New Manga Series', 'Add New',    'edit_posts', 'post-new.php?post_type=manga_series',                             null);
+                add_submenu_page('toocheke-manga-series-hub', 'Manga Genres',         'Genres',     'edit_posts', 'edit-tags.php?taxonomy=manga_genre&post_type=manga_series',       null);
+                add_submenu_page('toocheke-manga-series-hub', 'Manga Publishers',     'Publishers', 'edit_posts', 'edit-tags.php?taxonomy=manga_publisher&post_type=manga_series',   null);
 
                 // ── 5. MANGA VOLUMES (position 6) ──────────────────────────────
-                add_menu_page('Manga Volumes', 'Manga Volumes', 'edit_posts', 'toocheke-manga-volumes', [$this, 'toocheke_manga_volumes_hub_page'], $icon_manga_volume, 6);
-                add_submenu_page('toocheke-manga-volumes', 'All Manga Volumes',    'All Volumes',    'edit_posts', 'edit.php?post_type=manga_volume',    null);
-                add_submenu_page('toocheke-manga-volumes', 'Add New Manga Volume', 'Add New Volume', 'edit_posts', 'post-new.php?post_type=manga_volume',null);
+                add_menu_page('Manga Volumes', 'Manga Volumes', 'edit_posts', 'toocheke-manga-volumes-hub', [$this, 'toocheke_manga_volumes_hub_page'], $icon_manga_volume, 6);
+                  add_submenu_page('toocheke-manga-volumes-hub', 'Manga Volummes Hub',            'Hub',        'edit_posts', 'toocheke-manga-volumes-hub',                                              [$this, 'toocheke_manga_volumes_hub_page']);
+                add_submenu_page('toocheke-manga-volumes-hub', 'All Manga Volumes',    'All Volumes',    'edit_posts', 'edit.php?post_type=manga_volume',    null);
+                add_submenu_page('toocheke-manga-volumes-hub', 'Add New Manga Volume', 'Add New Volume', 'edit_posts', 'post-new.php?post_type=manga_volume',null);
 
                 // ── 6. MANGA CHAPTERS (position 7) ─────────────────────────────
-                add_menu_page('Manga Chapters', 'Manga Chapters', 'edit_posts', 'toocheke-manga-chapters', [$this, 'toocheke_manga_chapters_hub_page'], $icon_manga_chapter, 7);
-                add_submenu_page('toocheke-manga-chapters', 'All Manga Chapters',    'All Chapters',    'edit_posts', 'edit.php?post_type=manga_chapter',    null);
-                add_submenu_page('toocheke-manga-chapters', 'Add New Manga Chapter', 'Add New Chapter', 'edit_posts', 'post-new.php?post_type=manga_chapter',null);
+                add_menu_page('Manga Chapters', 'Manga Chapters', 'edit_posts', 'toocheke-manga-chapters-hub', [$this, 'toocheke_manga_chapters_hub_page'], $icon_manga_chapter, 7);
+                add_submenu_page('toocheke-manga-chapters-hub', 'Manga Chapters Hub',            'Hub',        'edit_posts', 'toocheke-manga-chapters-hub',                                              [$this, 'toocheke_manga_chapters_hub_page']);
+                add_submenu_page('toocheke-manga-chapters-hub', 'All Manga Chapters',    'All Chapters',    'edit_posts', 'edit.php?post_type=manga_chapter',    null);
+                add_submenu_page('toocheke-manga-chapters-hub', 'Add New Manga Chapter', 'Add New Chapter', 'edit_posts', 'post-new.php?post_type=manga_chapter',null);
             }
 
            public function toocheke_dashboard_hub_page()
@@ -2748,11 +2750,11 @@ public function toocheke_series_hub_page()
     <?php
 }
 
-public function toocheke_manga_hub_page()
+public function toocheke_manga_series_hub_page()
 {
     ?>
     <div class="wrap">
-        <h1><?php esc_html_e('Manga Management', 'toocheke-companion'); ?></h1>
+        <h1><?php esc_html_e('Manga Series Management', 'toocheke-companion'); ?></h1>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
 
             <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
@@ -2862,53 +2864,53 @@ public function toocheke_manga_hub_page()
 
                 // ── MANGA SERIES ───────────────────────────────────────────────
                 if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    $parent_file  = 'toocheke-manga-hub';
+                    $parent_file  = 'toocheke-manga-series-hub';
                     $submenu_file = 'edit.php?post_type=manga_series';
                 }
                 if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    $parent_file  = 'toocheke-manga-hub';
+                    $parent_file  = 'toocheke-manga-series-hub';
                     $submenu_file = 'post-new.php?post_type=manga_series';
                 }
                 if ($pagenow === 'post.php' && get_post_type() === 'manga_series') {
-                    $parent_file  = 'toocheke-manga-hub';
+                    $parent_file  = 'toocheke-manga-series-hub';
                     $submenu_file = 'edit.php?post_type=manga_series';
                 }
                 // Manga Series taxonomies (list screen)
                 if ($pagenow === 'edit-tags.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    $parent_file  = 'toocheke-manga-hub';
+                    $parent_file  = 'toocheke-manga-series-hub';
                     $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=manga_series';
                 }
                 // Manga Series taxonomies (editing a single term)
                 if ($pagenow === 'term.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_series') {
-                    $parent_file  = 'toocheke-manga-hub';
+                    $parent_file  = 'toocheke-manga-series-hub';
                     $submenu_file = 'edit-tags.php?taxonomy=' . ($_GET['taxonomy'] ?? '') . '&post_type=manga_series';
                 }
 
                 // ── MANGA VOLUMES ──────────────────────────────────────────────
                 if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_volume') {
-                    $parent_file  = 'toocheke-manga-volumes';
+                    $parent_file  = 'toocheke-manga-volumes-hub';
                     $submenu_file = 'edit.php?post_type=manga_volume';
                 }
                 if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_volume') {
-                    $parent_file  = 'toocheke-manga-volumes';
+                    $parent_file  = 'toocheke-manga-volumes-hub';
                     $submenu_file = 'post-new.php?post_type=manga_volume';
                 }
                 if ($pagenow === 'post.php' && get_post_type() === 'manga_volume') {
-                    $parent_file  = 'toocheke-manga-volumes';
+                    $parent_file  = 'toocheke-manga-volumes-hub';
                     $submenu_file = 'edit.php?post_type=manga_volume';
                 }
 
                 // ── MANGA CHAPTERS ─────────────────────────────────────────────
                 if ($pagenow === 'edit.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_chapter') {
-                    $parent_file  = 'toocheke-manga-chapters';
+                    $parent_file  = 'toocheke-manga-chapters-hub';
                     $submenu_file = 'edit.php?post_type=manga_chapter';
                 }
                 if ($pagenow === 'post-new.php' && isset($_GET['post_type']) && $_GET['post_type'] === 'manga_chapter') {
-                    $parent_file  = 'toocheke-manga-chapters';
+                    $parent_file  = 'toocheke-manga-chapters-hub';
                     $submenu_file = 'post-new.php?post_type=manga_chapter';
                 }
                 if ($pagenow === 'post.php' && get_post_type() === 'manga_chapter') {
-                    $parent_file  = 'toocheke-manga-chapters';
+                    $parent_file  = 'toocheke-manga-chapters-hub';
                     $submenu_file = 'edit.php?post_type=manga_chapter';
                 }
                 // Slides (Premium) — under toocheke-slides
@@ -2949,9 +2951,9 @@ public function toocheke_manga_hub_page()
                     'toocheke-menu',
                     'toocheke-comics-hub',
                     'toocheke-series-hub',
-                    'toocheke-manga-hub',
-                    'toocheke-manga-volumes',
-                    'toocheke-manga-chapters',
+                    'toocheke-manga-series-hub',
+                    'toocheke-manga-volumes-hub',
+                    'toocheke-manga-chapters-hub',
                 ];
 
                 // Add Premium menus only if Toocheke Premium is active
@@ -3017,7 +3019,7 @@ public function toocheke_manga_hub_page()
             {
                 ?>
                 <div class="wrap">
-                    <h1><?php esc_html_e('Manga Volumes', 'toocheke-companion'); ?></h1>
+                    <h1><?php esc_html_e('Manga Volumes Management', 'toocheke-companion'); ?></h1>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
                         <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
                             <h2><?php esc_html_e('All Manga Volumes', 'toocheke-companion'); ?></h2>
@@ -3038,7 +3040,7 @@ public function toocheke_manga_hub_page()
             {
                 ?>
                 <div class="wrap">
-                    <h1><?php esc_html_e('Manga Chapters', 'toocheke-companion'); ?></h1>
+                    <h1><?php esc_html_e('Manga Chapters Management', 'toocheke-companion'); ?></h1>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;">
                         <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
                             <h2><?php esc_html_e('All Manga Chapters', 'toocheke-companion'); ?></h2>

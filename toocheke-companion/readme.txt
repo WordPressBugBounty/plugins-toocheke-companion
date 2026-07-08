@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.1
+Stable tag: 2.2
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -128,6 +128,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.2 =
+* FIX: Optimized hiding of meta fields on comic posts.
 
 = 2.1 =
 * FIX: Resolved an issue where readers browsing many comics in one session could eventually see "431 Request Header Fields Too Large" errors.

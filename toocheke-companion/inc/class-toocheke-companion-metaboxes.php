@@ -28,9 +28,6 @@ trait Toocheke_Companion_Metaboxes
              */
             public function toocheke_comic_title_2nd_language_meta_box()
             {
-                if (! get_option('toocheke-bilingual-display')) {
-                    return;
-                }
                 add_meta_box(
                     'comic-title-2nd-language',
                     __('Comic Title for 2nd Language', 'toocheke-companion'),
@@ -91,9 +88,6 @@ trait Toocheke_Companion_Metaboxes
             //This function initializes the meta box.
             public function toocheke_desktop_comic_editor_meta_box()
             {
-                if (! get_option('toocheke-comic-layout-devices')) {
-                    return;
-                }
                 add_meta_box(
                     'desktop-comic-editor',
                     __('Desktop Comic Editor', 'toocheke-companion'),
@@ -212,9 +206,6 @@ trait Toocheke_Companion_Metaboxes
             //This function initializes the meta box.
             public function toocheke_2nd_language_mobile_comic_editor_meta_box()
             {
-                if (! get_option('toocheke-bilingual-display')) {
-                    return;
-                }
                 add_meta_box(
                     'mobile-comic-2nd-language-editor',
                     __('Mobile Comic Editor for 2nd Language', 'toocheke-companion'),
@@ -274,9 +265,6 @@ trait Toocheke_Companion_Metaboxes
             //This function initializes the meta box.
             public function toocheke_2nd_language_comic_blog_post_editor_meta_box()
             {
-                if (! get_option('toocheke-bilingual-display')) {
-                    return;
-                }
                 add_meta_box(
                     'comic-2nd-language-blog-post-editor',
                     __("Comic's Blog Post Editor for 2nd Language", 'toocheke-companion'),
@@ -336,12 +324,6 @@ trait Toocheke_Companion_Metaboxes
             //This function initializes the meta box.
             public function toocheke_2nd_language_desktop_comic_editor_meta_box()
             {
-                if (! get_option('toocheke-bilingual-display')) {
-                    return;
-                }
-                if (! get_option('toocheke-comic-layout-devices')) {
-                    return;
-                }
                 add_meta_box(
                     'desktop-comic-2nd-language-editor',
                     __('Desktop Comic Editor for 2nd Language', 'toocheke-companion'),
@@ -393,6 +375,53 @@ trait Toocheke_Companion_Metaboxes
                     $data = wp_kses_post($_POST['desktop_comic_2nd_language_editor']);
                     update_post_meta($post_id, 'desktop_comic_2nd_language_editor', $data);
                 }
+            }
+
+            /**
+             * Sets the DEFAULT hidden state (Screen Options) for the bilingual /
+             * dual-device-layout comic metaboxes, based on the site-wide options.
+             *
+             * This only affects users who have never saved a Screen Options
+             * preference on the comic edit screen. Once a user has customized
+             * Screen Options for that screen, WordPress uses their saved
+             * preference instead and this filter is no longer consulted for
+             * them - which is the intended "convenience default, user can
+             * override" behavior (see toocheke_desktop_comic_editor_meta_box(),
+             * toocheke_comic_title_2nd_language_meta_box(),
+             * toocheke_2nd_language_mobile_comic_editor_meta_box(),
+             * toocheke_2nd_language_comic_blog_post_editor_meta_box(), and
+             * toocheke_2nd_language_desktop_comic_editor_meta_box(), all of
+             * which now register unconditionally).
+             *
+             * @param string[]   $hidden Metabox IDs hidden by default.
+             * @param WP_Screen  $screen Current screen.
+             * @return string[]
+             */
+            public function toocheke_bilingual_layout_default_hidden_meta_boxes($hidden, $screen)
+            {
+                if (! isset($screen->id) || 'comic' !== $screen->id) {
+                    return $hidden;
+                }
+
+                $bilingual    = (bool) get_option('toocheke-bilingual-display');
+                $dual_layout  = (bool) get_option('toocheke-comic-layout-devices');
+
+                if (! $bilingual) {
+                    $hidden[] = 'comic-title-2nd-language';
+                    $hidden[] = 'mobile-comic-2nd-language-editor';
+                    $hidden[] = 'comic-2nd-language-blog-post-editor';
+                }
+
+                if (! $dual_layout) {
+                    $hidden[] = 'desktop-comic-editor';
+                }
+
+                // Gated by both options, so hidden by default unless both are on.
+                if (! $bilingual || ! $dual_layout) {
+                    $hidden[] = 'desktop-comic-2nd-language-editor';
+                }
+
+                return array_unique($hidden);
             }
 
             /**

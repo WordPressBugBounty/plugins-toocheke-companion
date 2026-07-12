@@ -1,0 +1,96 @@
+/**
+ * Toocheke Companion — options page nav collapse.
+ *
+ * Only enqueued on Toocheke > Options (see
+ * toocheke_enqueue_options_nav_assets() in class-toocheke-companion-settings-page.php).
+ *
+ * The tab row's default WordPress wrapping behavior is left completely
+ * alone here — no forced white-space override. An earlier version of this
+ * file tried forcing white-space: nowrap so overflow could be measured by
+ * width, but that CSS override turned out to be unreliably overridden by
+ * something else active in wp-admin on some sites, which silently broke
+ * detection. The JS now measures wrapped *height* instead — see
+ * js/toocheke-options-nav.js — which works correctly no matter how the
+ * tabs actually end up laid out, so there's nothing here that needs to win
+ * a CSS specificity fight. There is no fixed-width media query either, on
+ * purpose: the breakpoint is "wherever the tabs you currently have stop
+ * fitting," which is exactly what the JS measures directly rather than
+ * guesses.
+ */
+
+/* The toggle button is hidden until JS confirms the tabs are overflowing. */
+.toocheke-nav-toggle {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.toocheke-nav-toggle .dashicons {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+}
+
+.toocheke-nav-toggle:hover,
+.toocheke-nav-toggle:focus {
+    border-color: var(--wp-admin-theme-color, #3858e9);
+    color: var(--wp-admin-theme-color, #3858e9);
+}
+
+/* Once JS detects overflow, the button becomes visible and the tab row is
+   measured/clipped to a single line so the button + current-tab label sit
+   in its place instead. */
+.toocheke-nav-overflowing .toocheke-nav-toggle {
+    display: inline-flex !important;
+}
+
+.toocheke-nav-overflowing #toocheke-nav-tab-wrapper {
+    overflow: hidden !important;
+    max-height: 0 !important;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0 !important;
+    pointer-events: none;
+    transition: none;
+}
+
+/* Clicking the toggle adds this second class, revealing the same tab links
+   — untouched, same hrefs, same active-tab styling from PHP — as a
+   full-width stacked list directly under the button. */
+.toocheke-nav-overflowing.toocheke-nav-open #toocheke-nav-tab-wrapper {
+    display: block !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    pointer-events: auto;
+    margin: 0 0 12px;
+    padding: 6px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.toocheke-nav-overflowing.toocheke-nav-open #toocheke-nav-tab-wrapper .nav-tab {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 4px;
+    border-radius: 3px;
+    text-align: left;
+}
+
+.toocheke-nav-overflowing.toocheke-nav-open #toocheke-nav-tab-wrapper .nav-tab-active {
+    background: var(--wp-admin-theme-color, #3858e9);
+    color: #fff;
+    border-color: var(--wp-admin-theme-color, #3858e9);
+}

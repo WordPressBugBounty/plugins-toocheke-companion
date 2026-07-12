@@ -101,13 +101,18 @@ trait Toocheke_Companion_Settings_Page
             {
                 $theme = wp_get_theme(); // gets the current theme
     ?>
-        <div class="wrap">
+        <div class="wrap" id="toocheke-options-wrap">
             <h1>Toocheke Options</h1>
             <?php
                 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'comic_display_options';
             ?>
 
-            <h2 class="nav-tab-wrapper">
+            <button type="button" id="toocheke-nav-toggle" class="toocheke-nav-toggle" aria-expanded="false">
+                <span class="dashicons dashicons-menu"></span>
+                <span id="toocheke-nav-toggle-label">Menu</span>
+            </button>
+
+            <h2 class="nav-tab-wrapper" id="toocheke-nav-tab-wrapper">
                 <a href="?page=toocheke-options-page&tab=comic_display_options"
                 class="nav-tab <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">
                     Display
@@ -187,6 +192,11 @@ trait Toocheke_Companion_Settings_Page
                     ComicScout
                 </a>
 
+                <a href="?page=toocheke-options-page&tab=bluesky_options"
+                class="nav-tab <?php echo $active_tab == 'bluesky_options' ? 'nav-tab-active' : ''; ?>">
+                    Bluesky
+                </a>
+
                 <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
                     <a href="?page=toocheke-options-page&tab=buy_options"
                     class="nav-tab <?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">
@@ -199,6 +209,34 @@ trait Toocheke_Companion_Settings_Page
                     </a>
                 <?php endif; ?>
             </h2>
+
+            <script>
+            /**
+             * Critical, inline, synchronous check — deliberately NOT in the
+             * external toocheke-options-nav.js file. That file only runs
+             * once fully downloaded and parsed, which on a page also
+             * loading several other plugins' scripts can take long enough
+             * to be visible as tabs flashing full-width before collapsing.
+             * This tiny inline copy runs the instant the browser reaches
+             * this point in the HTML — no network wait at all — so the
+             * hamburger-vs-tabs decision is already made before the page
+             * ever paints. The external file still owns click-to-open and
+             * re-checking on window resize; this only handles the very
+             * first, otherwise-visible flash on initial page load.
+             */
+            (function () {
+                var wrap = document.getElementById('toocheke-options-wrap');
+                var nav  = document.getElementById('toocheke-nav-tab-wrapper');
+                if (!wrap || !nav) { return; }
+                var firstTab = nav.querySelector('.nav-tab');
+                if (!firstTab) { return; }
+                var oneLineHeight = firstTab.offsetHeight;
+                var rowHeight = nav.offsetHeight;
+                if (oneLineHeight > 0 && rowHeight > oneLineHeight * 1.5) {
+                    wrap.classList.add('toocheke-nav-overflowing');
+                }
+            })();
+            </script>
 
             <form method="post" action="<?php echo esc_url(add_query_arg('tab', $active_tab, admin_url('options.php'))); ?>">
                 <?php
@@ -694,6 +732,12 @@ trait Toocheke_Companion_Settings_Page
                             "toocheke-settings",
                             "toocheke-comicscout-global-social-share-image"
                         );
+                        break;
+                    case 'bluesky_options':
+                        // All Bluesky settings registration lives in
+                        // inc/class-toocheke-companion-bluesky.php so the
+                        // feature stays self-contained; see that file.
+                        $this->toocheke_bluesky_register_settings_fields();
                         break;
                     //Options for sponsoring a comic
                     case 'sponsor_options':
@@ -2475,6 +2519,45 @@ trait Toocheke_Companion_Settings_Page
                 //color picker
                 wp_enqueue_style('wp-color-picker');
                 wp_enqueue_script('wp-color-picker');
+            }
+
+            /**
+             * Enqueues the options-page nav collapse CSS/JS — scoped to just
+             * the Toocheke options screen (not site-wide admin, unlike
+             * toocheke_admin_styles_and_scripts() above) since it's only
+             * relevant there.
+             *
+             * Cache-busted with filemtime() rather than the plugin's static
+             * version constant. This plugin isn't being version-bumped for
+             * every small fix during this feature's development, so a
+             * static ?ver= would leave browsers serving a stale cached copy
+             * of these files after every edit, indefinitely, with no way
+             * for the browser to know anything changed. filemtime() means
+             * the cache-busting value changes automatically the moment the
+             * file's content does, with no version bump required.
+             */
+            public function toocheke_enqueue_options_nav_assets()
+            {
+                if (empty($_GET['page']) || 'toocheke-options-page' !== $_GET['page']) {
+                    return;
+                }
+
+                $css_path = TOOCHEKE_COMPANION_PLUGIN_DIR . 'css/toocheke-options-nav.css';
+                $js_path  = TOOCHEKE_COMPANION_PLUGIN_DIR . 'js/toocheke-options-nav.js';
+
+                wp_enqueue_style(
+                    'toocheke-options-nav',
+                    TOOCHEKE_COMPANION_PLUGIN_URL . 'css/toocheke-options-nav.css',
+                    [],
+                    file_exists($css_path) ? filemtime($css_path) : TOOCHEKE_COMPANION_VERSION
+                );
+                wp_enqueue_script(
+                    'toocheke-options-nav',
+                    TOOCHEKE_COMPANION_PLUGIN_URL . 'js/toocheke-options-nav.js',
+                    ['jquery'],
+                    file_exists($js_path) ? filemtime($js_path) : TOOCHEKE_COMPANION_VERSION,
+                    true
+                );
             }
 
             /**

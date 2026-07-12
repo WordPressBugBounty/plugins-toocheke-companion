@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.2
+Stable tag: 2.3
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -37,6 +37,7 @@ Comics published with Toocheke Companion can also be discovered through **[Comic
 - Infinite scroll for archive display
 - Bilingual/multilingual comic and manga support
 - Optimize your comic images by reducing file sizes, saving server space, and improving page load times.
+- Automatically share comic and manga chapter posts to Bluesky when they're published, with optional random archive re-posting for older comics. Includes card or text+image post formats, a customizable message template, and connection setup under Toocheke → Options → Bluesky.
 - ⭐ **ComicScout integration** — get your comic listed on [ComicScout](https://www.thecomicscout.com/), a curated discovery platform built specifically for independent comic websites to help readers discover new comics
 
 == Installation == 
@@ -128,6 +129,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.3 =
+* NEW: Automatically share comic and manga chapter posts to Bluesky when they're published, with optional random archive re-posting for older comics. Includes card or text+image post formats, a customizable message template, and connection setup under Toocheke → Options → Bluesky.
+* NEW: Streamlined the options page navigation on smaller screens — the tab row now automatically collapses into a menu button once there are too many tabs to fit, instead of wrapping awkwardly.
 
 = 2.2 =
 * FIX: Optimized hiding of meta fields on comic posts.

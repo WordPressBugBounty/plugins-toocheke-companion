@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.2
+ * Version:     2.3
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.2');
+    define('TOOCHEKE_COMPANION_VERSION', '2.3');
 }
 
 /**
@@ -52,6 +52,7 @@ require_once __DIR__ . '/inc/class-toocheke-companion-manga-sort-filter.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-comic-sort-filter.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-quick-bulk-edit.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-frontend-display.php';
+require_once __DIR__ . '/inc/class-toocheke-companion-bluesky.php';
 
 class Toocheke_Companion_Comic_Features
 {
@@ -73,6 +74,7 @@ class Toocheke_Companion_Comic_Features
     use Toocheke_Companion_Comic_Sort_Filter;
     use Toocheke_Companion_Quick_Bulk_Edit;
     use Toocheke_Companion_Frontend_Display;
+    use Toocheke_Companion_Bluesky;
 
     public function __construct()
     {
@@ -97,6 +99,7 @@ class Toocheke_Companion_Comic_Features
         add_action('init', [$this, 'toocheke_companion_create_comic_custom_post_type'], 0);
         register_activation_hook(__FILE__, [$this, 'toocheke_rewrite_flush']);
         register_activation_hook(__FILE__, [$this, 'toocheke_set_default_options']);
+        register_deactivation_hook(__FILE__, [$this, 'toocheke_bluesky_deactivation_cleanup']);
 
         // Keep the cached comic-id list used by the "all chapters" shortcode
         // (see toocheke_get_chapter_comic_ids() in inc/toocheke-companion-template-functions.php)
@@ -220,6 +223,7 @@ class Toocheke_Companion_Comic_Features
         add_filter('excerpt_length', [$this, 'toocheke_excerpt_length'], 999);
         add_filter('excerpt_length', [$this, 'toocheke_universal_excerpt_length'], 999);
         if (is_admin()) { add_action('admin_print_styles', [$this, 'toocheke_admin_styles_and_scripts']); }
+        if (is_admin()) { add_action('admin_enqueue_scripts', [$this, 'toocheke_enqueue_options_nav_assets']); }
         add_action('wp_enqueue_scripts', [$this, 'toocheke_frontend_styles_and_scripts']);
         add_action('wp_enqueue_scripts', [$this, 'toocheke_enqueue_reader_libraries']);
         add_filter('comment_post_redirect', [$this, 'toocheke_redirect_comments'], 10, 2);
@@ -390,12 +394,33 @@ class Toocheke_Companion_Comic_Features
 
         //Admin Dismiss
         if (is_admin()) { add_action('wp_ajax_toocheke_dismiss_notice', [$this, 'toocheke_dismiss_notice_handler']); }
+
+        // Bluesky auto-posting — every hook this feature needs lives in
+        // inc/class-toocheke-companion-bluesky.php; see that file's header.
+        $this->toocheke_bluesky_register_hooks();
     }
 
     /* Set default options */
     public function toocheke_set_default_options(){
         if (get_option('toocheke-global-buy-comic') === false) {
             add_option('toocheke-global-buy-comic', 1);
+        }
+        // Bluesky defaults — only seeded if not already set, so re-activating
+        // the plugin never clobbers a site's existing configuration.
+        if (get_option('toocheke-bluesky-post-format') === false) {
+            add_option('toocheke-bluesky-post-format', 'text_image');
+        }
+        if (get_option('toocheke-bluesky-message-template') === false) {
+            add_option('toocheke-bluesky-message-template', "New page is up!\n\n%%TITLE%%\n%%URL%%");
+        }
+        if (get_option('toocheke-bluesky-card-caption') === false) {
+            add_option('toocheke-bluesky-card-caption', 'New page is up! %%TITLE%%');
+        }
+        if (get_option('toocheke-bluesky-random-frequency-number') === false) {
+            add_option('toocheke-bluesky-random-frequency-number', 6);
+        }
+        if (get_option('toocheke-bluesky-random-frequency-unit') === false) {
+            add_option('toocheke-bluesky-random-frequency-unit', 'hours');
         }
     }
 

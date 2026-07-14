@@ -820,39 +820,142 @@ trait Toocheke_Companion_Frontend_Display
                 echo '<span class="byline"> ' . wp_kses_data($byline) . '</span>';
             }
 
+            /**
+             * Handles the /random/ URL for sites using a non-Toocheke theme
+             * (see the theme-name check around where this is hooked in
+             * toocheke-companion.php's init() — Toocheke/Toocheke Premium
+             * themes have their own copy of this in functions.php).
+             *
+             * Two deliberate hardening changes here, both aimed at the same
+             * problem: this URL being repeatedly hit by bots/scrapers can
+             * put real load on a server, since the original version ran a
+             * fresh `ORDER BY RAND()` query (an expensive full-table sort
+             * that gets slower as the comic archive grows) on every single
+             * request.
+             *
+             * 1. If the site owner has turned off "Do you want to display
+             *    the random button?" (toocheke-random-navigation) entirely,
+             *    there's no legitimate reason for this URL to still work —
+             *    a real 404 is returned instead of processing the redirect.
+             *    This checks the option directly here, rather than only
+             *    conditionally registering the rewrite rule, since rewrite
+             *    rules are cached and only regenerate on a flush — checking
+             *    here takes effect immediately the moment the setting is
+             *    saved, with no flush-timing gap.
+             *
+             * 2. Even when the button IS enabled, the eligible comic ID
+             *    list is cached for a few minutes and picked from with
+             *    PHP's array_rand() instead of re-querying MySQL with
+             *    ORDER BY RAND() on every hit. A burst of requests within
+             *    that window — whether a bot flood or just a lot of real
+             *    visitors — shares one cheap lookup instead of each paying
+             *    for its own full-table sort. New comics can take up to the
+             *    cache lifetime to enter the pool; see
+             *    toocheke_invalidate_random_comic_cache(), which clears it
+             *    immediately on publish so that wait is only relevant if
+             *    that hook somehow doesn't fire.
+             */
             public function toocheke_random_template()
             {
-                if (get_query_var('random') == 1) {
+                if (get_query_var('random') != 1) {
+                    return;
+                }
+
+                if (! get_option('toocheke-random-navigation')) {
+                    $this->toocheke_force_404();
+                    return;
+                }
+
+                $sid = absint(get_query_var('sid'));
+
+                $cache_key = 'toocheke_random_ids_' . ($sid > 0 ? $sid : 'all');
+                $ids       = get_transient($cache_key);
+
+                if (false === $ids) {
                     $args = [
                         'post_type'      => 'comic',
-                        'orderby'        => 'rand',
-                        'posts_per_page' => 1,
                         'post_status'    => 'publish',
+                        'posts_per_page' => -1,
+                        'fields'         => 'ids',
                     ];
-
-                    $sid = absint(get_query_var('sid'));
                     if ($sid > 0) {
                         $args['post_parent'] = $sid;
                     }
-
-                    $posts = get_posts($args);
-
-                    if (! empty($posts)) {
-                        $post = reset($posts);
-                        $link = get_permalink($post);
-
-                        // Append sid to the permalink if provided
-                        if ($sid > 0) {
-                            $link = add_query_arg('sid', $sid, $link);
-                        }
-                        if (get_option('toocheke-scroll-past-header') && 1 == get_option('toocheke-scroll-past-header')) {
-                            $link = $link . '#main';
-                        }
-
-                        wp_redirect($link, 307);
-                        exit;
-                    }
+                    $ids = get_posts($args);
+                    set_transient($cache_key, $ids, 5 * MINUTE_IN_SECONDS);
                 }
+
+                if (empty($ids)) {
+                    $this->toocheke_force_404();
+                    return;
+                }
+
+                $random_id = $ids[array_rand($ids)];
+                $link      = get_permalink($random_id);
+
+                // Append sid to the permalink if provided
+                if ($sid > 0) {
+                    $link = add_query_arg('sid', $sid, $link);
+                }
+                if (get_option('toocheke-scroll-past-header') && 1 == get_option('toocheke-scroll-past-header')) {
+                    $link = $link . '#main';
+                }
+
+                wp_redirect($link, 307);
+                exit;
+            }
+
+            /**
+             * Clears the cached random-comic ID list(s) used by
+             * toocheke_random_template() so a newly published (or
+             * unpublished/deleted) comic is reflected immediately rather
+             * than waiting out the cache lifetime. Clears both the
+             * site-wide pool and, if the comic belongs to a series, that
+             * series' own pool.
+             */
+            public function toocheke_invalidate_random_comic_cache($post_id)
+            {
+                if ('comic' !== get_post_type($post_id)) {
+                    return;
+                }
+
+                delete_transient('toocheke_random_ids_all');
+
+                $series_id = (int) wp_get_post_parent_id($post_id);
+                if ($series_id > 0) {
+                    delete_transient('toocheke_random_ids_' . $series_id);
+                }
+            }
+
+            /**
+             * Standard WP pattern for deliberately forcing a 404 response
+             * from a template_redirect-hooked function.
+             */
+            private function toocheke_force_404()
+            {
+                global $wp_query;
+                $wp_query->set_404();
+                status_header(404);
+                nocache_headers();
+            }
+
+            /**
+             * Adds a Disallow rule for /random/ to WordPress's own virtual
+             * robots.txt (site owner hasn't uploaded a physical robots.txt
+             * file of their own). This only ever helps well-behaved
+             * crawlers (Google, Bing, etc.) that actually respect
+             * robots.txt -- it does nothing against a bot that ignores it,
+             * but it's a free, safe way to stop legitimate crawlers from
+             * wasting crawl budget on a redirect-only URL with no content
+             * of its own to index.
+             */
+            public function toocheke_random_robots_disallow($output, $public)
+            {
+                if ('1' === (string) $public) {
+                    $output .= "Disallow: /random\n";
+                    $output .= "Disallow: /random/\n";
+                }
+                return $output;
             }
 
             public function toocheke_extend_search($search, $query)

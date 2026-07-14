@@ -986,6 +986,34 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
+    /**
+     * Permalink for a post, with a series id (?sid=) appended when the post
+     * is a comic assigned to a series. Mirrors the same handling already
+     * used for RSS permalinks — see toocheke_add_series_id_to_rss_permalink()
+     * in class-toocheke-companion-rss-feeds.php: a comic's post_parent is
+     * its series, and the front end needs that ?sid= param to render the
+     * comic in the context of that series (series-scoped navigation,
+     * background/branding, etc.) rather than as a standalone page. Manga
+     * chapters don't use this same post_parent-as-series convention, so
+     * this only applies to the 'comic' post type, exactly like the RSS
+     * version.
+     */
+    private function toocheke_bluesky_get_post_url($post_id, $post_type)
+    {
+        $permalink = get_permalink($post_id);
+
+        if ('comic' !== $post_type) {
+            return $permalink;
+        }
+
+        $series_id = (int) wp_get_post_parent_id($post_id);
+        if ($series_id > 0) {
+            $permalink = add_query_arg('sid', $series_id, $permalink);
+        }
+
+        return $permalink;
+    }
+
     /* =========================================================================
        CORE: BUILD + SEND ONE POST
        This is the single shared entry point used by both the publish-time
@@ -1051,7 +1079,7 @@ trait Toocheke_Companion_Bluesky
             'embed'     => [
                 '$type'    => 'app.bsky.embed.external',
                 'external' => [
-                    'uri'         => get_permalink($post_id),
+                    'uri'         => $this->toocheke_bluesky_get_post_url($post_id, $post_type),
                     'title'       => get_the_title($post_id),
                     'description' => $this->toocheke_bluesky_get_card_description($post_id, $post_type),
                     'thumb'       => $upload['blob'],
@@ -1097,7 +1125,7 @@ trait Toocheke_Companion_Bluesky
             return $upload;
         }
 
-        $url  = get_permalink($post_id);
+        $url  = $this->toocheke_bluesky_get_post_url($post_id, $post_type);
         $text = $this->toocheke_bluesky_build_message_text(get_the_title($post_id), $url);
         $alt  = $this->toocheke_bluesky_get_alt_text($post_id, $post_type);
 

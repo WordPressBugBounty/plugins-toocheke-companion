@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.3
+Stable tag: 2.4
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -129,6 +129,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.4 =
+* FIX: Bluesky posts for comics assigned to a series now include the series ID in the link.
+* FIX: Reduced server load from the /random/ comic URL (used as a compatibility fallback for non-Toocheke themes).
 
 = 2.3 =
 * NEW: Automatically share comic and manga chapter posts to Bluesky when they're published, with optional random archive re-posting for older comics. Includes card or text+image post formats, a customizable message template, and connection setup under Toocheke → Options → Bluesky.

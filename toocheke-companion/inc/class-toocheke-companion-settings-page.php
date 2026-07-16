@@ -207,6 +207,11 @@ trait Toocheke_Companion_Settings_Page
                     class="nav-tab <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">
                         Sponsor Comic
                     </a>
+
+                    <a href="?page=toocheke-options-page&tab=notification_options"
+                    class="nav-tab <?php echo $active_tab == 'notification_options' ? 'nav-tab-active' : ''; ?>">
+                        Notifications
+                    </a>
                 <?php endif; ?>
             </h2>
 
@@ -738,6 +743,16 @@ trait Toocheke_Companion_Settings_Page
                         // inc/class-toocheke-companion-bluesky.php so the
                         // feature stays self-contained; see that file.
                         $this->toocheke_bluesky_register_settings_fields();
+                        break;
+                    // Email notifications — Premium only, same gate as
+                    // 'buy_options' / 'sponsor_options' below. All settings
+                    // registration lives in
+                    // inc/class-toocheke-companion-notifications.php so the
+                    // feature stays self-contained; see that file.
+                    case 'notification_options':
+                        if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
+                            $this->toocheke_notifications_register_settings_fields();
+                        }
                         break;
                     //Options for sponsoring a comic
                     case 'sponsor_options':

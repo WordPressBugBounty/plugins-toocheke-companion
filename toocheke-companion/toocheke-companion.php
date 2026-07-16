@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.4
+ * Version:     2.5
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.4');
+    define('TOOCHEKE_COMPANION_VERSION', '2.5');
 }
 
 /**
@@ -53,6 +53,7 @@ require_once __DIR__ . '/inc/class-toocheke-companion-comic-sort-filter.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-quick-bulk-edit.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-frontend-display.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-bluesky.php';
+require_once __DIR__ . '/inc/class-toocheke-companion-notifications.php';
 
 class Toocheke_Companion_Comic_Features
 {
@@ -75,6 +76,7 @@ class Toocheke_Companion_Comic_Features
     use Toocheke_Companion_Quick_Bulk_Edit;
     use Toocheke_Companion_Frontend_Display;
     use Toocheke_Companion_Bluesky;
+    use Toocheke_Companion_Notifications;
 
     public function __construct()
     {
@@ -99,7 +101,9 @@ class Toocheke_Companion_Comic_Features
         add_action('init', [$this, 'toocheke_companion_create_comic_custom_post_type'], 0);
         register_activation_hook(__FILE__, [$this, 'toocheke_rewrite_flush']);
         register_activation_hook(__FILE__, [$this, 'toocheke_set_default_options']);
+        register_activation_hook(__FILE__, [$this, 'toocheke_notifications_create_tables']);
         register_deactivation_hook(__FILE__, [$this, 'toocheke_bluesky_deactivation_cleanup']);
+        register_deactivation_hook(__FILE__, [$this, 'toocheke_notifications_deactivation_cleanup']);
 
         // Keep the cached comic-id list used by the "all chapters" shortcode
         // (see toocheke_get_chapter_comic_ids() in inc/toocheke-companion-template-functions.php)
@@ -401,6 +405,11 @@ class Toocheke_Companion_Comic_Features
         // Bluesky auto-posting — every hook this feature needs lives in
         // inc/class-toocheke-companion-bluesky.php; see that file's header.
         $this->toocheke_bluesky_register_hooks();
+
+        // Email notifications (Premium only) — every hook this feature
+        // needs lives in inc/class-toocheke-companion-notifications.php;
+        // see that file's header.
+        $this->toocheke_notifications_register_hooks();
     }
 
     /* Set default options */

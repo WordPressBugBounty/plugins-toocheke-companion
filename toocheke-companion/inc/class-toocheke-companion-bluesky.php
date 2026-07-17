@@ -276,7 +276,12 @@ trait Toocheke_Companion_Bluesky
         <div id="toocheke-bluesky-card-caption-row">
             <textarea name="toocheke-bluesky-card-caption" id="toocheke-bluesky-card-caption" rows="2" cols="50" class="large-text"><?php echo esc_textarea($value); ?></textarea>
             <p class="description">
-                <?php esc_html_e('A short caption shown above the link card. Use %%TITLE%% for the post title.', 'toocheke-companion'); ?>
+                <?php
+                echo wp_kses(
+                    __('A short caption shown above the link card. Available placeholders: <strong>%%TITLE%%</strong>, <strong>%%SERIES_TITLE%%</strong>, <strong>%%MANGA_SERIES_TITLE%%</strong>, <strong>%%MANGA_VOLUME_TITLE%%</strong>, <strong>%%EXCERPT%%</strong>, <strong>%%BLOG_POST%%</strong>, <strong>%%NOTES%%</strong>, <strong>%%CHARACTERS%%</strong>, <strong>%%LOCATIONS%%</strong>, <strong>%%TAGS%%</strong>, <strong>%%CHAPTER%%</strong>, and <strong>%%COLLECTIONS%%</strong>. There\'s no %%URL%% here since the card itself already links to the post. Comic-only placeholders resolve to nothing on a Manga Chapter post, and Manga-only placeholders resolve to nothing on a Comic post, so it\'s safe to use the same caption for both.', 'toocheke-companion'),
+                    ['strong' => []]
+                );
+                ?>
             </p>
         </div>
         <?php
@@ -292,7 +297,12 @@ trait Toocheke_Companion_Bluesky
         <div id="toocheke-bluesky-template-row">
             <textarea name="toocheke-bluesky-message-template" id="toocheke-bluesky-message-template" rows="4" cols="50" class="large-text"><?php echo esc_textarea($value); ?></textarea>
             <p class="description">
-                <?php esc_html_e('Use %%TITLE%% for the post title and %%URL%% for the post link.', 'toocheke-companion'); ?>
+                <?php
+                echo wp_kses(
+                    __('Available placeholders: <strong>%%TITLE%%</strong>, <strong>%%URL%%</strong>, <strong>%%SERIES_TITLE%%</strong>, <strong>%%MANGA_SERIES_TITLE%%</strong>, <strong>%%MANGA_VOLUME_TITLE%%</strong>, <strong>%%EXCERPT%%</strong>, <strong>%%BLOG_POST%%</strong>, <strong>%%NOTES%%</strong>, <strong>%%CHARACTERS%%</strong>, <strong>%%LOCATIONS%%</strong>, <strong>%%TAGS%%</strong>, <strong>%%CHAPTER%%</strong>, and <strong>%%COLLECTIONS%%</strong>. Comic-only placeholders (Excerpt, Blog Post, Series Title, Characters, Locations, Tags, Chapter, Collections) resolve to nothing on a Manga Chapter post, and Manga-only placeholders (Notes, Manga Series Title, Manga Volume Title) resolve to nothing on a Comic post, so it\'s safe to use the same template for both.', 'toocheke-companion'),
+                    ['strong' => []]
+                );
+                ?>
                 <?php esc_html_e('Bluesky posts are limited to 300 characters, and the full link always counts toward that limit (Bluesky does not shorten URLs). The counter below is a guide only — the final length depends on each post\'s actual title, which varies per post; if a real post would go over the limit its title is shortened automatically so the post always still goes through.', 'toocheke-companion'); ?>
             </p>
             <p><span id="toocheke-bluesky-char-counter"></span></p>
@@ -1072,9 +1082,12 @@ trait Toocheke_Companion_Bluesky
             return $upload;
         }
 
+        $caption = $this->toocheke_bluesky_build_card_caption_text($post_id, $post_type, get_the_title($post_id));
+
         return [
             '$type'     => 'app.bsky.feed.post',
-            'text'      => $this->toocheke_bluesky_build_card_caption_text(get_the_title($post_id)),
+            'text'      => $caption['text'],
+            'facets'    => $caption['facets'],
             'createdAt' => gmdate('c'),
             'embed'     => [
                 '$type'    => 'app.bsky.embed.external',
@@ -1093,24 +1106,44 @@ trait Toocheke_Companion_Bluesky
      * Text+Image template, there's no %%URL%% placeholder — the link card
      * itself already carries the link, so repeating it in the caption text
      * would be redundant and would need its own separate facet handling for
-     * no real benefit. Because there's no URL to protect, truncation here is
-     * a simple hard cap rather than the title-shortening logic used in
+     * no real benefit. %%URL%% is deliberately excluded from the
+     * substitution map here (see toocheke_bluesky_get_template_placeholders()),
+     * and any literal "%%URL%%" left in a caption (e.g. from copy-pasting
+     * the Text+Image template by mistake) is stripped to an empty string
+     * rather than left visible as a raw, broken-looking token in a live
+     * post. Because there's no URL to protect, truncation here is a simple
+     * hard cap rather than the title-shortening logic used in
      * toocheke_bluesky_build_message_text().
+     *
+     * Returns ['text' => ..., 'facets' => [...]] rather than a bare
+     * string, so any %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% used in the
+     * caption still render as real hashtags (see
+     * toocheke_bluesky_build_tag_facets()) — not just the URL format gets
+     * that treatment.
      */
-    private function toocheke_bluesky_build_card_caption_text($title)
+    private function toocheke_bluesky_build_card_caption_text($post_id, $post_type, $title)
     {
         $template = get_option('toocheke-bluesky-card-caption');
         if (empty($template)) {
             $template = '%%TITLE%%';
         }
 
-        $text = str_replace('%%TITLE%%', $title, $template);
+        $resolved     = $this->toocheke_bluesky_get_template_placeholders($post_id, $post_type, $title, '');
+        $placeholders = $resolved['values'];
+        $hashtags     = $resolved['hashtags'];
+        unset($placeholders['%%URL%%']);
+
+        $text = str_replace(array_keys($placeholders), array_values($placeholders), $template);
+        $text = str_replace('%%URL%%', '', $text);
 
         if (mb_strlen($text) > 300) {
             $text = mb_substr($text, 0, 300);
         }
 
-        return $text;
+        return [
+            'text'   => $text,
+            'facets' => $this->toocheke_bluesky_build_tag_facets($text, $hashtags),
+        ];
     }
 
     /**
@@ -1125,29 +1158,9 @@ trait Toocheke_Companion_Bluesky
             return $upload;
         }
 
-        $url  = $this->toocheke_bluesky_get_post_url($post_id, $post_type);
-        $text = $this->toocheke_bluesky_build_message_text(get_the_title($post_id), $url);
-        $alt  = $this->toocheke_bluesky_get_alt_text($post_id, $post_type);
-
-        // Build the link facet so the URL renders as a clickable link
-        // instead of plain text.
-        $facets  = [];
-        $url_pos = strpos($text, $url);
-        if (false !== $url_pos) {
-            $byte_start = strlen(substr($text, 0, $url_pos));
-            $byte_end   = $byte_start + strlen($url);
-            $facets[]   = [
-                'index'    => [
-                    '$type'     => 'app.bsky.richtext.facet#byteSlice',
-                    'byteStart' => $byte_start,
-                    'byteEnd'   => $byte_end,
-                ],
-                'features' => [[
-                    '$type' => 'app.bsky.richtext.facet#link',
-                    'uri'   => $url,
-                ]],
-            ];
-        }
+        $url     = $this->toocheke_bluesky_get_post_url($post_id, $post_type);
+        $message = $this->toocheke_bluesky_build_message_text($post_id, $post_type, get_the_title($post_id), $url);
+        $alt     = $this->toocheke_bluesky_get_alt_text($post_id, $post_type);
 
         // array_filter with a strict `!== null` check, not the default
         // truthy check — an empty-string alt (meaning "no hovertext/notes
@@ -1166,9 +1179,9 @@ trait Toocheke_Companion_Bluesky
 
         return [
             '$type'     => 'app.bsky.feed.post',
-            'text'      => $text,
+            'text'      => $message['text'],
             'createdAt' => gmdate('c'),
-            'facets'    => $facets,
+            'facets'    => $message['facets'],
             'embed'     => [
                 '$type'  => 'app.bsky.embed.images',
                 'images' => [$image],
@@ -1261,38 +1274,272 @@ trait Toocheke_Companion_Bluesky
     }
 
     /**
+     * Resolves every supported %%PLACEHOLDER%% for the given post into an
+     * associative array, used by both toocheke_bluesky_build_message_text()
+     * (Text+Image template) and toocheke_bluesky_build_card_caption_text()
+     * (Card Caption, which additionally excludes %%URL%% -- see that
+     * method's own docblock for why).
+     *
+     * Every value here is already plain text (HTML stripped where the
+     * source field can contain rich content, e.g. %%BLOG_POST%%) and
+     * left untruncated -- the two callers above are what enforce
+     * Bluesky's 300-character limit, once, after full substitution; this
+     * method's only job is producing correct values, not managing length.
+     *
+     * Comic-only placeholders resolve to '' on a manga_chapter post, and
+     * manga_chapter-only placeholders resolve to '' on a comic post --
+     * deliberately, so a single shared template can be used across both
+     * post types without ever leaving a raw, unresolved %%TOKEN%% visible
+     * in a published post.
+     */
+    private function toocheke_bluesky_get_template_placeholders($post_id, $post_type, $title, $url)
+    {
+        $placeholders = [
+            '%%TITLE%%' => $title,
+            '%%URL%%'   => $url,
+        ];
+
+        $hashtag_names = [];
+
+        if ('comic' === $post_type) {
+            $placeholders['%%EXCERPT%%']   = trim((string) get_post_field('post_excerpt', $post_id, 'raw'));
+            $placeholders['%%BLOG_POST%%'] = trim(wp_strip_all_tags((string) get_post_meta($post_id, 'comic_blog_post_editor', true)));
+
+            // Mirrors the same post_parent-as-series relationship
+            // toocheke_bluesky_get_post_url() already relies on for this
+            // exact post type -- see that method's docblock.
+            $parent_id                        = (int) wp_get_post_parent_id($post_id);
+            $placeholders['%%SERIES_TITLE%%'] = $parent_id > 0 ? get_the_title($parent_id) : '';
+
+            $placeholders['%%CHARACTERS%%']  = $this->toocheke_bluesky_terms_as_hashtags($post_id, 'comic_characters', $hashtag_names);
+            $placeholders['%%LOCATIONS%%']   = $this->toocheke_bluesky_terms_as_hashtags($post_id, 'comic_locations', $hashtag_names);
+            $placeholders['%%TAGS%%']        = $this->toocheke_bluesky_terms_as_hashtags($post_id, 'comic_tags', $hashtag_names);
+            $placeholders['%%CHAPTER%%']     = $this->toocheke_bluesky_terms_as_list($post_id, 'chapters', ', ');
+            $placeholders['%%COLLECTIONS%%'] = $this->toocheke_bluesky_terms_as_list($post_id, 'collections', ', ');
+
+            $placeholders['%%NOTES%%']              = '';
+            $placeholders['%%MANGA_SERIES_TITLE%%'] = '';
+            $placeholders['%%MANGA_VOLUME_TITLE%%'] = '';
+        } elseif ('manga_chapter' === $post_type) {
+            $placeholders['%%NOTES%%'] = trim((string) get_post_meta($post_id, 'notes', true));
+
+            // Same meta fields the manga_chapter metabox itself saves
+            // (see the manga_chapter save handler in
+            // class-toocheke-companion-metaboxes.php) -- 'series_id'
+            // here points to the parent Manga Series, not a Series post.
+            $manga_series_id                        = (int) get_post_meta($post_id, 'series_id', true);
+            $placeholders['%%MANGA_SERIES_TITLE%%'] = $manga_series_id > 0 ? get_the_title($manga_series_id) : '';
+
+            $manga_volume_id                        = (int) get_post_meta($post_id, 'volume_id', true);
+            $placeholders['%%MANGA_VOLUME_TITLE%%'] = $manga_volume_id > 0 ? get_the_title($manga_volume_id) : '';
+
+            $placeholders['%%EXCERPT%%']      = '';
+            $placeholders['%%BLOG_POST%%']    = '';
+            $placeholders['%%SERIES_TITLE%%'] = '';
+            $placeholders['%%CHARACTERS%%']   = '';
+            $placeholders['%%LOCATIONS%%']    = '';
+            $placeholders['%%TAGS%%']         = '';
+            $placeholders['%%CHAPTER%%']      = '';
+            $placeholders['%%COLLECTIONS%%']  = '';
+        }
+
+        // Bluesky's API expects plain UTF-8 text, not HTML -- but several
+        // of these values (most notably titles, via get_the_title(),
+        // which runs through wptexturize()) can come back containing
+        // literal HTML entities. For example "Volume 2 - Title" becomes
+        // "Volume 2 &#8211; Title" (an en dash entity) rather than the
+        // actual "–" character, which would otherwise post to Bluesky as
+        // that literal entity text instead of a dash. Decoding every
+        // placeholder here, once, fixes this for every current and
+        // future placeholder built from a WordPress title/content field,
+        // rather than patching it per-field. %%URL%% is deliberately
+        // skipped -- a URL should never contain HTML entities in the
+        // first place, and decoding one on the rare chance it did could
+        // corrupt an intentionally percent/entity-encoded query string.
+        foreach ($placeholders as $key => $value) {
+            if ('%%URL%%' === $key) {
+                continue;
+            }
+            $placeholders[$key] = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+        }
+
+        return [
+            'values'   => $placeholders,
+            'hashtags' => array_values(array_unique($hashtag_names)),
+        ];
+    }
+
+    /**
+     * Builds one app.bsky.richtext.facet#tag facet per occurrence of each
+     * given hashtag name found in $text (as "#Name") -- this is what
+     * actually makes %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% render as
+     * real, clickable, searchable hashtags on Bluesky. Just posting text
+     * that happens to start with "#" does nothing on its own via the API
+     * (unlike typing directly into Bluesky's own compose box, which does
+     * its own client-side detection) -- the AT Protocol requires an
+     * explicit facet annotating the exact byte range for any client to
+     * treat a substring as a tag.
+     *
+     * Built against the FINAL, already-truncated text (not the
+     * pre-truncation template output) -- passed in by both callers only
+     * after their own truncation/shortening logic has already run, so a
+     * facet can never point past the end of what's actually being
+     * posted. If truncation happened to cut a hashtag in half, that
+     * leftover partial "#Wo" text is simply left as plain text rather
+     * than producing an invalid or misleading facet for it.
+     */
+    private function toocheke_bluesky_build_tag_facets($text, array $hashtag_names)
+    {
+        $facets = [];
+
+        foreach ($hashtag_names as $name) {
+            $needle = '#' . $name;
+            $offset = 0;
+
+            while (false !== ($pos = strpos($text, $needle, $offset))) {
+                $byte_start = strlen(substr($text, 0, $pos));
+                $byte_end   = $byte_start + strlen($needle);
+
+                $facets[] = [
+                    'index'    => [
+                        '$type'     => 'app.bsky.richtext.facet#byteSlice',
+                        'byteStart' => $byte_start,
+                        'byteEnd'   => $byte_end,
+                    ],
+                    'features' => [[
+                        '$type' => 'app.bsky.richtext.facet#tag',
+                        'tag'   => $name,
+                    ]],
+                ];
+
+                $offset = $pos + strlen($needle);
+            }
+        }
+
+        return $facets;
+    }
+
+    /**
+     * Comma-separated term names for %%CHAPTER%% and %%COLLECTIONS%%
+     * (explicitly requested as a plain list, not hashtags, unlike
+     * %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% below).
+     */
+    private function toocheke_bluesky_terms_as_list($post_id, $taxonomy, $separator)
+    {
+        $terms = get_the_terms($post_id, $taxonomy);
+        if (empty($terms) || is_wp_error($terms)) {
+            return '';
+        }
+
+        return implode($separator, wp_list_pluck($terms, 'name'));
+    }
+
+    /**
+     * Term names as Bluesky-safe hashtags for %%CHARACTERS%%,
+     * %%LOCATIONS%%, and %%TAGS%% -- same convention Jetpack Social uses
+     * for its own {tags} placeholder. Hashtags can't contain spaces or
+     * punctuation, so each term name is stripped down to letters/numbers/
+     * underscore only (Unicode-aware, so non-English character names
+     * aren't mangled) before being prefixed with #.
+     *
+     * Every clean tag name (without the # prefix) is also appended to
+     * $collected_tags by reference -- toocheke_bluesky_get_template_placeholders()
+     * gathers these across all three hashtag placeholders so
+     * toocheke_bluesky_build_tag_facets() knows exactly which substrings
+     * in the final assembled text need a real app.bsky.richtext.facet#tag
+     * facet, rather than just being plain "#Word" text with no facet at
+     * all (which is what a hashtag with no facet actually is to Bluesky
+     * -- inert, unclickable, unsearchable text).
+     */
+    private function toocheke_bluesky_terms_as_hashtags($post_id, $taxonomy, array &$collected_tags)
+    {
+        $terms = get_the_terms($post_id, $taxonomy);
+        if (empty($terms) || is_wp_error($terms)) {
+            return '';
+        }
+
+        $hashtags = [];
+        foreach ($terms as $term) {
+            $clean = preg_replace('/[^\p{L}\p{N}_]/u', '', $term->name);
+            if ('' !== $clean) {
+                $hashtags[]        = '#' . $clean;
+                $collected_tags[] = $clean;
+            }
+        }
+
+        return implode(' ', $hashtags);
+    }
+
+    /**
      * Assembles the Text+Image format's post text from the admin-configured
-     * template, substituting %%TITLE%% and %%URL%%.
+     * template, substituting every placeholder resolved by
+     * toocheke_bluesky_get_template_placeholders().
      *
      * Bluesky's 300-character (grapheme) limit applies to the full text
      * including the URL — Bluesky does not shorten links or exempt them from
      * the count (confirmed directly against the AT Protocol post lexicon).
-     * If a real post's title pushes the assembled text over that limit, the
-     * TITLE portion is shortened (it's the most variable-length piece) so
-     * the template wording and the URL are always left fully intact.
+     * If a real post's combined placeholders push the assembled text over
+     * that limit, only %%TITLE%% is shortened to make room — it was the
+     * single elastic placeholder before this template grew to support many
+     * more fields, and remains the one deliberately shortened now; every
+     * other placeholder (excerpt, blog post content, hashtags, etc.) keeps
+     * its full value. If TITLE alone can't free up enough room, the whole
+     * assembled string is hard-truncated as a last resort so the API call
+     * never fails outright.
+     *
+     * Returns ['text' => ..., 'facets' => [...]] rather than a bare
+     * string — the URL link facet (previously built separately by the
+     * caller) and any %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% hashtag
+     * facets are both built here, once, against the final text, so the
+     * caller doesn't need its own facet-building logic at all.
      */
-    private function toocheke_bluesky_build_message_text($title, $url)
+    private function toocheke_bluesky_build_message_text($post_id, $post_type, $title, $url)
     {
         $template = get_option('toocheke-bluesky-message-template');
         if (empty($template)) {
             $template = "%%TITLE%%\n%%URL%%";
         }
 
-        $text = str_replace(['%%TITLE%%', '%%URL%%'], [$title, $url], $template);
+        $resolved     = $this->toocheke_bluesky_get_template_placeholders($post_id, $post_type, $title, $url);
+        $placeholders = $resolved['values'];
+        $hashtags     = $resolved['hashtags'];
+
+        $text = str_replace(array_keys($placeholders), array_values($placeholders), $template);
 
         $overflow = mb_strlen($text) - 300;
         if ($overflow > 0) {
-            $shortened_title = mb_substr($title, 0, max(0, mb_strlen($title) - $overflow - 1)) . '…';
-            $text            = str_replace(['%%TITLE%%', '%%URL%%'], [$shortened_title, $url], $template);
+            $shortened_title            = mb_substr($title, 0, max(0, mb_strlen($title) - $overflow - 1)) . '…';
+            $placeholders['%%TITLE%%']  = $shortened_title;
+            $text                       = str_replace(array_keys($placeholders), array_values($placeholders), $template);
 
-            // Extreme fallback (e.g. an unusually long URL) — hard-truncate
-            // so the API call never fails outright.
             if (mb_strlen($text) > 300) {
                 $text = mb_substr($text, 0, 300);
             }
         }
 
-        return $text;
+        $facets = $this->toocheke_bluesky_build_tag_facets($text, $hashtags);
+
+        $url_pos = strpos($text, $url);
+        if (false !== $url_pos) {
+            $byte_start = strlen(substr($text, 0, $url_pos));
+            $byte_end   = $byte_start + strlen($url);
+            $facets[]   = [
+                'index'    => [
+                    '$type'     => 'app.bsky.richtext.facet#byteSlice',
+                    'byteStart' => $byte_start,
+                    'byteEnd'   => $byte_end,
+                ],
+                'features' => [[
+                    '$type' => 'app.bsky.richtext.facet#link',
+                    'uri'   => $url,
+                ]],
+            ];
+        }
+
+        return [
+            'text'   => $text,
+            'facets' => $facets,
+        ];
     }
 
     /* =========================================================================

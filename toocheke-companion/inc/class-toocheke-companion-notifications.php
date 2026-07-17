@@ -57,6 +57,14 @@ if (! defined('TOOCHEKE_TURNSTILE_VERIFY_URL')) {
     define('TOOCHEKE_TURNSTILE_VERIFY_URL', 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
 }
 
+// The guaranteed minimum time a queued notification sits before it's
+// eligible to send -- see the docblock on
+// toocheke_notifications_process_queue_batch() for why this exists
+// alongside (not instead of) the 15-minute cron interval.
+if (! defined('TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES')) {
+    define('TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES', 10);
+}
+
 trait Toocheke_Companion_Notifications
 {
     /**
@@ -503,6 +511,17 @@ trait Toocheke_Companion_Notifications
     public function toocheke_notifications_post_types_section_message()
     {
         echo '<p>' . esc_html__('Choose which kinds of new posts trigger a notification email to subscribed readers. Post, Comic, and Manga Chapter are on by default; Series-level content is off by default since most readers only want to hear about new pages, not new series/volume listings.', 'toocheke-companion') . '</p>';
+
+        // A short, deliberate grace period before a notification
+        // actually goes out -- similar in spirit to Gmail's "Undo Send."
+        // Queued notifications are picked up in batches every 15
+        // minutes, and the sender double-checks the post is still
+        // actually published at send time (see
+        // toocheke_notifications_process_queue_batch()) -- so hitting
+        // "Publish" by mistake instead of "Schedule," then unpublishing
+        // within that window, stops the email before it ever goes out.
+        $notice_html = '<p>' . esc_html__('Notifications aren\'t sent instantly — they go out in batches roughly every 15 minutes. This is deliberate: if you ever hit Publish by mistake instead of Schedule, unpublishing within that window will stop the notification email before it\'s sent, similar to Gmail\'s "Undo Send."', 'toocheke-companion') . '</p>';
+        $this->toocheke_render_dismissible_info('toocheke_notifications_send_delay_notice', $notice_html);
     }
 
     public function toocheke_notifications_delivery_section_message()
@@ -1568,10 +1587,10 @@ trait Toocheke_Companion_Notifications
 
     public function toocheke_notifications_register_cron_schedule($schedules)
     {
-        if (! isset($schedules['toocheke_notify_five_minutes'])) {
-            $schedules['toocheke_notify_five_minutes'] = [
-                'interval' => 300,
-                'display'  => __('Every 5 Minutes (Toocheke Notifications)', 'toocheke-companion'),
+        if (! isset($schedules['toocheke_notify_fifteen_minutes'])) {
+            $schedules['toocheke_notify_fifteen_minutes'] = [
+                'interval' => 900,
+                'display'  => __('Every 15 Minutes (Toocheke Notifications)', 'toocheke-companion'),
             ];
         }
         return $schedules;
@@ -1582,8 +1601,22 @@ trait Toocheke_Companion_Notifications
         if (! $this->toocheke_notifications_is_premium_active()) {
             return;
         }
+
+        $current_schedule = wp_get_schedule('toocheke_notifications_send_queue');
+
+        // Sites that already had this scheduled under the old 5-minute
+        // interval (before the cadence was deliberately widened to give
+        // publishers a short window to catch a "Publish" instead of
+        // "Schedule" mistake) would otherwise keep running on the old
+        // interval forever -- wp_next_scheduled() only checks whether
+        // *something* is scheduled, not which recurrence it's using.
+        // Clearing it here lets the check below reschedule it properly.
+        if ($current_schedule && 'toocheke_notify_fifteen_minutes' !== $current_schedule) {
+            wp_clear_scheduled_hook('toocheke_notifications_send_queue');
+        }
+
         if (! wp_next_scheduled('toocheke_notifications_send_queue')) {
-            wp_schedule_event(time(), 'toocheke_notify_five_minutes', 'toocheke_notifications_send_queue');
+            wp_schedule_event(time(), 'toocheke_notify_fifteen_minutes', 'toocheke_notifications_send_queue');
         }
     }
 
@@ -1599,9 +1632,20 @@ trait Toocheke_Companion_Notifications
 
     /**
      * Drains up to $batch_size pending queue rows per cron tick. Kept
-     * deliberately small and frequent (20 every 5 minutes, rather than a
-     * large batch once an hour) so a popular post with many subscribers
-     * doesn't create one big send spike.
+     * deliberately small (20 per run, every 15 minutes) so a popular
+     * post with many subscribers doesn't create one big send spike.
+     *
+     * Also enforces TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES as a
+     * genuine, guaranteed minimum age before a row is even eligible to
+     * send -- widening the cron interval to 15 minutes alone only
+     * changes how *often* this runs, not how long any individual row
+     * has actually been sitting when it's picked up: a post published
+     * right before a scheduled tick could otherwise still go out within
+     * seconds. This minimum-age check is what actually guarantees the
+     * "Publish by mistake instead of Schedule, then unpublish in time"
+     * safety window described in the Notifications tab notice,
+     * regardless of exactly when within the cron cycle a post happened
+     * to be queued.
      */
     public function toocheke_notifications_process_queue_batch()
     {
@@ -1610,13 +1654,22 @@ trait Toocheke_Companion_Notifications
         $subscribers_table = $wpdb->prefix . 'toocheke_notify_subscribers';
         $batch_size        = 20;
 
+        // Computed the same way current_time('mysql') itself is built
+        // internally (gmdate() over an already site-offset-adjusted
+        // timestamp), so this cutoff compares apples-to-apples against
+        // created_at values regardless of the server's own PHP
+        // timezone setting.
+        $cutoff = gmdate('Y-m-d H:i:s', current_time('timestamp') - (TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES * MINUTE_IN_SECONDS));
+
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT q.id AS queue_id, q.subscriber_id, q.post_id, q.attempts, s.email, s.token, s.status AS subscriber_status
              FROM {$queue_table} q
              INNER JOIN {$subscribers_table} s ON s.id = q.subscriber_id
              WHERE q.status = 'pending'
+               AND q.created_at <= %s
              ORDER BY q.id ASC
              LIMIT %d",
+            $cutoff,
             $batch_size
         ));
 
@@ -1869,6 +1922,23 @@ trait Toocheke_Companion_Notifications
         }
 
         $content = apply_filters('the_content', $post->post_content);
+
+        if ('comic' === $post_type) {
+            // Mirrors toocheke_add_metadata_to_rss() in
+            // class-toocheke-companion-rss-feeds.php exactly (same
+            // meta key, same append pattern): if the comic has content
+            // in the separate "Comic's Blog Post Editor" metabox, it
+            // gets appended below the main post content here too, just
+            // as it already is in both RSS feed variants. Deliberately
+            // NOT the "Desktop Comic Editor" field (meta key
+            // desktop_comic_editor) -- that one isn't used in the RSS
+            // output either, per the same reference logic.
+            $blog_post_meta = get_post_meta($post->ID, 'comic_blog_post_editor', true);
+            if (! empty($blog_post_meta)) {
+                $content .= '<br /><br /><div>' . $blog_post_meta . '</div>';
+            }
+        }
+
         return wp_kses_post($content);
     }
 

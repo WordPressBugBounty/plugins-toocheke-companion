@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.5
+Stable tag: 2.6
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -129,6 +129,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.6 =
+* UPDATE: Added comic's blog post to the content of the email.
+* NEW: Added placeholders for Bluesky post.
 
 = 2.5 =
 * NEW: Added Email notification feature (**Premium only**). 

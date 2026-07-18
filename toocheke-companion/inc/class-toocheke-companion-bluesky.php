@@ -131,50 +131,346 @@ trait Toocheke_Companion_Bluesky
        here so the feature stays self-contained.
     ========================================================================= */
 
-    public function toocheke_bluesky_register_settings_fields()
+    /**
+     * $active_subsection is passed in from toocheke_init_option_fields()
+     * in class-toocheke-companion-settings-page.php, which is also what
+     * renders the actual subnav links -- both key off the exact same
+     * subsection list (see toocheke_get_tab_subsections() there) so they
+     * can't drift out of sync. Each of the four sections below maps
+     * 1:1 to one subsection; nothing about the sections/fields
+     * themselves changed here, only that each is now gated behind its
+     * matching subsection so the settings page only ever renders (and
+     * saves) whichever one the admin is actually looking at, instead of
+     * every Bluesky field on one long page.
+     */
+    public function toocheke_bluesky_register_settings_fields($active_subsection = 'connection')
     {
-        // --- Connection ---
-        add_settings_section('toocheke_bluesky_connection_section', 'Bluesky Connection', [$this, 'toocheke_bluesky_connection_section_message'], 'toocheke-options-page');
+        if ('connection' === $active_subsection) {
+            // --- Connection ---
+            add_settings_section('toocheke_bluesky_connection_section', 'Bluesky Connection', [$this, 'toocheke_bluesky_connection_section_message'], 'toocheke-options-page');
 
-        add_settings_field('toocheke-bluesky-handle', 'Bluesky Handle', [$this, 'toocheke_bluesky_handle_field'], 'toocheke-options-page', 'toocheke_bluesky_connection_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-handle', ['sanitize_callback' => 'sanitize_text_field']);
+            add_settings_field('toocheke-bluesky-handle', 'Bluesky Handle', [$this, 'toocheke_bluesky_handle_field'], 'toocheke-options-page', 'toocheke_bluesky_connection_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-handle', ['sanitize_callback' => 'sanitize_text_field']);
 
-        add_settings_field('toocheke-bluesky-app-password', 'App Password', [$this, 'toocheke_bluesky_app_password_field'], 'toocheke-options-page', 'toocheke_bluesky_connection_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-app-password', ['sanitize_callback' => 'sanitize_text_field']);
+            add_settings_field('toocheke-bluesky-app-password', 'App Password', [$this, 'toocheke_bluesky_app_password_field'], 'toocheke-options-page', 'toocheke_bluesky_connection_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-app-password', ['sanitize_callback' => 'sanitize_text_field']);
+        }
 
-        // --- Automatic posting on publish ---
-        add_settings_section('toocheke_bluesky_posting_section', 'Automatic Posting', [$this, 'toocheke_bluesky_posting_section_message'], 'toocheke-options-page');
+        if ('automatic_posting' === $active_subsection) {
+            // --- Automatic posting on publish ---
+            add_settings_section('toocheke_bluesky_posting_section', 'Automatic Posting', [$this, 'toocheke_bluesky_posting_section_message'], 'toocheke-options-page');
 
-        add_settings_field('toocheke-bluesky-enable-comics', 'Post comics to Bluesky?', [$this, 'toocheke_bluesky_enable_comics_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_posting_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-enable-comics');
+            add_settings_field('toocheke-bluesky-enable-comics', 'Post comics to Bluesky?', [$this, 'toocheke_bluesky_enable_comics_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_posting_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-enable-comics');
 
-        add_settings_field('toocheke-bluesky-enable-manga-chapters', 'Post manga chapters to Bluesky?', [$this, 'toocheke_bluesky_enable_manga_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_posting_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-enable-manga-chapters');
+            add_settings_field('toocheke-bluesky-enable-manga-chapters', 'Post manga chapters to Bluesky?', [$this, 'toocheke_bluesky_enable_manga_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_posting_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-enable-manga-chapters');
 
-        // --- Post format ---
-        add_settings_section('toocheke_bluesky_format_section', 'Post Format', [$this, 'toocheke_bluesky_format_section_message'], 'toocheke-options-page');
+            $this->toocheke_bluesky_register_filter_fields('auto', 'toocheke_bluesky_posting_section');
+        }
 
-        add_settings_field('toocheke-bluesky-post-format', 'How should posts appear on Bluesky?', [$this, 'toocheke_bluesky_post_format_radio'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-post-format');
+        if ('post_format' === $active_subsection) {
+            // --- Post format ---
+            add_settings_section('toocheke_bluesky_format_section', 'Post Format', [$this, 'toocheke_bluesky_format_section_message'], 'toocheke-options-page');
 
-        add_settings_field('toocheke-bluesky-message-template', 'Message Template', [$this, 'toocheke_bluesky_message_template_field'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-message-template', ['sanitize_callback' => 'sanitize_textarea_field']);
+            add_settings_field('toocheke-bluesky-post-format', 'How should posts appear on Bluesky?', [$this, 'toocheke_bluesky_post_format_radio'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-post-format');
 
-        add_settings_field('toocheke-bluesky-card-caption', 'Card Caption', [$this, 'toocheke_bluesky_card_caption_field'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-card-caption', ['sanitize_callback' => 'sanitize_textarea_field']);
+            add_settings_field('toocheke-bluesky-message-template', 'Message Template', [$this, 'toocheke_bluesky_message_template_field'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-message-template', ['sanitize_callback' => 'sanitize_textarea_field']);
 
-        // --- Random archive posting ---
-        add_settings_section('toocheke_bluesky_random_section', 'Random Archive Posting', [$this, 'toocheke_bluesky_random_section_message'], 'toocheke-options-page');
+            add_settings_field('toocheke-bluesky-card-caption', 'Card Caption', [$this, 'toocheke_bluesky_card_caption_field'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-card-caption', ['sanitize_callback' => 'sanitize_textarea_field']);
+        }
 
-        add_settings_field('toocheke-bluesky-random-comics', 'Randomly re-post comics from the archive?', [$this, 'toocheke_bluesky_random_comics_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-random-comics');
+        if ('random_posting' === $active_subsection) {
+            // --- Random archive posting ---
+            add_settings_section('toocheke_bluesky_random_section', 'Random Archive Posting', [$this, 'toocheke_bluesky_random_section_message'], 'toocheke-options-page');
 
-        add_settings_field('toocheke-bluesky-random-manga-chapters', 'Randomly re-post manga chapters from the archive?', [$this, 'toocheke_bluesky_random_manga_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-random-manga-chapters');
+            add_settings_field('toocheke-bluesky-random-comics', 'Randomly re-post comics from the archive?', [$this, 'toocheke_bluesky_random_comics_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-comics');
 
-        add_settings_field('toocheke-bluesky-random-frequency', 'Post every...', [$this, 'toocheke_bluesky_random_frequency_field'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
-        register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-number');
-        register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-unit');
+            add_settings_field('toocheke-bluesky-random-manga-chapters', 'Randomly re-post manga chapters from the archive?', [$this, 'toocheke_bluesky_random_manga_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-manga-chapters');
+
+            add_settings_field('toocheke-bluesky-random-frequency', 'Post every...', [$this, 'toocheke_bluesky_random_frequency_field'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-number');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-unit');
+
+            $this->toocheke_bluesky_register_filter_fields('random', 'toocheke_bluesky_random_section');
+        }
+    }
+
+    /* =========================================================================
+       POST FILTERING
+       Lets the admin scope Automatic Posting and Random Archive Posting to
+       specific Series/Collections/Chapters (comics) or Manga Series/Manga
+       Volumes (manga chapters) — independently for each of those two
+       contexts, per the original design discussion. Matching is OR across
+       everything selected, including across the different taxonomy/post-type
+       groups within one filter (e.g. a comic in either the selected Series
+       OR the selected Collection qualifies) — confirmed deliberately, since
+       Series and Collection are naturally distinct, non-overlapping ways of
+       grouping the same comics.
+
+       Deliberately NOT applied on the manual "Post to Bluesky Now" checkbox
+       path (see toocheke_bluesky_maybe_post_on_publish()) — checking that
+       box is the author explicitly saying "yes, post this one," which
+       always overrides any filter.
+    ========================================================================= */
+
+    /**
+     * Registers the mode radio + all filter-option settings for one
+     * context ('auto' or 'random'). Shared by both Automatic Posting and
+     * Random Archive Posting so the two stay structurally identical.
+     */
+    private function toocheke_bluesky_register_filter_fields($context, $section_id)
+    {
+        $label_prefix = ('auto' === $context) ? __('auto-posted', 'toocheke-companion') : __('eligible for random re-posting', 'toocheke-companion');
+
+        add_settings_field(
+            "toocheke-bluesky-{$context}-comic-filter",
+            sprintf(
+                /* translators: %s: "auto-posted" or "eligible for random re-posting" */
+                __('Which comics should be %s?', 'toocheke-companion'),
+                $label_prefix
+            ),
+            [$this, 'toocheke_bluesky_comic_filter_field'],
+            'toocheke-options-page',
+            $section_id,
+            ['context' => $context]
+        );
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-comic-filter-mode", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_mode'], 'default' => 'all']);
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-comic-filter-series", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_ids']]);
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-comic-filter-collections", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_ids']]);
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-comic-filter-chapters", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_ids']]);
+
+        add_settings_field(
+            "toocheke-bluesky-{$context}-manga-filter",
+            sprintf(
+                /* translators: %s: "auto-posted" or "eligible for random re-posting" */
+                __('Which manga chapters should be %s?', 'toocheke-companion'),
+                $label_prefix
+            ),
+            [$this, 'toocheke_bluesky_manga_filter_field'],
+            'toocheke-options-page',
+            $section_id,
+            ['context' => $context]
+        );
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-manga-filter-mode", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_mode'], 'default' => 'all']);
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-manga-filter-series", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_ids']]);
+        register_setting('toocheke-settings', "toocheke-bluesky-{$context}-manga-filter-volumes", ['sanitize_callback' => [$this, 'toocheke_bluesky_sanitize_filter_ids']]);
+    }
+
+    public function toocheke_bluesky_sanitize_filter_mode($value)
+    {
+        return ('selected' === $value) ? 'selected' : 'all';
+    }
+
+    public function toocheke_bluesky_sanitize_filter_ids($value)
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+        return array_values(array_unique(array_map('absint', $value)));
+    }
+
+    public function toocheke_bluesky_comic_filter_field($args)
+    {
+        $this->toocheke_bluesky_render_filter_ui($args['context'], 'comic');
+    }
+
+    public function toocheke_bluesky_manga_filter_field($args)
+    {
+        $this->toocheke_bluesky_render_filter_ui($args['context'], 'manga');
+    }
+
+    /**
+     * Renders the "Post everything" / "Only post these:" radio choice plus
+     * one collapsible pill group per relevant taxonomy or post type. Shared
+     * by both toocheke_bluesky_comic_filter_field() and
+     * toocheke_bluesky_manga_filter_field() above — $type is 'comic' or
+     * 'manga', which only changes which groups get built, not the overall
+     * structure.
+     */
+    private function toocheke_bluesky_render_filter_ui($context, $type)
+    {
+        $mode_option = "toocheke-bluesky-{$context}-{$type}-filter-mode";
+        $mode        = get_option($mode_option, 'all');
+
+        if ('comic' === $type) {
+            $groups = [
+                'series'      => [
+                    'label' => __('Series', 'toocheke-companion'),
+                    'items' => get_posts(['post_type' => 'series', 'posts_per_page' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'ASC']),
+                ],
+                'collections' => [
+                    'label' => __('Collections', 'toocheke-companion'),
+                    'items' => get_terms(['taxonomy' => 'collections', 'hide_empty' => false]),
+                ],
+                'chapters'    => [
+                    'label' => __('Chapters', 'toocheke-companion'),
+                    'items' => get_terms(['taxonomy' => 'chapters', 'hide_empty' => false]),
+                ],
+            ];
+        } else {
+            $groups = [
+                'series'  => [
+                    'label' => __('Manga Series', 'toocheke-companion'),
+                    'items' => get_posts(['post_type' => 'manga_series', 'posts_per_page' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'ASC']),
+                ],
+                'volumes' => [
+                    'label' => __('Manga Volumes', 'toocheke-companion'),
+                    'items' => get_posts(['post_type' => 'manga_volume', 'posts_per_page' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'ASC']),
+                ],
+            ];
+        }
+        ?>
+        <div class="toocheke-bluesky-filter">
+            <p>
+                <label>
+                    <input type="radio" name="<?php echo esc_attr($mode_option); ?>" value="all" <?php checked('all', $mode); ?> class="toocheke-bluesky-filter-mode-radio" />
+                    <?php esc_html_e('Post everything', 'toocheke-companion'); ?>
+                </label>
+                <br />
+                <label>
+                    <input type="radio" name="<?php echo esc_attr($mode_option); ?>" value="selected" <?php checked('selected', $mode); ?> class="toocheke-bluesky-filter-mode-radio" />
+                    <?php esc_html_e('Only these:', 'toocheke-companion'); ?>
+                </label>
+            </p>
+            <div class="toocheke-bluesky-filter-groups"<?php echo ('selected' !== $mode) ? ' style="display:none;"' : ''; ?>>
+                <?php foreach ($groups as $key => $group) :
+                    $option_name  = "toocheke-bluesky-{$context}-{$type}-filter-{$key}";
+                    $selected_ids = array_map('absint', (array) get_option($option_name, []));
+                    ?>
+                    <details class="toocheke-bluesky-filter-group"<?php echo $selected_ids ? ' open' : ''; ?>>
+                        <summary>
+                            <?php
+                            printf(
+                                /* translators: 1: group label (e.g. "Series"), 2: number currently selected */
+                                esc_html__('%1$s (%2$d selected)', 'toocheke-companion'),
+                                esc_html($group['label']),
+                                count($selected_ids)
+                            );
+                            ?>
+                        </summary>
+                        <div class="toocheke-pill-group">
+                            <?php if (empty($group['items'])) : ?>
+                                <p class="description"><?php esc_html_e('None found yet.', 'toocheke-companion'); ?></p>
+                            <?php endif; ?>
+                            <?php foreach ($group['items'] as $item) :
+                                $item_id    = isset($item->ID) ? (int) $item->ID : (int) $item->term_id;
+                                $item_title = isset($item->post_title) ? $item->post_title : $item->name;
+                                $is_selected = in_array($item_id, $selected_ids, true);
+                                ?>
+                                <label class="toocheke-pill<?php echo $is_selected ? ' is-selected' : ''; ?>">
+                                    <input type="checkbox" name="<?php echo esc_attr($option_name); ?>[]" value="<?php echo esc_attr($item_id); ?>" <?php checked($is_selected); ?> />
+                                    <?php echo esc_html($item_title); ?>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </details>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * The single entry point both the automatic-publish path and the
+     * random-archive selection use to decide whether a given post qualifies.
+     */
+    private function toocheke_bluesky_post_passes_filter($post_id, $post_type, $context)
+    {
+        if ('comic' === $post_type) {
+            return $this->toocheke_bluesky_comic_passes_filter($post_id, $context);
+        }
+        if ('manga_chapter' === $post_type) {
+            return $this->toocheke_bluesky_manga_chapter_passes_filter($post_id, $context);
+        }
+        return true;
+    }
+
+    private function toocheke_bluesky_comic_passes_filter($post_id, $context)
+    {
+        $mode = get_option("toocheke-bluesky-{$context}-comic-filter-mode", 'all');
+        if ('selected' !== $mode) {
+            return true;
+        }
+
+        $selected_series      = array_map('absint', (array) get_option("toocheke-bluesky-{$context}-comic-filter-series", []));
+        $selected_collections = array_map('absint', (array) get_option("toocheke-bluesky-{$context}-comic-filter-collections", []));
+        $selected_chapters    = array_map('absint', (array) get_option("toocheke-bluesky-{$context}-comic-filter-chapters", []));
+
+        if (! $selected_series && ! $selected_collections && ! $selected_chapters) {
+            // "Only these" is selected but nothing has actually been
+            // chosen yet -- treat as "nothing qualifies" rather than
+            // silently falling back to "everything," so an incomplete
+            // setup doesn't surprise anyone by posting more than intended.
+            return false;
+        }
+
+        if ($selected_series) {
+            // Mirrors the same post_parent-as-series relationship used
+            // everywhere else in this file (see
+            // toocheke_bluesky_get_post_url()) -- not the separate legacy
+            // 'series_id' meta field.
+            $parent_id = (int) wp_get_post_parent_id($post_id);
+            if ($parent_id && in_array($parent_id, $selected_series, true)) {
+                return true;
+            }
+        }
+
+        if ($selected_collections && $this->toocheke_bluesky_post_has_any_term($post_id, 'collections', $selected_collections)) {
+            return true;
+        }
+
+        if ($selected_chapters && $this->toocheke_bluesky_post_has_any_term($post_id, 'chapters', $selected_chapters)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function toocheke_bluesky_manga_chapter_passes_filter($post_id, $context)
+    {
+        $mode = get_option("toocheke-bluesky-{$context}-manga-filter-mode", 'all');
+        if ('selected' !== $mode) {
+            return true;
+        }
+
+        $selected_manga_series = array_map('absint', (array) get_option("toocheke-bluesky-{$context}-manga-filter-series", []));
+        $selected_manga_volumes = array_map('absint', (array) get_option("toocheke-bluesky-{$context}-manga-filter-volumes", []));
+
+        if (! $selected_manga_series && ! $selected_manga_volumes) {
+            return false;
+        }
+
+        // Same meta fields the manga_chapter metabox itself saves (see
+        // class-toocheke-companion-metaboxes.php) -- 'series_id' here
+        // points to the parent Manga Series, 'volume_id' to the Manga
+        // Volume.
+        $manga_series_id = (int) get_post_meta($post_id, 'series_id', true);
+        if ($manga_series_id && in_array($manga_series_id, $selected_manga_series, true)) {
+            return true;
+        }
+
+        $manga_volume_id = (int) get_post_meta($post_id, 'volume_id', true);
+        if ($manga_volume_id && in_array($manga_volume_id, $selected_manga_volumes, true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function toocheke_bluesky_post_has_any_term($post_id, $taxonomy, array $selected_term_ids)
+    {
+        $terms = get_the_terms($post_id, $taxonomy);
+        if (empty($terms) || is_wp_error($terms)) {
+            return false;
+        }
+        $term_ids = wp_list_pluck($terms, 'term_id');
+        return (bool) array_intersect($term_ids, $selected_term_ids);
     }
 
     public function toocheke_bluesky_connection_section_message()
@@ -249,6 +545,27 @@ trait Toocheke_Companion_Bluesky
     public function toocheke_bluesky_format_section_message()
     {
         echo '<p>' . esc_html__('Choose how comics/manga chapters posts look on Bluesky. This applies to both post types and to random archive re-posts.', 'toocheke-companion') . '</p>';
+
+        // Anti-flash: hides whichever of the two format-specific rows
+        // below shouldn't show, computed here from the CURRENTLY SAVED
+        // format -- server-side, so there's nothing to flash on initial
+        // page load. js/bluesky-admin.js's toggleFormatRows() still
+        // handles the live case (changing the radio before saving);
+        // this just makes sure the very first paint already matches
+        // whatever's saved, instead of briefly showing both rows before
+        // JS decides which one to hide. :has() is safe to rely on here
+        // (unlike on the public-facing front end) since wp-admin only
+        // needs to support modern, evergreen browsers.
+        $is_card = ('card' === get_option('toocheke-bluesky-post-format', 'text_image'));
+        ?>
+        <style>
+            <?php if ($is_card) : ?>
+            tr:has(#toocheke-bluesky-template-row) { display: none; }
+            <?php else : ?>
+            tr:has(#toocheke-bluesky-card-caption-row) { display: none; }
+            <?php endif; ?>
+        </style>
+        <?php
     }
 
     public function toocheke_bluesky_post_format_radio()
@@ -313,6 +630,19 @@ trait Toocheke_Companion_Bluesky
     public function toocheke_bluesky_random_section_message()
     {
         echo '<p>' . esc_html__('Optionally re-share older comics/manga chapters from the archive at a set interval. Nothing repeats until every eligible post has been shared once, at which point the archive loops back to the start automatically.', 'toocheke-companion') . '</p>';
+
+        // Same anti-flash technique as toocheke_bluesky_format_section_message()
+        // above -- computed server-side from the saved checkboxes, so
+        // the "Post every..." row never briefly flashes visible on load
+        // when neither random-posting checkbox is actually on.
+        $show_frequency = get_option('toocheke-bluesky-random-comics') || get_option('toocheke-bluesky-random-manga-chapters');
+        if (! $show_frequency) :
+            ?>
+            <style>
+                tr:has(#toocheke-bluesky-frequency-row) { display: none; }
+            </style>
+            <?php
+        endif;
 
         $comic_reset = get_option('toocheke-bluesky-last-reset-comic');
         $manga_reset = get_option('toocheke-bluesky-last-reset-manga');
@@ -397,6 +727,27 @@ trait Toocheke_Companion_Bluesky
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('toocheke_bluesky_test_connection'),
         ]);
+
+        // Post Filtering UI (pill-toggle Series/Collections/Chapters and
+        // Manga Series/Volumes) only lives on these two subsections.
+        if (! empty($_GET['subsection']) && in_array($_GET['subsection'], ['automatic_posting', 'random_posting'], true)) {
+            $filter_css_path = TOOCHEKE_COMPANION_PLUGIN_DIR . 'css/toocheke-bluesky-filters.css';
+            $filter_js_path  = TOOCHEKE_COMPANION_PLUGIN_DIR . 'js/toocheke-bluesky-filters.js';
+
+            wp_enqueue_style(
+                'toocheke-bluesky-filters',
+                TOOCHEKE_COMPANION_PLUGIN_URL . 'css/toocheke-bluesky-filters.css',
+                [],
+                file_exists($filter_css_path) ? filemtime($filter_css_path) : TOOCHEKE_COMPANION_VERSION
+            );
+            wp_enqueue_script(
+                'toocheke-bluesky-filters',
+                TOOCHEKE_COMPANION_PLUGIN_URL . 'js/toocheke-bluesky-filters.js',
+                ['jquery'],
+                file_exists($filter_js_path) ? filemtime($filter_js_path) : TOOCHEKE_COMPANION_VERSION,
+                true
+            );
+        }
     }
 
     public function toocheke_bluesky_ajax_test_connection()
@@ -732,6 +1083,15 @@ trait Toocheke_Companion_Bluesky
             return; // Hard requirement — never post without a featured image.
         }
 
+        // The filtering feature only ever narrows the AUTOMATIC (scheduled)
+        // path -- checking the manual "Post to Bluesky Now" box is the
+        // author explicitly saying "yes, post this one," which always
+        // overrides any filter. See the Post Filtering section under
+        // Automatic Posting.
+        if (! $is_manual && ! $this->toocheke_bluesky_post_passes_filter($post->ID, $post->post_type, 'auto')) {
+            return;
+        }
+
         // Record the decision; the actual posting happens later, on the
         // generic save_post hook (priority 999), once this post's own
         // field values are guaranteed to be fully saved.
@@ -923,6 +1283,8 @@ trait Toocheke_Companion_Bluesky
             ],
         ]);
 
+        $ids = $this->toocheke_bluesky_filter_ids_for_random($ids, $post_type);
+
         if (empty($ids)) {
             return false;
         }
@@ -941,12 +1303,30 @@ trait Toocheke_Companion_Bluesky
         $ids = get_posts([
             'post_type'      => $post_type,
             'post_status'    => 'publish',
-            'posts_per_page' => 1,
+            'posts_per_page' => -1, // must check every candidate against the filter below, not just the first one found
             'fields'         => 'ids',
             'meta_query'     => [['key' => '_thumbnail_id', 'compare' => 'EXISTS']],
         ]);
 
+        $ids = $this->toocheke_bluesky_filter_ids_for_random($ids, $post_type);
+
         return ! empty($ids);
+    }
+
+    /**
+     * Shared by both toocheke_bluesky_query_random_unposted_id() and
+     * toocheke_bluesky_type_has_any_eligible_post() above -- applies the
+     * Random Archive Posting filter to a list of candidate IDs.
+     */
+    private function toocheke_bluesky_filter_ids_for_random(array $ids, $post_type)
+    {
+        if (empty($ids)) {
+            return $ids;
+        }
+
+        return array_values(array_filter($ids, function ($id) use ($post_type) {
+            return $this->toocheke_bluesky_post_passes_filter($id, $post_type, 'random');
+        }));
     }
 
     /**

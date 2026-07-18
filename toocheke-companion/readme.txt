@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.6
+Stable tag: 2.7
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -129,6 +129,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.7 =
+* UPDATE: Added filtering options for Bluesky posts — choose exactly which series, collections, chapters, manga series, or manga volumes get auto-posted or included in random archive re-posts.
+* UPDATE: Reorganized the Options menu with new sub-tabs for a cleaner, faster experience, especially on pages with lots of settings.
 
 = 2.6 =
 * UPDATE: Added comic's blog post to the content of the email.

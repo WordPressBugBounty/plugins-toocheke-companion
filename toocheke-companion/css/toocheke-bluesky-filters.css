@@ -1,0 +1,92 @@
+/**
+ * Toocheke Companion — Bluesky post-filtering UI.
+ * Enqueued only on Toocheke > Options > Bluesky > Automatic Posting /
+ * Random Archive Posting (see toocheke_bluesky_enqueue_admin_assets() in
+ * class-toocheke-companion-bluesky.php).
+ *
+ * Pill/tag-toggle style for selecting Series/Collections/Chapters (or
+ * Manga Series/Manga Volumes) — chosen over a plain checkbox list to stay
+ * compact and readable even as a site's list of series/collections/etc.
+ * grows. Each taxonomy/post-type gets its own collapsible <details> group
+ * (closed by default unless it already has a selection) rather than one
+ * long combined list, for the same reason.
+ */
+
+.toocheke-bluesky-filter-groups {
+    margin-top: 12px;
+    max-width: 700px;
+}
+
+.toocheke-bluesky-filter-group {
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background: #fff;
+}
+
+.toocheke-bluesky-filter-group summary {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+}
+
+.toocheke-bluesky-filter-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.toocheke-bluesky-filter-group summary::before {
+    content: "\25B8"; /* ▸ */
+    display: inline-block;
+    width: 1em;
+    transition: transform 0.15s ease;
+}
+
+.toocheke-bluesky-filter-group[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.toocheke-pill-group {
+    padding: 4px 14px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.toocheke-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border: 1px solid #c3c4c7;
+    border-radius: 999px;
+    background: #f6f7f7;
+    color: #1d2327;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+}
+
+.toocheke-pill:hover {
+    border-color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.toocheke-pill input[type="checkbox"] {
+    /* Kept in the DOM (not display:none) so it stays keyboard-accessible
+       and its checked state is what actually gets submitted/saved — only
+       visually hidden, with the pill's own background/border carrying
+       the selected state instead. */
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+}
+
+.toocheke-pill.is-selected {
+    background: var(--wp-admin-theme-color, #3858e9);
+    border-color: var(--wp-admin-theme-color, #3858e9);
+    color: #fff;
+}

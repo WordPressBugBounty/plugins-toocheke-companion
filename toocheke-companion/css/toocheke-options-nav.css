@@ -1,24 +1,28 @@
 /**
- * Toocheke Companion — options page nav collapse.
+ * Toocheke Companion — collapsible nav (hamburger-on-overflow) behavior.
  *
- * Only enqueued on Toocheke > Options (see
- * toocheke_enqueue_options_nav_assets() in class-toocheke-companion-settings-page.php).
+ * Enqueued on Toocheke > Options (see toocheke_enqueue_options_nav_assets()
+ * in class-toocheke-companion-settings-page.php). Shared by the main
+ * Options tab row AND any per-tab subnav (e.g. Bluesky/Navigation) — every
+ * selector below is class-based (`.toocheke-collapsible-nav-wrap`,
+ * `.toocheke-collapsible-nav`), not ID-based, specifically so more than
+ * one independent instance can exist on the same page. See
+ * js/toocheke-options-nav.js for the matching JS.
  *
  * The tab row's default WordPress wrapping behavior is left completely
  * alone here — no forced white-space override. An earlier version of this
  * file tried forcing white-space: nowrap so overflow could be measured by
  * width, but that CSS override turned out to be unreliably overridden by
  * something else active in wp-admin on some sites, which silently broke
- * detection. The JS now measures wrapped *height* instead — see
- * js/toocheke-options-nav.js — which works correctly no matter how the
- * tabs actually end up laid out, so there's nothing here that needs to win
- * a CSS specificity fight. There is no fixed-width media query either, on
- * purpose: the breakpoint is "wherever the tabs you currently have stop
- * fitting," which is exactly what the JS measures directly rather than
- * guesses.
+ * detection. The JS now measures wrapped *height* instead, which works
+ * correctly no matter how the tabs actually end up laid out, so there's
+ * nothing here that needs to win a CSS specificity fight. There is no
+ * fixed-width media query either, on purpose: the breakpoint is "wherever
+ * the tabs you currently have stop fitting," which is exactly what the JS
+ * measures directly rather than guesses.
  */
 
-/* The toggle button is hidden until JS confirms the tabs are overflowing. */
+/* The toggle button is hidden until JS confirms its own nav is overflowing. */
 .toocheke-nav-toggle {
     display: none;
     align-items: center;
@@ -45,14 +49,17 @@
     color: var(--wp-admin-theme-color, #3858e9);
 }
 
-/* Once JS detects overflow, the button becomes visible and the tab row is
-   measured/clipped to a single line so the button + current-tab label sit
-   in its place instead. */
-.toocheke-nav-overflowing .toocheke-nav-toggle {
+/* Once JS detects overflow on a given .toocheke-collapsible-nav-wrap
+   instance, its own toggle button becomes visible and its own nav row is
+   measured/clipped to nothing so the button + current-tab label sit in
+   its place instead. Scoped per-instance via the wrap class, so a second
+   nav on the same page (e.g. a subnav) is entirely unaffected by whether
+   the first one is currently overflowing. */
+.toocheke-collapsible-nav-wrap.toocheke-nav-overflowing .toocheke-nav-toggle {
     display: inline-flex !important;
 }
 
-.toocheke-nav-overflowing #toocheke-nav-tab-wrapper {
+.toocheke-collapsible-nav-wrap.toocheke-nav-overflowing .toocheke-collapsible-nav {
     overflow: hidden !important;
     max-height: 0 !important;
     border: 0;
@@ -66,7 +73,7 @@
 /* Clicking the toggle adds this second class, revealing the same tab links
    — untouched, same hrefs, same active-tab styling from PHP — as a
    full-width stacked list directly under the button. */
-.toocheke-nav-overflowing.toocheke-nav-open #toocheke-nav-tab-wrapper {
+.toocheke-collapsible-nav-wrap.toocheke-nav-overflowing.toocheke-nav-open .toocheke-collapsible-nav {
     display: block !important;
     white-space: normal !important;
     overflow: visible !important;
@@ -80,7 +87,7 @@
     background: #fff;
 }
 
-.toocheke-nav-overflowing.toocheke-nav-open #toocheke-nav-tab-wrapper .nav-tab {
+.toocheke-collapsible-nav-wrap.toocheke-nav-overflowing.toocheke-nav-open .toocheke-collapsible-nav .nav-tab {
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -89,8 +96,48 @@
     text-align: left;
 }
 
-.toocheke-nav-overflowing.toocheke-nav-open #toocheke-nav-tab-wrapper .nav-tab-active {
+.toocheke-collapsible-nav-wrap.toocheke-nav-overflowing.toocheke-nav-open .toocheke-collapsible-nav .nav-tab-active {
     background: var(--wp-admin-theme-color, #3858e9);
     color: #fff;
     border-color: var(--wp-admin-theme-color, #3858e9);
+}
+
+/* ==========================================================================
+   SUBNAV-SPECIFIC STYLE
+   A plain underline on the active subtab (matching the WP Simple Pay
+   reference) rather than the main nav's pill/box tab style — this is what
+   visually distinguishes "this is a subsection of the tab you're on" from
+   the main tab row itself. Only applies to the expanded, non-overflowing
+   state; the collapsed mobile list above intentionally falls back to the
+   same solid-background stacked-list treatment as the main nav for
+   consistency and legibility once it's a full-width tap target list.
+   ========================================================================== */
+
+.toocheke-subnav-tab-wrapper {
+    border-bottom: 1px solid #dcdcde;
+    padding-bottom: 0;
+    margin: 0 0 20px;
+}
+
+.toocheke-subnav-tab-wrapper .nav-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    margin: 0 20px 0 0;
+    padding: 8px 2px 10px;
+    font-size: 14px;
+    color: #50575e;
+    top: 0;
+}
+
+.toocheke-subnav-tab-wrapper .nav-tab:hover {
+    color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.toocheke-subnav-tab-wrapper .nav-tab-active,
+.toocheke-subnav-tab-wrapper .nav-tab-active:hover {
+    background: none;
+    color: var(--wp-admin-theme-color, #3858e9);
+    border-bottom-color: var(--wp-admin-theme-color, #3858e9);
 }

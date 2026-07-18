@@ -101,18 +101,70 @@ trait Toocheke_Companion_Settings_Page
             {
                 $theme = wp_get_theme(); // gets the current theme
     ?>
+        <style>
+            /**
+             * Inline, applied instantly at parse time (no wait on the
+             * external toocheke-options-nav.css file to download) --
+             * hides each collapsible nav's toggle button and tab row by
+             * default via visibility, not display, so their layout/
+             * height is still fully measurable while hidden. The
+             * synchronous inline <script> further down this same page
+             * (see below) adds the "toocheke-nav-ready" class once it
+             * has actually decided whether that nav needs to collapse
+             * behind the hamburger toggle or not -- only then does the
+             * second rule below reveal it again.
+             *
+             * Deliberately scoped to the nav/toggle elements themselves
+             * via a descendant selector, NOT the .toocheke-collapsible-nav-wrap
+             * element directly -- on the main Options page, that wrap
+             * class sits on the same div as the page's overall .wrap
+             * container (#toocheke-options-wrap), which holds the
+             * entire page's content (the whole settings form, every
+             * field, the Save button). Hiding that element directly
+             * would hide the whole page, not just its nav row.
+             *
+             * Without this, there was a brief but real flash on every
+             * page load and every tab click: the browser can begin
+             * painting a nav in its default expanded state before the
+             * synchronous script actually finishes measuring and
+             * toggling its overflow class, even though that script runs
+             * about as early as physically possible. Starting hidden and
+             * only ever revealing once styled correctly means there's
+             * nothing wrong-looking to flash in the first place.
+             *
+             * This does mean a nav stays invisible if JavaScript is
+             * disabled entirely -- an acceptable tradeoff here, since
+             * wp-admin already assumes JavaScript is available for
+             * virtually everything else it does.
+             */
+            .toocheke-collapsible-nav-wrap .toocheke-collapsible-nav,
+            .toocheke-collapsible-nav-wrap .toocheke-nav-toggle {
+                visibility: hidden;
+            }
+            .toocheke-collapsible-nav-wrap.toocheke-nav-ready .toocheke-collapsible-nav,
+            .toocheke-collapsible-nav-wrap.toocheke-nav-ready .toocheke-nav-toggle {
+                visibility: visible;
+            }
+        </style>
         <div class="wrap" id="toocheke-options-wrap">
             <h1>Toocheke Options</h1>
             <?php
-                $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'comic_display_options';
+                $active_tab         = isset($_GET['tab']) ? $_GET['tab'] : 'comic_display_options';
+                $tab_subsections    = $this->toocheke_get_tab_subsections($active_tab);
+                $active_subsection  = isset($_GET['subsection']) ? sanitize_key($_GET['subsection']) : '';
+                if (! isset($tab_subsections[$active_subsection])) {
+                    $keys              = array_keys($tab_subsections);
+                    $active_subsection = $keys ? $keys[0] : '';
+                }
             ?>
 
+            <div class="toocheke-collapsible-nav-wrap" id="toocheke-main-nav-wrap">
             <button type="button" id="toocheke-nav-toggle" class="toocheke-nav-toggle" aria-expanded="false">
                 <span class="dashicons dashicons-menu"></span>
-                <span id="toocheke-nav-toggle-label">Menu</span>
+                <span id="toocheke-nav-toggle-label" class="toocheke-nav-toggle-label">Menu</span>
             </button>
 
-            <h2 class="nav-tab-wrapper" id="toocheke-nav-tab-wrapper">
+            <h2 class="nav-tab-wrapper toocheke-collapsible-nav" id="toocheke-nav-tab-wrapper">
                 <a href="?page=toocheke-options-page&tab=comic_display_options"
                 class="nav-tab <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">
                     Display
@@ -214,6 +266,24 @@ trait Toocheke_Companion_Settings_Page
                     </a>
                 <?php endif; ?>
             </h2>
+            </div>
+
+            <?php if ($tab_subsections): ?>
+            <div class="toocheke-collapsible-nav-wrap" id="toocheke-subnav-wrap">
+                <button type="button" class="toocheke-nav-toggle" id="toocheke-subnav-toggle" aria-expanded="false">
+                    <span class="dashicons dashicons-menu"></span>
+                    <span class="toocheke-nav-toggle-label" id="toocheke-subnav-toggle-label">Menu</span>
+                </button>
+                <h2 class="nav-tab-wrapper toocheke-collapsible-nav toocheke-subnav-tab-wrapper" id="toocheke-subnav-tab-wrapper">
+                    <?php foreach ($tab_subsections as $sub_slug => $sub_label) : ?>
+                        <a href="?page=toocheke-options-page&tab=<?php echo esc_attr($active_tab); ?>&subsection=<?php echo esc_attr($sub_slug); ?>"
+                        class="nav-tab <?php echo $active_subsection === $sub_slug ? 'nav-tab-active' : ''; ?>">
+                            <?php echo esc_html($sub_label); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </h2>
+            </div>
+            <?php endif; ?>
 
             <script>
             /**
@@ -225,25 +295,61 @@ trait Toocheke_Companion_Settings_Page
              * This tiny inline copy runs the instant the browser reaches
              * this point in the HTML — no network wait at all — so the
              * hamburger-vs-tabs decision is already made before the page
-             * ever paints. The external file still owns click-to-open and
-             * re-checking on window resize; this only handles the very
-             * first, otherwise-visible flash on initial page load.
+             * ever paints, for every collapsible nav instance on the page
+             * (the main tab row, and any subnav). The external file still
+             * owns click-to-open and re-checking on window resize; this
+             * only handles the very first, otherwise-visible flash on
+             * initial page load.
              */
             (function () {
-                var wrap = document.getElementById('toocheke-options-wrap');
-                var nav  = document.getElementById('toocheke-nav-tab-wrapper');
-                if (!wrap || !nav) { return; }
-                var firstTab = nav.querySelector('.nav-tab');
-                if (!firstTab) { return; }
-                var oneLineHeight = firstTab.offsetHeight;
-                var rowHeight = nav.offsetHeight;
-                if (oneLineHeight > 0 && rowHeight > oneLineHeight * 1.5) {
-                    wrap.classList.add('toocheke-nav-overflowing');
+                var wraps = document.querySelectorAll('.toocheke-collapsible-nav-wrap');
+                for (var i = 0; i < wraps.length; i++) {
+                    var wrap = wraps[i];
+                    var nav  = wrap.querySelector('.toocheke-collapsible-nav');
+                    if (!nav) { continue; }
+                    var firstTab = nav.querySelector('.nav-tab');
+                    if (firstTab) {
+                        var oneLineHeight = firstTab.offsetHeight;
+                        var rowHeight = nav.offsetHeight;
+                        if (oneLineHeight > 0 && rowHeight > oneLineHeight * 1.5) {
+                            wrap.classList.add('toocheke-nav-overflowing');
+                        }
+                    }
+                    // Reveal now that the correct state (collapsed or
+                    // not) has already been applied -- see the inline
+                    // <style> above for why this starts hidden.
+                    wrap.classList.add('toocheke-nav-ready');
                 }
             })();
             </script>
 
-            <form method="post" action="<?php echo esc_url(add_query_arg('tab', $active_tab, admin_url('options.php'))); ?>">
+            <?php
+            // Anti-flash for the Buttons subtab: js/media.js hides every
+            // button-upload row (except the checkbox's own row) via a
+            // click handler and a document-ready check, both of which
+            // only run once jQuery and that external file have loaded --
+            // same class of flash as the Bluesky Post Format/Random
+            // Archive Posting rows fixed earlier. This applies the
+            // CURRENTLY SAVED value of "Use default navigation buttons?"
+            // immediately, server-side, so there's nothing to flash in
+            // the first place; media.js still fully handles the live,
+            // before-saving toggle once the page has loaded.
+            if (
+                'navigation_options' === $active_tab
+                && 'buttons' === $active_subsection
+                && get_option('toocheke-comics-navigation', 1)
+            ) :
+                ?>
+                <style>
+                    #toocheke-options-wrap .form-table tr:not(:has(#toocheke-comics-navigation)) {
+                        display: none;
+                    }
+                </style>
+                <?php
+            endif;
+            ?>
+
+            <form method="post" action="<?php echo esc_url(add_query_arg(array_filter(['tab' => $active_tab, 'subsection' => $active_subsection]), admin_url('options.php'))); ?>">
                 <?php
                 // Option for display desktop and mobile versions of comic
 
@@ -257,10 +363,67 @@ trait Toocheke_Companion_Settings_Page
     <?php
             }
 
+            /**
+             * Single source of truth for which tabs have a subnav, and what
+             * subsections each one has, in display order. An empty array
+             * means "no subnav for this tab" -- both
+             * toocheke_display_options_page() (which renders the subnav
+             * links) and toocheke_init_option_fields() (which gates which
+             * fields actually register) key off this same list, so they
+             * can never drift out of sync with each other.
+             */
+            private function toocheke_get_tab_subsections($tab)
+            {
+                $subsections = [
+                    'navigation_options' => [
+                        'manga_reading'         => 'Manga Reading',
+                        'comic_navigation'      => 'Comic Navigation',
+                        'buttons'               => 'Buttons',
+                        'chapter_navigation'    => 'Chapter Navigation',
+                        'collection_navigation' => 'Collection Navigation',
+                    ],
+                    'bluesky_options' => [
+                        'connection'        => 'Connection',
+                        'automatic_posting' => 'Automatic Posting',
+                        'post_format'       => 'Post Format',
+                        'random_posting'    => 'Random Archive Posting',
+                    ],
+                ];
+
+                return isset($subsections[$tab]) ? $subsections[$tab] : [];
+            }
+
             public function toocheke_init_option_fields()
             {
-                $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'comic_display_options';
-                $theme      = wp_get_theme();
+                // This is hooked to admin_init, which fires on every
+                // single wp-admin page load site-wide (Dashboard, Posts,
+                // everywhere) -- not just this plugin's own Options page.
+                // Without this guard, the entire switch statement below
+                // (every tab's add_settings_section/add_settings_field/
+                // register_setting calls) ran on every admin request
+                // across the whole site, which is pure wasted work
+                // everywhere except here. Two cases need to pass through:
+                // actually viewing the Options page ($_GET['page']), and
+                // the save request itself, which POSTs to options.php
+                // directly and has no 'page' query var at all -- WordPress
+                // identifies which plugin's settings are being saved via
+                // the hidden 'option_page' field settings_fields() prints
+                // (see toocheke_display_options_page()), so that's checked
+                // here too, or a legitimate save would be silently skipped.
+                $is_options_page = (! empty($_GET['page']) && 'toocheke-options-page' === $_GET['page']);
+                $is_options_save = (! empty($_POST['option_page']) && 'toocheke-settings' === $_POST['option_page']);
+                if (! $is_options_page && ! $is_options_save) {
+                    return;
+                }
+
+                $active_tab        = isset($_GET['tab']) ? $_GET['tab'] : 'comic_display_options';
+                $theme              = wp_get_theme();
+                $tab_subsections    = $this->toocheke_get_tab_subsections($active_tab);
+                $active_subsection  = isset($_GET['subsection']) ? sanitize_key($_GET['subsection']) : '';
+                if (! isset($tab_subsections[$active_subsection])) {
+                    $keys              = array_keys($tab_subsections);
+                    $active_subsection = $keys ? $keys[0] : '';
+                }
                 switch ($active_tab) {
                     case 'comic_display_options':
                         //Option for determining whether to show both a desktop and mobile version of the comic
@@ -303,6 +466,16 @@ trait Toocheke_Companion_Settings_Page
                         register_setting("toocheke-settings", "toocheke-top-10-comics-layout");
                         break;
                     case 'navigation_options':
+                        if ('manga_reading' === $active_subsection) {
+                        //manga option
+                        add_settings_section("toocheke_manga_page_navigation_section", "Manga Page Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Configure the navigation for your manga reader.']);
+                        add_settings_field("toocheke-manga-default-pages", "How many pages do you want to display by default?", [$this, 'toocheke_manga_default_pages_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
+                        register_setting("toocheke-settings", "toocheke-manga-default-pages");
+                        add_settings_field("toocheke-manga-rtl", "Which reading format do you want?", [$this, 'toocheke_manga_rtl_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
+                        register_setting("toocheke-settings", "toocheke-manga-rtl");
+                        }
+
+                        if ('comic_navigation' === $active_subsection) {
                         $theme = wp_get_theme(); // gets the current theme
                         if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
                             //Option for determining whether enable swipe navigation
@@ -310,15 +483,25 @@ trait Toocheke_Companion_Settings_Page
                             add_settings_field("toocheke-comic-panel-swipe-navigation", "Do you want to enable the ability to swipe through the comic, panel-by-panel, similar to Instgram's swipe navigation?", [$this, 'toocheke_comic_panel_swipe_navigation_checkbox'], "toocheke-options-page", "toocheke_comic_panel_swipe_navigation_section");
                             register_setting("toocheke-settings", "toocheke-comic-panel-swipe-navigation");
                         }
-                        //manga option
-                        add_settings_section("toocheke_manga_page_navigation_section", "Manga Page Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Configure the navigation for your manga reader.']);
-                        add_settings_field("toocheke-manga-default-pages", "How many pages do you want to display by default?", [$this, 'toocheke_manga_default_pages_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-manga-default-pages");
-                        add_settings_field("toocheke-manga-rtl", "Which reading format do you want?", [$this, 'toocheke_manga_rtl_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-manga-rtl");
                         //navigation buttons settings
                         add_settings_section("toocheke_comic_navigation_options_section", "Comic Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Customize your comic\'s navigation options. You can upload your own navigation button images to replace the default buttons.']);
+                        }
+                        // This blank/untitled section is a shared container --
+                        // its fields span three different subsections (Comic
+                        // Navigation's button-image uploads, Social Icons, and
+                        // Support Icons), not just comic_nav_buttons, so it
+                        // must be registered regardless of which of those
+                        // three is currently active. Registering a section
+                        // that ends up with no fields attached (e.g. on a tab
+                        // that doesn't need it) is harmless -- do_settings_sections()
+                        // simply renders nothing for it.
                         add_settings_section("toocheke_custom_comic_navigation_section", "", "", "toocheke-options-page");
+                        // Default-seeding for every navigation button image below --
+                        // deliberately left unconditional (not gated by subsection) since
+                        // these are one-time defaults for buttons that live across three
+                        // different subsections (Comic Navigation, Social Icons, Support
+                        // Icons), not just one -- they need to be seeded regardless of
+                        // which subsection tab happens to be open on first visit.
                         //initialize  navigation options
                         if (! get_option('toocheke-random-navigation')) {
                             add_option('toocheke-random-navigation', 1);
@@ -404,6 +587,7 @@ trait Toocheke_Companion_Settings_Page
                         if (! get_option('toocheke-tipeee-button')) {
                             add_option('toocheke-tipeee-button', plugins_url('toocheke-companion' . '/img/no-image.png'));
                         }
+                        if ('comic_navigation' === $active_subsection) {
                         //Option for determining whether to display infinite scroll of comics on the home page.
                         add_settings_field("toocheke-infinite-scroll", "Do you want to display your comic archive as an infinite scroll(no previous/next buttons) on the homepage?", [$this, 'toocheke_infinite_scroll_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
                         register_setting("toocheke-settings", "toocheke-infinite-scroll");
@@ -455,16 +639,24 @@ trait Toocheke_Companion_Settings_Page
                         }
 
                         //Chapter Navigation section
+                        }
+
+                        if ('chapter_navigation' === $active_subsection) {
                         add_settings_section("toocheke_chapter_navigation_section", "Chapter Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Customize chapter-related navigation options. By default, chapter links point to the first or latest comic in the chapter (depending on your Comic Ordering settings) rather than the chapter archive page.']);
                         add_settings_field("toocheke-chapter-archive-link", "Do you want to link to Chapter archive page?", [$this, 'toocheke_chapter_archive_link_checkbox'], "toocheke-options-page", "toocheke_chapter_navigation_section");
                         register_setting("toocheke-settings", "toocheke-chapter-archive-link");
+                        }
 
+                        if ('collection_navigation' === $active_subsection) {
                         //Collection Navigation section
                         add_settings_section("toocheke_collection_navigation_section", "Collection Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Customize collection-related navigation options. By default, collection links point to the first or latest comic in the collection (depending on your Comic Ordering settings) rather than the collection archive page.']);
                         add_settings_field("toocheke-collection-archive-link", "Do you want to link to Collection archive page?", [$this, 'toocheke_collection_archive_link_checkbox'], "toocheke-options-page", "toocheke_collection_navigation_section");
                         register_setting("toocheke-settings", "toocheke-collection-archive-link");
 
                         //Option for determining whether to use the default comic navigation buttons
+                        }
+
+                        if ('buttons' === $active_subsection) {
                         add_settings_field("toocheke-comics-navigation", "Do you want to use the default navigation buttons?", [$this, 'toocheke_comics_navigation_checkbox'], "toocheke-options-page", "toocheke_custom_comic_navigation_section");
                         register_setting("toocheke-settings", "toocheke-comics-navigation");
 
@@ -549,6 +741,7 @@ trait Toocheke_Companion_Settings_Page
                         add_settings_field('toocheke-tipeee-preview', 'Current Tipeee button', [$this, 'toocheke_tipeee_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-tipeee-button', 'Replace Tipeee button', [$this, 'toocheke_tipeee_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         register_setting('toocheke-settings', 'toocheke-tipeee-button');
+                        }
                         break;
                     case 'social_options':
                         //social share settings
@@ -742,7 +935,7 @@ trait Toocheke_Companion_Settings_Page
                         // All Bluesky settings registration lives in
                         // inc/class-toocheke-companion-bluesky.php so the
                         // feature stays self-contained; see that file.
-                        $this->toocheke_bluesky_register_settings_fields();
+                        $this->toocheke_bluesky_register_settings_fields($active_subsection);
                         break;
                     // Email notifications — Premium only, same gate as
                     // 'buy_options' / 'sponsor_options' below. All settings

@@ -1722,8 +1722,6 @@ trait Toocheke_Companion_Notifications
         $manage_page_id = (int) get_option('toocheke-notify-manage-page');
         $manage_link    = $manage_page_id ? add_query_arg('token', $token, get_permalink($manage_page_id)) : '';
 
-        $body_content = $this->toocheke_notifications_build_email_content($post, $post_type);
-
         $heading = sprintf(
             /* translators: 1: post type label (e.g. "Comic"), 2: post title */
             __('New %1$s: %2$s', 'toocheke-companion'),
@@ -1731,7 +1729,105 @@ trait Toocheke_Companion_Notifications
             get_the_title($post)
         );
 
+        // A Patreon-gated post (Toocheke Premium's own paywall integration)
+        // never has its real content included in the email -- readers
+        // without access shouldn't see it there any more than they would
+        // on the site itself. The normal "Read it here" button is also
+        // suppressed in favor of the locked layout's own Patreon login
+        // button, which is the actual next step for a gated post rather
+        // than a link straight to content the reader can't see yet.
+        if ($this->toocheke_notifications_is_post_patreon_gated($post->ID)) {
+            $locked_body = $this->toocheke_notifications_build_patreon_locked_body($post);
+            return $this->toocheke_notifications_send_email($email, $heading, $locked_body, $link, __('Read it here', 'toocheke-companion'), $unsubscribe_link, $manage_link, true);
+        }
+
+        $body_content = $this->toocheke_notifications_build_email_content($post, $post_type);
+
         return $this->toocheke_notifications_send_email($email, $heading, $body_content, $link, __('Read it here', 'toocheke-companion'), $unsubscribe_link, $manage_link);
+    }
+
+    /* =========================================================================
+       PATREON GATING (Toocheke Premium integration)
+       Toocheke Premium's own Patreon integration can lock a post behind a
+       paywall via the 'patreon-level' post meta (set > 0). Notification
+       emails must never include the actual gated content -- readers
+       without access shouldn't see it there any more than on the site
+       itself. This applies uniformly across every post type this feature
+       already supports (Post, Comic, Manga Chapter, Series, Manga Series,
+       Manga Volume), since the theme's own gating meta isn't restricted to
+       any specific post type either.
+    ========================================================================= */
+
+    /**
+     * Mirrors the exact check Toocheke Premium's own code uses (see
+     * is_plugin_active('patreon-connect/patreon.php') in
+     * inc/toocheke-functions.php) -- is_plugin_active() lives in
+     * wp-admin/includes/plugin.php, which isn't autoloaded outside
+     * wp-admin (e.g. during a WP-Cron run), hence the explicit require.
+     */
+    private function toocheke_notifications_is_patreon_active()
+    {
+        if (! function_exists('is_plugin_active')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        return is_plugin_active('patreon-connect/patreon.php');
+    }
+
+    private function toocheke_notifications_is_post_patreon_gated($post_id)
+    {
+        if (! $this->toocheke_notifications_is_patreon_active()) {
+            return false;
+        }
+        $level = get_post_meta($post_id, 'patreon-level', true);
+        return '' !== $level && (float) $level > 0;
+    }
+
+    /**
+     * Mirrors the exact link Toocheke Premium's own "Login with Patreon"
+     * button builds (see the $flow_link construction in
+     * inc/toocheke-functions.php) -- home_url()/patreon-flow/ with a
+     * final_redirect back to the gated post itself, so after logging in
+     * the reader lands right back where the content actually is, the same
+     * as clicking that button on the site.
+     */
+    private function toocheke_notifications_get_patreon_login_url($post_id)
+    {
+        return home_url('/patreon-flow/') . '?patreon-login=yes&patreon-final-redirect=' . urlencode(get_permalink($post_id));
+    }
+
+    /**
+     * The locked-content layout: padlock icon, a short explanation, and a
+     * Patreon login button -- in place of the post's actual content. No
+     * title here deliberately -- the outer email template
+     * (toocheke_notifications_render_email_html()) already renders the
+     * post title as part of its own heading (e.g. "New Comic: Locked
+     * Comic"), so repeating it here would just duplicate it. Bluesky's
+     * own SVG-based icons aren't used here since SVG support in email
+     * clients is inconsistent; both images are plain PNGs bundled with
+     * the plugin (img/patreon-padlock.png and img/patreon-login-button.png)
+     * specifically for this.
+     */
+    private function toocheke_notifications_build_patreon_locked_body($post)
+    {
+        $login_url   = $this->toocheke_notifications_get_patreon_login_url($post->ID);
+        $padlock_url = TOOCHEKE_COMPANION_PLUGIN_URL . 'img/patreon-padlock.png';
+        $button_url  = TOOCHEKE_COMPANION_PLUGIN_URL . 'img/patreon-login-button.png';
+
+        ob_start();
+        ?>
+<p style="text-align:center;margin:0 0 20px;">
+<img src="<?php echo esc_url($padlock_url); ?>" width="50" height="64" alt="" style="display:inline-block;border:0;" />
+</p>
+<p style="text-align:center;margin:0 0 24px;color:#333333;font-size:16px;line-height:1.5;">
+<?php esc_html_e('This post is available exclusively to Patreon supporters.', 'toocheke-companion'); ?>
+</p>
+<p style="text-align:center;margin:0;">
+<a href="<?php echo esc_url($login_url); ?>">
+<img src="<?php echo esc_url($button_url); ?>" width="220" height="34" alt="<?php esc_attr_e('Log in with Patreon', 'toocheke-companion'); ?>" style="display:inline-block;border:0;" />
+</a>
+</p>
+        <?php
+        return ob_get_clean();
     }
 
     /**
@@ -1745,9 +1841,9 @@ trait Toocheke_Companion_Notifications
      * admin-facing error log below has an actual reason, not just
      * "failed."
      */
-    private function toocheke_notifications_send_email($to, $subject, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url = '')
+    private function toocheke_notifications_send_email($to, $subject, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url = '', $hide_cta = false)
     {
-        $html = $this->toocheke_notifications_render_email_html($subject, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url);
+        $html = $this->toocheke_notifications_render_email_html($subject, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url, $hide_cta);
 
         $this->toocheke_notify_last_mail_error = '';
         add_filter('wp_mail_content_type', [$this, 'toocheke_notifications_set_html_content_type']);
@@ -1803,7 +1899,7 @@ trait Toocheke_Companion_Notifications
      * the handful of clients that don't support it (mainly older
      * Outlook), which is standard, accepted practice for HTML email.
      */
-    private function toocheke_notifications_render_email_html($heading, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url)
+    private function toocheke_notifications_render_email_html($heading, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url, $hide_cta = false)
     {
         $logo_url  = get_option('toocheke-notify-email-logo', '');
         $signature = get_option('toocheke-notify-email-signature', '');
@@ -1843,6 +1939,7 @@ trait Toocheke_Companion_Notifications
 <?php echo $body_html; ?>
 </div>
 
+<?php if (! $hide_cta) : ?>
 <table role="presentation" cellpadding="0" cellspacing="0">
 <tr>
 <td style="border-radius:6px;background-color:#10ae98;">
@@ -1857,6 +1954,7 @@ trait Toocheke_Companion_Notifications
 <?php esc_html_e('Or copy and paste this link into your browser:', 'toocheke-companion'); ?><br />
 <a href="<?php echo esc_url($cta_url); ?>" style="color:#999999;word-break:break-all;overflow-wrap:break-word;"><?php echo esc_html($cta_url); ?></a>
 </p>
+<?php endif; ?>
 
 <?php if ($signature) : ?>
 <div style="margin-top:32px;padding-top:20px;border-top:1px solid #eeeeee;color:#555555;font-size:14px;line-height:1.5;">

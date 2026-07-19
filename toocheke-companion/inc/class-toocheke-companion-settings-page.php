@@ -351,6 +351,65 @@ trait Toocheke_Companion_Settings_Page
 
             <form method="post" action="<?php echo esc_url(add_query_arg(array_filter(['tab' => $active_tab, 'subsection' => $active_subsection]), admin_url('options.php'))); ?>">
                 <?php
+                // Two groups get displayed here:
+                // - 'toocheke-settings': this plugin's own explicit
+                //   messages (currently only the Permalinks tab adds any --
+                //   see class-toocheke-companion-permalinks.php).
+                // - 'general': WordPress core's own generic "Settings
+                //   saved." message, which options.php adds automatically
+                //   after any successful save on ANY tab, but only when
+                //   nothing more specific was already added during that
+                //   same request -- so on Permalinks, its own specific
+                //   messages simply take the place of this generic one
+                //   instead of both showing at once; every other tab,
+                //   which has never added anything specific of its own,
+                //   gets this generic confirmation instead. Deliberately
+                //   NOT an unscoped settings_errors() call, which would
+                //   also show any other plugin's own unrelated notices.
+                //
+                // Both are deduplicated first, defensively -- WordPress's
+                // own settings-errors mechanism (a transient merged into
+                // the global $wp_settings_errors array) is known to
+                // display the same message more than once if
+                // get_settings_errors()/settings_errors() ends up invoked
+                // more than once in a single page render, and separately,
+                // a duplicate form submission (a double-click on Save
+                // Changes, or the browser's own "Confirm Form
+                // Resubmission" prompt after a refresh) can queue the
+                // identical message twice for entirely legitimate reasons.
+                // Either way, nobody should ever see the same confirmation
+                // or error twice.
+                global $wp_settings_errors;
+                $toocheke_error_groups  = ['toocheke-settings', 'general'];
+                $toocheke_queued_errors = [];
+                foreach ($toocheke_error_groups as $toocheke_group) {
+                    $toocheke_queued_errors = array_merge($toocheke_queued_errors, get_settings_errors($toocheke_group));
+                }
+                if (! empty($toocheke_queued_errors)) {
+                    $toocheke_deduped_errors    = [];
+                    $toocheke_seen_fingerprints = [];
+                    foreach ($toocheke_queued_errors as $toocheke_error) {
+                        $fingerprint = $toocheke_error['setting'] . '|' . $toocheke_error['code'] . '|' . $toocheke_error['message'];
+                        if (! isset($toocheke_seen_fingerprints[$fingerprint])) {
+                            $toocheke_seen_fingerprints[$fingerprint] = true;
+                            $toocheke_deduped_errors[] = $toocheke_error;
+                        }
+                    }
+                    // Only ever replace these two groups' own entries
+                    // within the global array -- any other plugin's own
+                    // queued errors (a different 'setting' value) are
+                    // left completely untouched.
+                    $wp_settings_errors = array_merge(
+                        array_filter((array) $wp_settings_errors, function ($error) use ($toocheke_error_groups) {
+                            return ! in_array($error['setting'], $toocheke_error_groups, true);
+                        }),
+                        $toocheke_deduped_errors
+                    );
+                }
+                foreach ($toocheke_error_groups as $toocheke_group) {
+                    settings_errors($toocheke_group);
+                }
+
                 // Option for display desktop and mobile versions of comic
 
                 do_settings_sections("toocheke-options-page");
@@ -381,6 +440,7 @@ trait Toocheke_Companion_Settings_Page
                         'buttons'               => 'Buttons',
                         'chapter_navigation'    => 'Chapter Navigation',
                         'collection_navigation' => 'Collection Navigation',
+                        'permalinks'            => 'Permalinks',
                     ],
                     'bluesky_options' => [
                         'connection'        => 'Connection',
@@ -654,6 +714,13 @@ trait Toocheke_Companion_Settings_Page
                         register_setting("toocheke-settings", "toocheke-collection-archive-link");
 
                         //Option for determining whether to use the default comic navigation buttons
+                        }
+
+                        // Custom permalink slugs -- all registration lives in
+                        // inc/class-toocheke-companion-permalinks.php so the
+                        // feature stays self-contained, same as Bluesky/Notifications.
+                        if ('permalinks' === $active_subsection) {
+                            $this->toocheke_permalinks_register_settings_fields();
                         }
 
                         if ('buttons' === $active_subsection) {

@@ -110,6 +110,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'publicly_queryable'  => true,
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
+            'rewrite'             => ['slug' => $this->toocheke_permalinks_get_slug('series', 'series')],
         ];
 
         // Registering your Custom Post Type
@@ -160,6 +161,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
             'show_in_rest'        => true,
+            'rewrite'             => ['slug' => $this->toocheke_permalinks_get_slug('comic', 'comic')],
 
         ];
 
@@ -211,6 +213,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'publicly_queryable'  => true,
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
+            'rewrite'             => ['slug' => $this->toocheke_permalinks_get_slug('manga_series', 'manga_series')],
         ];
 
         // Registering your Custom Post Type
@@ -260,6 +263,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'publicly_queryable'  => true,
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
+            'rewrite'             => ['slug' => $this->toocheke_permalinks_get_slug('manga_volume', 'manga_volume')],
         ];
 
         // Registering your Custom Post Type
@@ -304,13 +308,13 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_in_rest'        => true,
             'menu_position'       => 7,
             'can_export'          => true,
-            'has_archive'         => 'manga',
+            'has_archive'         => $this->toocheke_permalinks_get_slug('manga_chapter', 'manga'),
             'exclude_from_search' => false,
             'publicly_queryable'  => true,
             'capability_type'     => 'post',
             'menu_icon'           => 'dashicons-toocheke-companion',
             'rewrite'             => [
-                'slug'  => 'manga',
+                'slug'  => $this->toocheke_permalinks_get_slug('manga_chapter', 'manga'),
                 'with_front' => false,
                 'feeds' => true,
             ],
@@ -349,7 +353,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_admin_column' => true,
             'show_in_rest'      => true,
             'query_var'         => true,
-            'rewrite'           => ['slug' => 'genre'],
+            'rewrite'           => ['slug' => $this->toocheke_permalinks_get_slug('genres', 'genre')],
         ]);
 
         // Register tag for series
@@ -378,7 +382,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_ui'      => true,
             'show_in_rest' => true,
             'query_var'    => true,
-            'rewrite'      => ['slug' => 'series-tag'],
+            'rewrite'      => ['slug' => $this->toocheke_permalinks_get_slug('series_tags', 'series-tag')],
         ];
         register_taxonomy('series_tags', 'series', $series_tags_args);
 
@@ -410,7 +414,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_admin_column' => true,
             'show_in_rest'      => true,
             'query_var'         => true,
-            'rewrite'           => ['slug' => 'collection'],
+            'rewrite'           => ['slug' => $this->toocheke_permalinks_get_slug('collections', 'collection')],
         ]);
         //chapters
         $chapter_labels = [
@@ -437,7 +441,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_admin_column' => true,
             'show_in_rest'      => true,
             'query_var'         => true,
-            'rewrite'           => ['slug' => 'chapter'],
+            'rewrite'           => ['slug' => $this->toocheke_permalinks_get_slug('chapters', 'chapter')],
         ]);
 
         // Register tag for comics
@@ -555,7 +559,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_in_rest' => true,
             'show_ui'      => true,
             'query_var'    => true,
-            'rewrite'      => ['slug' => 'manga-genre'],
+            'rewrite'      => ['slug' => $this->toocheke_permalinks_get_slug('manga_genre', 'manga-genre')],
         ]);
 
         //publishers
@@ -586,7 +590,7 @@ trait Toocheke_Companion_CPT_Taxonomy
             'show_in_rest' => true,
             'show_ui'      => true,
             'query_var'    => true,
-            'rewrite'      => ['slug' => 'manga-publisher'],
+            'rewrite'      => ['slug' => $this->toocheke_permalinks_get_slug('manga_publisher', 'manga-publisher')],
         ]);
     }
 

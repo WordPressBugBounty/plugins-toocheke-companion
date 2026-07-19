@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.7
+Stable tag: 2.8
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -129,6 +129,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.8 =
+* UPDATE: Email notifications for Patreon-locked posts (**Premium only**) no longer include the post's content.
+* NEW: Added a Permalinks tab under Navigation, letting you customize the URL slugs used for comics, series, manga, and their taxonomies.
 
 = 2.7 =
 * UPDATE: Added filtering options for Bluesky posts — choose exactly which series, collections, chapters, manga series, or manga volumes get auto-posted or included in random archive re-posts.

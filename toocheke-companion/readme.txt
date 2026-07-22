@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.8
+Stable tag: 2.9
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -129,6 +129,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.9 =
+* NEW: Added thumbnail list related options for the comic archive page.
 
 = 2.8 =
 * UPDATE: Email notifications for Patreon-locked posts (**Premium only**) no longer include the post's content.

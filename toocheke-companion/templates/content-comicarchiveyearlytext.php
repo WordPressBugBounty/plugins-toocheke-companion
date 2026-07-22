@@ -7,15 +7,11 @@
  * @package Toocheke
  */
 $templates = new Toocheke_Companion_Template_Loader;
+$comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
+$comic_order_asc = ('ASC' === strtoupper($comic_order));
 ?>
 <?php if (have_posts()): ?>
-     <header class="page-header">
-            <?php
-the_archive_title('<h1 class="page-title">', '</h1>');
 
-?>
-      </header><!-- .page-header -->
-      <hr/>
       <?php
 $archive_args = array(
 	'post_type' => 'comic',
@@ -40,8 +36,8 @@ endwhile;
  <?php
 the_posts_navigation(
     array(
-        'prev_text' => __('Older comics', 'toocheke-companion'),
-        'next_text' => __('Newer comics', 'toocheke-companion'),
+        'prev_text' => $comic_order_asc ? __('Newer comics', 'toocheke-companion') : __('Older comics', 'toocheke-companion'),
+        'next_text' => $comic_order_asc ? __('Older comics', 'toocheke-companion') : __('Newer comics', 'toocheke-companion'),
         'screen_reader_text' => __('Posts navigation', 'toocheke-companion'),
     )
 );

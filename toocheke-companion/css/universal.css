@@ -149,12 +149,13 @@ Universal theme styles
 	padding: 0;
 }
 
-.pagination {
+.toocheke-archive-pagination {
 	display: -ms-flexbox;
 	display: flex;
 	padding-left: 0;
 	list-style: none;
 	border-radius: .25rem;
+	margin-top:15px;
 }
 
 .page-numbers {
@@ -186,6 +187,38 @@ Universal theme styles
 	background-color: #fff;
 	border-color: #000000;
 
+}
+
+
+#archive-menu {
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+	margin: 0 0 15px;
+	padding: 0;
+	border-bottom: 1px solid #ddd;
+}
+
+#archive-menu li {
+	margin: 0;
+}
+
+#archive-menu li a {
+	display: inline-block;
+	padding: 10px 16px;
+	text-decoration: none;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px; /* overlaps the ul's border so the underline sits flush against it */
+}
+
+#archive-menu li a:hover,
+#archive-menu li a:focus {
+	border-bottom-color: currentColor;
+}
+
+#archive-menu li a[aria-current="page"] {
+	font-weight: 600;
+	border-bottom-color: currentColor;
 }
 
 

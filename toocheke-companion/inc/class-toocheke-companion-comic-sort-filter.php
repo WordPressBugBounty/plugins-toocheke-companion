@@ -27,6 +27,60 @@ trait Toocheke_Companion_Comic_Sort_Filter
             }
 
             /**
+             * The yearly archive templates (content-comicarchiveyearlytext.php,
+             * -gallery.php, -thumbnail.php) loop over the main query directly
+             * with have_posts()/the_post() instead of building their own
+             * WP_Query. That happens in two different contexts, both of which
+             * need the toocheke-comics-order option applied here rather than
+             * as an 'order' arg inside those templates, since by the time the
+             * templates run the main query has already been executed:
+             *
+             * 1. An actual year archive, e.g. /2014/?post_type=comic
+             *    (is_date() is true).
+             * 2. The default comic post-type archive, e.g. /comic/, when
+             *    'toocheke-comics-archive'[layout_type] is set to one of the
+             *    yearly-* options — content-comicdefaultarchive.php routes
+             *    that case to the same yearly templates, but is_date() is
+             *    false there since no year is present in the URL.
+             */
+            public function toocheke_companion_year_archive_order($query)
+            {
+                if (is_admin() || ! $query->is_main_query()) {
+                    return $query;
+                }
+
+                $post_type = $query->get('post_type');
+                $is_comic_archive = ('comic' === $post_type) || (is_array($post_type) && in_array('comic', $post_type, true));
+
+                if (! $is_comic_archive) {
+                    return $query;
+                }
+
+                $is_year_context = false;
+
+                if ($query->is_date()) {
+                    $is_year_context = true;
+                } elseif ($query->is_post_type_archive('comic')) {
+                    $archive_options = get_option('toocheke-comics-archive');
+                    $layout_type = isset($archive_options['layout_type']) ? $archive_options['layout_type'] : '';
+                    $yearly_layouts = ['yearly-plain-text-list', 'yearly-gallery', 'yearly-thumbnail-list'];
+                    if (in_array($layout_type, $yearly_layouts, true)) {
+                        $is_year_context = true;
+                    }
+                }
+
+                if (! $is_year_context) {
+                    return $query;
+                }
+
+                $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
+                $query->set('orderby', 'post_date');
+                $query->set('order', $comic_order);
+
+                return $query;
+            }
+
+            /**
              * Post Number.
              */
             public function toocheke_update_comic_post_numbers()

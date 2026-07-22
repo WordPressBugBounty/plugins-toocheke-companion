@@ -85,7 +85,7 @@
 
         ?>
 
-		<nav class="pagination">
+		<nav class="toocheke-archive-pagination">
 
 		    <?php echo wp_kses($comic_links, [
                         'a'    => [

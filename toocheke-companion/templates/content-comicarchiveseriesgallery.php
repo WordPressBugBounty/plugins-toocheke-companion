@@ -10,13 +10,7 @@ $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics
 $templates = new Toocheke_Companion_Template_Loader;
 ?>
 <?php if (have_posts()): ?>
-     <header class="page-header">
-            <?php
-the_archive_title('<h1 class="page-title">', '</h1>');
 
-?>
-      </header><!-- .page-header -->
-      <hr/>
       <?php
 //for each chapter, show all posts
 $series_args = array(
@@ -66,7 +60,7 @@ if ($series_query->have_posts()):
                     echo  esc_url($comic_url);
                     echo '" >';
                     echo '<img src="';
-                    echo esc_attr(toocheke_catch_that_image_alt($comic));
+                    echo esc_attr(toocheke_universal_catch_that_image_alt($comic));
                     echo '" alt="" />';
                     echo '</a>';
 
@@ -76,10 +70,10 @@ if ($series_query->have_posts()):
                 echo '</span>';
             } // foreach($series_comics
             echo '</div>';
-        } // if ($series_comics
-        ?>
+            ?>
 			  <p>&nbsp;</p>
 			  <?php
+        } // if ($series_comics
     endwhile;
     $series_query = null;
     wp_reset_postdata();

@@ -10,13 +10,6 @@ $templates = new Toocheke_Companion_Template_Loader;
 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
 ?>
 <?php if (have_posts()): ?>
-     <header class="page-header">
-            <?php
-the_archive_title('<h1 class="page-title">', '</h1>');
-
-?>
-      </header><!-- .page-header -->
-      <hr/>
       <?php
 //for each collection, show all posts
 $collection_args = array(
@@ -75,7 +68,7 @@ foreach ($collections as $collection) {
                 echo  esc_url($comic_url);
                 echo '" >';
                 echo '<img src="';
-                echo esc_attr(toocheke_catch_that_image_alt($comic));
+                echo esc_attr(toocheke_universal_catch_that_image_alt($comic));
                 echo '" alt="" />';
                 echo '</a>';
 
@@ -85,10 +78,10 @@ foreach ($collections as $collection) {
             echo '</span>';
         } // foreach($collections_posts
         echo '</div>';
-    } // if ($collections_posts
-    ?>
+        ?>
 	  <p>&nbsp;</p>
 	  <?php
+    } // if ($collections_posts
 } // foreach($collections
 ?>
 

@@ -33,14 +33,23 @@ switch ($comic_archive_option) {
     case 'chapters-gallery':
         $templates->get_template_part('content', 'comicarchivechaptersgallery');
         break;
+    case 'chapters-thumbnail-list':
+        $templates->get_template_part('content', 'comicarchivechaptersthumbnail');
+        break;
     case 'collections-plain-text-list':
         $templates->get_template_part('content', 'comicarchivecollectionstext');
         break;
     case 'collections-gallery':
         $templates->get_template_part('content', 'comicarchivecollectionsgallery');
         break;
+    case 'collections-thumbnail-list':
+        $templates->get_template_part('content', 'comicarchivecollectionsthumbnail');
+        break;
     case 'series-plain-text-list':
         $templates->get_template_part('content', 'comicarchiveseriestext');
+        break;
+    case 'series-thumbnail-list':
+        $templates->get_template_part('content', 'comicarchiveseriesthumbnail');
         break;
     case 'series-gallery':
         $templates->get_template_part('content', 'comicarchiveseriesgallery');
@@ -50,5 +59,8 @@ switch ($comic_archive_option) {
         break;
     case 'yearly-gallery':
         $templates->get_template_part('content', 'comicarchiveyearlygallery');
+        break;
+    case 'yearly-thumbnail-list':
+        $templates->get_template_part('content', 'comicarchiveyearlythumbnail');
         break;
 }

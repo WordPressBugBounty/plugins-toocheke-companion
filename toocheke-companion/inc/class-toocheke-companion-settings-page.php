@@ -2160,18 +2160,26 @@ trait Toocheke_Companion_Settings_Page
                 Segmented By Chapters - Plain Text List</option>
             <option value="chapters-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-gallery"); ?>>
                 Segmented By Chapters - Gallery/Grid</option>
+            <option value="chapters-thumbnail-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "chapters-thumbnail-list"); ?>>
+                Segmented By Chapters - Thumbnail List</option> 
             <option value="collections-plain-text-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "collections-plain-text-list"); ?>>
                 Segmented By Collections - Plain Text List</option>
             <option value="collections-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "collections-gallery"); ?>>
                 Segmented By Collections - Gallery/Grid</option>
+            <option value="collections-thumbnail-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "collections-thumbnail-list"); ?>>
+                Segmented By Collections - Thumbnail List</option> 
             <option value="series-plain-text-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-plain-text-list"); ?>>
                 Segmented By Series - Plain Text List</option>
             <option value="series-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-gallery"); ?>>
                 Segmented By Series - Gallery/Grid</option>
+            <option value="series-thumbnail-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "series-thumbnail-list"); ?>>
+                Segmented By Series - Thumbnail List</option> 
             <option value="yearly-plain-text-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-plain-text-list"); ?>>
                 Segmented By Year - Plain Text List</option>
             <option value="yearly-gallery" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-gallery"); ?>>
                 Segmented By Year - Gallery/Grid</option>
+            <option value="yearly-thumbnail-list" <?php selected(isset($options['layout_type']) ? $options['layout_type'] : '', "yearly-thumbnail-list"); ?>>
+                Segmented By Year - Thumbnail List</option>
         </select>
     <?php
             }

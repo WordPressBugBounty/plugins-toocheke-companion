@@ -13,11 +13,7 @@ if(is_archive()){
 }
 ?>
      <div id="archive-page-calendar-wrapper">
-     <header class="page-header">
-            <?php
-the_archive_title('<h1 class="page-title">', '</h1>');
 
-?>
            <?php
 if (is_day() ):
 

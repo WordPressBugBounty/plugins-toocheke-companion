@@ -62,7 +62,7 @@ if ($comic_links):
 
 ?>
 
-<nav class="pagination">
+<nav class="toocheke-archive-pagination">
 
     <?php echo wp_kses($comic_links, array(
     'a' => array(

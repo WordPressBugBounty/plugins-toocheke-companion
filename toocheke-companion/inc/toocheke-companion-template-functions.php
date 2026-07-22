@@ -774,3 +774,16 @@ if (! function_exists('toocheke_invalidate_chapter_comic_ids_cache')):
     }
 endif;
 
+function toocheke_universal_catch_that_image_alt($comic)
+{
+    $first_img = '';
+    $output = preg_match_all('/<img.+?src=[\'"]([^\'"]+)[\'"].*?>/i', $comic->post_content, $matches);
+    if ($output) {
+        $first_img = $matches[1][0];
+    }
+
+    if (empty($first_img)) {
+        $first_img = esc_attr(plugins_url('toocheke-companion' . '/img/default-thumbnail-image.png'));
+    }
+    return $first_img;
+}

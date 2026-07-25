@@ -3,41 +3,7 @@
  * Toocheke Companion — Email Notifications (Premium only).
  *
  * Lets readers subscribe by email to be notified when new comics, manga
- * chapters, or posts go up. This is a Toocheke Premium feature: the
- * settings tab is only ever shown/registered when the active theme is
- * Toocheke Premium (or a child of it) — see the 'notification_options'
- * case in toocheke_init_option_fields() in
- * class-toocheke-companion-settings-page.php, which mirrors the existing
- * premium gate already used for 'buy_options' / 'sponsor_options'.
- *
- * PASS 1 SCOPE (this file, this pass):
- * - The two custom database tables this feature needs (subscribers +
- *   send queue), created/upgraded via their own independent DB-version
- *   check (see toocheke_notifications_maybe_upgrade_db()) rather than
- *   being tied to TOOCHEKE_COMPANION_VERSION. This is deliberate: the
- *   plugin version bump to 2.5 is being held until the feature is fully
- *   built across all passes, but the tables need to exist (and need to
- *   get created for existing 2.4 sites that update the plugin files
- *   without deactivating/reactivating, which never fires
- *   register_activation_hook) as soon as this pass ships. Decoupling the
- *   schema version from the plugin release version means this works
- *   correctly regardless of which pass a given site is currently on.
- * - The "Notifications" settings tab: which post types should trigger a
- *   notification email, plus Cloudflare Turnstile bot-protection config
- *   for the (not-yet-built) public signup form, with a live test-connection
- *   check.
- * - A dismissible info notice recommending a real SMTP delivery plugin +
- *   provider, since wp_mail() alone is unreliable at any real subscriber
- *   count.
- *
- * NOT in this pass (later passes): the signup/confirm/unsubscribe
- * shortcodes, the actual publish-time queueing hook, the cron batch
- * sender, and the email template itself. Settings fields for those
- * (sender name/email, logo, signature) will be added to this same tab
- * in later passes.
- *
- * Used by {@see Toocheke_Companion_Comic_Features} in toocheke-companion.php,
- * which `use`s this trait alongside the others in /inc.
+ * chapters, or posts go up.
  */
 
 if (! defined('ABSPATH')) { exit; }
@@ -868,6 +834,16 @@ trait Toocheke_Companion_Notifications
             $this->toocheke_notify_render_flags['turnstile_rendered'] = true;
         }
 
+        // Unique per rendered instance (not just per series_id, which
+        // defaults to 0 for every unscoped form) -- a page can have more
+        // than one signup form at once (e.g. inline content + a sidebar
+        // widget), and each needs its own distinct id="" pair for the
+        // screen-reader label to correctly associate with its own input,
+        // not whichever instance happened to render first.
+        static $instance = 0;
+        $instance++;
+        $field_id = "toocheke-notify-email-{$series_id}-{$instance}";
+
         ob_start();
         ?>
         <form class="toocheke-notify-signup-form">
@@ -879,22 +855,25 @@ trait Toocheke_Companion_Notifications
             // not look good, since a sighted human never sees it.
             ?>
             <p style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
-                <label for="toocheke-notify-hp-<?php echo esc_attr($series_id); ?>"><?php esc_html_e('Leave this field blank', 'toocheke-companion'); ?></label>
-                <input type="text" id="toocheke-notify-hp-<?php echo esc_attr($series_id); ?>" name="toocheke_notify_hp" tabindex="-1" autocomplete="off" />
+                <label for="toocheke-notify-hp-<?php echo esc_attr($instance); ?>"><?php esc_html_e('Leave this field blank', 'toocheke-companion'); ?></label>
+                <input type="text" id="toocheke-notify-hp-<?php echo esc_attr($instance); ?>" name="toocheke_notify_hp" tabindex="-1" autocomplete="off" />
             </p>
             <input type="hidden" name="series_id" value="<?php echo esc_attr($series_id); ?>" />
-            <p class="toocheke-notify-field">
-                <label>
-                    <?php esc_html_e('Email address', 'toocheke-companion'); ?><br />
-                    <input type="email" name="email" required="required" />
-                </label>
-            </p>
+            <div class="toocheke-notify-form-row">
+                <label for="<?php echo esc_attr($field_id); ?>" class="screen-reader-text"><?php esc_html_e('Email address', 'toocheke-companion'); ?></label>
+                <input
+                    type="email"
+                    id="<?php echo esc_attr($field_id); ?>"
+                    name="email"
+                    class="toocheke-notify-email-input"
+                    placeholder="<?php esc_attr_e('Type your email…', 'toocheke-companion'); ?>"
+                    required="required"
+                />
+                <button type="submit" class="toocheke-notify-submit"><?php esc_html_e('Subscribe', 'toocheke-companion'); ?></button>
+            </div>
             <?php if ($turnstile_enabled && $turnstile_site_key) : ?>
                 <div class="toocheke-notify-turnstile-widget" data-sitekey="<?php echo esc_attr($turnstile_site_key); ?>"></div>
             <?php endif; ?>
-            <p>
-                <button type="submit" class="toocheke-notify-submit"><?php esc_html_e('Subscribe', 'toocheke-companion'); ?></button>
-            </p>
             <p class="toocheke-notify-result" aria-live="polite"></p>
         </form>
         <?php

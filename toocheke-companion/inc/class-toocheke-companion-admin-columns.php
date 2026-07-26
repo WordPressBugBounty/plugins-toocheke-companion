@@ -226,9 +226,9 @@ trait Toocheke_Companion_Admin_Columns
                 $terms_list = get_the_terms($id, 'series_tags');
                 if (! empty($terms_list) && ! isset($terms_list->errors)) {
                     foreach ($terms_list as $term) {
-                        $tags_list[] = '<a href="' . admin_url('/edit.php?post_type=series&series_tags=' . $term->slug) . '">' . $term->name . '</a>';
+                        $tags_list[] = '<a href="' . esc_url(admin_url('/edit.php?post_type=series&series_tags=' . $term->slug)) . '">' . esc_html($term->name) . '</a>';
                     }
-                    echo join(', ', $tags_list);
+                    echo wp_kses_post(join(', ', $tags_list));
                 }
                 break;
             case 'series_thumbnail':
@@ -237,12 +237,12 @@ trait Toocheke_Companion_Admin_Columns
                     $post_thumbnail_img     = wp_get_attachment_image_src($post_thumbnail_id, 'featured_preview');
                     $post_thumbnail_img_src = $post_thumbnail_img[0];
                     if ($post_thumbnail_img_src) {
-                        echo '<img src="' . $post_thumbnail_img_src . '" class="series-thumbnail" />';
+                        echo '<img src="' . esc_url($post_thumbnail_img_src) . '" class="series-thumbnail" />';
                     } else {
-                        echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-thumbnail" />';
+                        echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-thumbnail" />';
                     }
                 } else {
-                    echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-thumbnail" />';
+                    echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-thumbnail" />';
                 }
                 break;
             case 'series_hero':
@@ -252,12 +252,12 @@ trait Toocheke_Companion_Admin_Columns
                     $post_hero_img     = wp_get_attachment_image_src($post_hero_id, 'featured_preview');
                     $post_hero_img_src = $post_hero_img[0];
                     if ($post_hero_img_src) {
-                        echo '<img src="' . $post_hero_img_src . '" class="series-hero" />';
+                        echo '<img src="' . esc_url($post_hero_img_src) . '" class="series-hero" />';
                     } else {
-                        echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-hero" />';
+                        echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-hero" />';
                     }
                 } else {
-                    echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-hero" />';
+                    echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-hero" />';
                 }
                 break;
             case 'series_mobile_hero':
@@ -267,12 +267,12 @@ trait Toocheke_Companion_Admin_Columns
                     $post_hero_img     = wp_get_attachment_image_src($post_hero_id, 'featured_preview');
                     $post_hero_img_src = $post_hero_img[0];
                     if ($post_hero_img_src) {
-                        echo '<img src="' . $post_hero_img_src . '" class="series-hero" />';
+                        echo '<img src="' . esc_url($post_hero_img_src) . '" class="series-hero" />';
                     } else {
-                        echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-hero" />';
+                        echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-hero" />';
                     }
                 } else {
-                    echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-hero" />';
+                    echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-hero" />';
                 }
                 break;
             case 'series_bg_img':
@@ -282,19 +282,19 @@ trait Toocheke_Companion_Admin_Columns
                     $post_bg_img     = wp_get_attachment_image_src($post_bg_id, 'featured_preview');
                     $post_bg_img_src = $post_bg_img[0];
                     if ($post_bg_img_src) {
-                        echo '<img src="' . $post_bg_img_src . '" class="series-bg" />';
+                        echo '<img src="' . esc_url($post_bg_img_src) . '" class="series-bg" />';
                     } else {
-                        echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-bg" />';
+                        echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-bg" />';
                     }
                 } else {
-                    echo '<img src="' . plugins_url('toocheke-companion' . '/img/no-image.png') . '" class="series-bg" />';
+                    echo '<img src="' . esc_url(plugins_url('toocheke-companion' . '/img/no-image.png')) . '" class="series-bg" />';
                 }
                 break;
             case 'series_bg_color':
                 $bg_color = get_post_meta($id, 'series_bg_color');
                 if (! empty($bg_color) && ! isset($bg_color->errors)) {
-                    $color_box = '<div class="color-box" style="background-color: ' . $bg_color[0] . '"></div>';
-                    echo $color_box;
+                    $color_box = '<div class="color-box" style="background-color: ' . esc_attr($bg_color[0]) . '"></div>';
+                    echo wp_kses_post($color_box);
                 }
                 break;
 
@@ -311,23 +311,23 @@ trait Toocheke_Companion_Admin_Columns
                 $terms_list = get_the_terms($id, 'manga_genre');
                 if (! empty($terms_list) && ! isset($terms_list->errors)) {
                     foreach ($terms_list as $term) {
-                        $genres_list[] = '<a href="' . admin_url('edit.php?post_type=manga_series&manga_genre=' . $term->slug) . '">' . $term->name . '</a>';
+                        $genres_list[] = '<a href="' . esc_url(admin_url('edit.php?post_type=manga_series&manga_genre=' . $term->slug)) . '">' . esc_html($term->name) . '</a>';
                     }
-                    echo join(', ', $genres_list);
+                    echo wp_kses_post(join(', ', $genres_list));
                 }
                 break;
             case 'manga_series_publishers':
                 $terms_list = get_the_terms($id, 'manga_publisher');
                 if (! empty($terms_list) && ! isset($terms_list->errors)) {
                     foreach ($terms_list as $term) {
-                        $publishers_list[] = '<a href="' . admin_url('/edit.php?post_type=manga_series&manga_publisher=' . $term->slug) . '">' . $term->name . '</a>';
+                        $publishers_list[] = '<a href="' . esc_url(admin_url('/edit.php?post_type=manga_series&manga_publisher=' . $term->slug)) . '">' . esc_html($term->name) . '</a>';
                     }
-                    echo join(', ', $publishers_list);
+                    echo wp_kses_post(join(', ', $publishers_list));
                 }
                 break;
             case 'manga_series_likes':
                 if (get_post_meta($id, "_post_like_count", true)) {
-                    echo get_post_meta($id, "_post_like_count", true);
+                    echo esc_html(get_post_meta($id, "_post_like_count", true));
                 } else {
                     echo '<span aria-hidden="true">—</span>';
                 }
@@ -364,7 +364,7 @@ trait Toocheke_Companion_Admin_Columns
                 break;
             case 'manga_volume_likes':
                 if (get_post_meta($post_id, "_post_like_count", true)) {
-                    echo get_post_meta($post_id, "_post_like_count", true);
+                    echo esc_html(get_post_meta($post_id, "_post_like_count", true));
                 } else {
                     echo '<span aria-hidden="true">—</span>';
                 }
@@ -411,14 +411,14 @@ trait Toocheke_Companion_Admin_Columns
                 break;
             case 'manga_chapter_likes':
                 if (get_post_meta($post_id, "_post_like_count", true)) {
-                    echo get_post_meta($post_id, "_post_like_count", true);
+                    echo esc_html(get_post_meta($post_id, "_post_like_count", true));
                 } else {
                     echo '<span aria-hidden="true">—</span>';
                 }
                 break;
             case 'manga_chapter_views':
                 if (get_post_meta($post_id, "post_views_count", true)) {
-                    echo get_post_meta($post_id, "post_views_count", true);
+                    echo esc_html(get_post_meta($post_id, "post_views_count", true));
                 } else {
                     echo '<span aria-hidden="true">—</span>';
                 }
@@ -437,18 +437,18 @@ trait Toocheke_Companion_Admin_Columns
                 $terms_list = get_the_terms($id, 'comic_characters');
                 if (! empty($terms_list) && ! isset($terms_list->errors)) {
                     foreach ($terms_list as $term) {
-                        $character_list[] = '<a href="' . admin_url('edit.php?post_type=comic&comic_characters=' . $term->slug) . '">' . $term->name . '</a>';
+                        $character_list[] = '<a href="' . esc_url(admin_url('edit.php?post_type=comic&comic_characters=' . $term->slug)) . '">' . esc_html($term->name) . '</a>';
                     }
-                    echo join(', ', $character_list);
+                    echo wp_kses_post(join(', ', $character_list));
                 }
                 break;
             case 'comic_locations':
                 $terms_list = get_the_terms($id, 'comic_locations');
                 if (! empty($terms_list) && ! isset($terms_list->errors)) {
                     foreach ($terms_list as $term) {
-                        $locations_list[] = '<a href="' . admin_url('/edit.php?post_type=comic&comic_locations=' . $term->slug) . '">' . $term->name . '</a>';
+                        $locations_list[] = '<a href="' . esc_url(admin_url('/edit.php?post_type=comic&comic_locations=' . $term->slug)) . '">' . esc_html($term->name) . '</a>';
                     }
-                    echo join(', ', $locations_list);
+                    echo wp_kses_post(join(', ', $locations_list));
                 }
                 break;
             case 'comic_thumbnail':
@@ -456,7 +456,7 @@ trait Toocheke_Companion_Admin_Columns
                 break;
             case 'comic_likes':
                 if (get_post_meta($id, "_post_like_count", true)) {
-                    echo get_post_meta($id, "_post_like_count", true);
+                    echo esc_html(get_post_meta($id, "_post_like_count", true));
                 } else {
                     echo '<span aria-hidden="true">—</span>';
                 }
@@ -464,7 +464,7 @@ trait Toocheke_Companion_Admin_Columns
                 break;
             case 'comic_views':
                 if (get_post_meta($id, "post_views_count", true)) {
-                    echo get_post_meta($id, "post_views_count", true);
+                    echo esc_html(get_post_meta($id, "post_views_count", true));
                 } else {
                     echo '<span aria-hidden="true">—</span>';
                 }
@@ -474,16 +474,16 @@ trait Toocheke_Companion_Admin_Columns
                 $terms_list = get_the_terms($id, 'comic_tags');
                 if (! empty($terms_list) && ! isset($terms_list->errors)) {
                     foreach ($terms_list as $term) {
-                        $tags_list[] = '<a href="' . admin_url('/edit.php?post_type=comic&comic_tags=' . $term->slug) . '">' . $term->name . '</a>';
+                        $tags_list[] = '<a href="' . esc_url(admin_url('/edit.php?post_type=comic&comic_tags=' . $term->slug)) . '">' . esc_html($term->name) . '</a>';
                     }
-                    echo join(', ', $tags_list);
+                    echo wp_kses_post(join(', ', $tags_list));
                 }
                 break;
             case 'comic_series':
                 $ancestors     = get_ancestors($id, 'series');
                 $post_ancestor = end($ancestors);
                 if ($post_ancestor != 0) {
-                    echo '<a href="' . admin_url('/edit.php?post_type=comic&post_parent=' . $post_ancestor) . '">' . get_the_title($post_ancestor) . '</a>';
+                    echo '<a href="' . esc_url(admin_url('/edit.php?post_type=comic&post_parent=' . $post_ancestor)) . '">' . esc_html(get_the_title($post_ancestor)) . '</a>';
                 } else {
                     echo '—';
                 }

@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for displaying latest manga volume
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
@@ -220,11 +223,17 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
 
 <div class="manga-row row">
     <div class="col-md-5">
-        <?php echo $volume_thumb; ?>
+        <?php echo wp_kses_post($volume_thumb); ?>
     </div>
     <div class="col-md-7">
         <h1><?php echo esc_html($volume_title); ?></h1>
-        <?php echo $volume_content; ?>
+        <?php echo wp_kses(
+            $volume_content,
+            array_merge(
+                wp_kses_allowed_html('post'),
+                ['iframe' => ['src' => true, 'width' => true, 'height' => true, 'frameborder' => true, 'allow' => true, 'allowfullscreen' => true, 'title' => true, 'loading' => true]]
+            )
+        ); ?>
 
         <?php if ($display_likes): ?>
             <p>
@@ -258,25 +267,25 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
     <div class="col-lg-12">
 
         <!--Volume Information-->
-        <h2><?php _e('Volume Information', 'toocheke-companion'); ?></h2>
+        <h2><?php esc_html_e('Volume Information', 'toocheke-companion'); ?></h2>
         <div class="manga-info-table">
             <div class="manga-info-row">
                 <div class="manga-info-col">
-                    <span class="manga-info-key"><?php _e('Release Date', 'toocheke-companion'); ?></span>
+                    <span class="manga-info-key"><?php esc_html_e('Release Date', 'toocheke-companion'); ?></span>
                     <span class="manga-info-value"><?php echo esc_html($volume_formatted_release_date ?? ''); ?></span>
                 </div>
                 <div class="manga-info-col">
-                    <span class="manga-info-key"><?php _e('ISBN', 'toocheke-companion'); ?></span>
+                    <span class="manga-info-key"><?php esc_html_e('ISBN', 'toocheke-companion'); ?></span>
                     <span class="manga-info-value"><?php echo esc_html($volume_isbn ?? ''); ?></span>
                 </div>
             </div>
             <div class="manga-info-row">
                 <div class="manga-info-col">
-                    <span class="manga-info-key"><?php _e('Rating', 'toocheke-companion'); ?></span>
+                    <span class="manga-info-key"><?php esc_html_e('Rating', 'toocheke-companion'); ?></span>
                     <span class="manga-info-value"><?php echo esc_html($volume_rating ?? ''); ?></span>
                 </div>
                 <div class="manga-info-col">
-                    <span class="manga-info-key"><?php _e('Pages', 'toocheke-companion'); ?></span>
+                    <span class="manga-info-key"><?php esc_html_e('Pages', 'toocheke-companion'); ?></span>
                     <span class="manga-info-value"><?php echo esc_html($volume_pages ?? ''); ?></span>
                 </div>
             </div>
@@ -286,7 +295,7 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
 
         <?php if ($volume_buy_digital_url || $volume_buy_print_url): ?>
             <!--Volume Purchasing-->
-            <h2><?php _e('Buy', 'toocheke-companion'); ?></h2>
+            <h2><?php esc_html_e('Buy', 'toocheke-companion'); ?></h2>
             <div class="manga-volume-purchase-options">
                 <?php
                 $buy_links = [
@@ -301,10 +310,10 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
                         'title' => __('Buy Print Copy', 'toocheke-companion'),
                     ],
                 ];
-                $site_host = parse_url(home_url(), PHP_URL_HOST);
+                $site_host = wp_parse_url(home_url(), PHP_URL_HOST);
                 foreach ($buy_links as $link):
                     if (! empty($link['url'])):
-                        $link_host   = parse_url($link['url'], PHP_URL_HOST);
+                        $link_host   = wp_parse_url($link['url'], PHP_URL_HOST);
                         $is_external = $link_host && $link_host !== $site_host;
                 ?>
                     <a class="btn btn-outline-black btn-lg btn-manga-volume-buy-link"
@@ -368,13 +377,14 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
       
 
         <!--Chapters-->
-        <h2><?php _e('Chapters', 'toocheke-companion'); ?></h2>
+        <h2><?php esc_html_e('Chapters', 'toocheke-companion'); ?></h2>
         <?php if ($chapter_count > 0): ?>
             <h4 class="mb-4 font-weight-normal">
                 <em>
                     <?php
                     echo sprintf(
-                        _n('%s Chapter', '%s Chapters', $chapter_count, 'toocheke-companion'),
+                        /* translators: %s: number of chapters */
+                        esc_html(_n('%s Chapter', '%s Chapters', $chapter_count, 'toocheke-companion')),
                         esc_html($chapter_count)
                     );
                     ?>
@@ -411,14 +421,15 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
                                 <span><?php echo esc_html($formatted_release_date ?? ''); ?></span> |
                                 <span><?php
                                     echo sprintf(
-                                        _n('%s page', '%s pages', $pages, 'toocheke-companion'),
+                                        /* translators: %s: number of pages */
+                                        esc_html(_n('%s page', '%s pages', $pages, 'toocheke-companion')),
                                         esc_html($pages)
                                     );
                                 ?></span>
                             </div>
                             <a href="<?php echo esc_url(get_permalink()); ?>"
-                               title="<?php printf(esc_attr__('Read %s', 'toocheke-companion'), get_the_title()); ?>">
-                                <?php _e('READ', 'toocheke-companion'); ?>
+                               title="<?php /* translators: %s: manga chapter title */ printf(esc_attr__('Read %s', 'toocheke-companion'), esc_attr(get_the_title())); ?>">
+                                <?php esc_html_e('READ', 'toocheke-companion'); ?>
                             </a>
                         </div>
                     </div>

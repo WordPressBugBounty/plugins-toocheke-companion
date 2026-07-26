@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.10
+Stable tag: 2.11
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -97,6 +97,38 @@ Toocheke Companion enables you to display comics using either shortcodes or the 
 15. **Toocheke Characters**  
     `[toocheke-characters]`
 
+You can also display Manga features with the following shortcodes
+
+1. **All Manga Series**  
+    `[toocheke-all-manga-series]` or `[toocheke-all-manga-series title="Your Title Here"]`
+
+2. **All Manga Volumes**  
+    `[toocheke-all-manga-volumes]`, `[toocheke-all-manga-volumes title="Your Title Here"]`, or `[toocheke-all-manga-volumes sid="####"]` (`sid` filters to volumes belonging to a specific Manga Series ID)
+
+3. **All Manga Chapters**  
+    `[toocheke-all-manga-chapters]`, `[toocheke-all-manga-chapters title="Your Title Here"]`, `[toocheke-all-manga-chapters sid="####"]`, or `[toocheke-all-manga-chapters sid="####" vid="####"]` (`sid` filters to chapters belonging to a Manga Series ID, `vid` further filters to a specific Manga Volume ID)
+
+4. **Popular Manga Series**  
+    `[toocheke-popular-manga-series]` or `[toocheke-popular-manga-series title="Your Title Here"]`
+
+5. **Popular Manga Volumes**  
+    `[toocheke-popular-manga-volumes]` or `[toocheke-popular-manga-volumes title="Your Title Here"]`
+
+6. **Popular Manga Chapters**  
+    `[toocheke-popular-manga-chapters]` or `[toocheke-popular-manga-chapters title="Your Title Here"]`
+    
+7. **First Manga Series**  
+    `[toocheke-first-manga-series]`
+
+8. **Latest Manga Series**  
+    `[toocheke-latest-manga-series]`
+
+9. **First Manga Volume**  
+    `[toocheke-first-manga-volume]` or `[toocheke-first-manga-volume sid="####"]`
+
+10. **Latest Manga Volume**  
+    `[toocheke-latest-manga-volume]` or `[toocheke-latest-manga-volume sid="####"]`
+
 == Frequently Asked Questions ==
 
 = The comic permalinks are not working. How do I fix them? =
@@ -129,6 +161,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.11 =
+* NEW: Added `[toocheke-all-manga-volumes]` and `[toocheke-all-manga-chapters]` shortcodes, so you can display a grid of manga volumes or Chapters.
+* UPDATE: General security and code-quality improvements throughout the plugin.
 
 = 2.10 =
 * UPDATE: Changed layout for email subscription form

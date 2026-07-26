@@ -651,12 +651,13 @@ trait Toocheke_Companion_Metaboxes
                     $this_file = $filearray['url'];
                     if ($this_file != '') {
                         $html .= '<div>
-        <p><b>Current file:</b><br /> <small style="color: green;">' . $this_file . '</small></p>
+        <p><b>Current file:</b><br /> <small style="color: green;">' . esc_url($this_file) . '</small></p>
         <p><b>Remove this file?</b> <input type="checkbox" id="remove_comic_audio" name="remove_comic_audio" value="1"></p>
     </div>';
                     }
                 }
 
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static admin markup; the one dynamic value ($this_file) is escaped with esc_url() above.
                 echo $html;
             }
 
@@ -692,7 +693,7 @@ trait Toocheke_Companion_Metaboxes
                     if (in_array($uploaded_type, $supported_types)) {
                         $upload = wp_upload_bits($_FILES['comic_audio']['name'], null, file_get_contents($_FILES['comic_audio']['tmp_name']));
                         if (isset($upload['error']) && $upload['error'] != 0) {
-                            wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
+                            wp_die(esc_html('There was an error uploading your file. The error is: ' . $upload['error']));
                         } else {
                             add_post_meta($post_id, 'comic_audio', $upload);
                             update_post_meta($post_id, 'comic_audio', $upload);
@@ -719,13 +720,14 @@ trait Toocheke_Companion_Metaboxes
                 $post_type_object = get_post_type_object($post->post_type);
                 $pages            = wp_dropdown_pages([
                     'post_type' => 'series',
-                    'selected'                                   => $post->post_parent,
+                    'selected'                                   => absint($post->post_parent),
                     'name'       => 'parent_id',
-                    'show_option_none'                                 => __('(No Series)', 'toocheke-companion'),
+                    'show_option_none'                                 => esc_html__('(No Series)', 'toocheke-companion'),
                     'sort_column' => 'menu_order, post_title',
                     'echo' => 0
                 ]);
                 if (! empty($pages)) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_dropdown_pages() with 'echo' => 0 returns already-escaped core-generated <select> markup; wp_kses_post() would strip the select/option tags.
                     echo $pages;
                 }
             }
@@ -1042,13 +1044,13 @@ trait Toocheke_Companion_Metaboxes
                 <?php $this->toocheke_render_dismissible_info('series_comic_order', 'Override the global Comics Ordering setting for this series only.<br>Leave as <strong>Use Global Setting</strong> to inherit the default.'); ?>
                 <p>
                     <label for="series_comic_order_override">
-                        <strong><?php _e('Comic Order for this Series', 'toocheke-companion'); ?></strong>
+                        <strong><?php esc_html_e('Comic Order for this Series', 'toocheke-companion'); ?></strong>
                     </label>
                 </p>
                 <select name="series_comic_order_override" id="series_comic_order_override" style="width:100%">
-                    <option value="" <?php selected($current, ''); ?>><?php _e('Use Global Setting', 'toocheke-companion'); ?></option>
-                    <option value="ASC"  <?php selected($current, 'ASC');  ?>><?php _e('Ascending (oldest first)', 'toocheke-companion'); ?></option>
-                    <option value="DESC" <?php selected($current, 'DESC'); ?>><?php _e('Descending (newest first)', 'toocheke-companion'); ?></option>
+                    <option value="" <?php selected($current, ''); ?>><?php esc_html_e('Use Global Setting', 'toocheke-companion'); ?></option>
+                    <option value="ASC"  <?php selected($current, 'ASC');  ?>><?php esc_html_e('Ascending (oldest first)', 'toocheke-companion'); ?></option>
+                    <option value="DESC" <?php selected($current, 'DESC'); ?>><?php esc_html_e('Descending (newest first)', 'toocheke-companion'); ?></option>
                 </select>
                 <?php
             }
@@ -1252,7 +1254,7 @@ trait Toocheke_Companion_Metaboxes
 
                     // Add them back in the desired order
                     add_meta_box('postimagediv', $thumbnail_label, 'post_thumbnail_meta_box', get_post_type(), 'side', 'high'); // Featured Image (Highest)
-                    add_meta_box('submitdiv', __('Publish'), 'post_submit_meta_box', get_post_type(), 'side', 'high');          // Publish (Second Highest)
+                    add_meta_box('submitdiv', __('Publish', 'toocheke-companion'), 'post_submit_meta_box', get_post_type(), 'side', 'high');          // Publish (Second Highest)
                 }
             }
 
@@ -1289,13 +1291,13 @@ trait Toocheke_Companion_Metaboxes
 
                 if ($image_id && get_post($image_id)) {
                     $thumbnail_html = wp_get_attachment_image($image_id, [$content_width, $content_width]);
-                    echo $thumbnail_html;
-                    echo '<p class="hide-if-no-js"><a href="#" class="upload-hero-image button" data-field="' . esc_attr($meta_key) . '">' . __('Change image', 'toocheke-companion') . '</a></p>';
-                    echo '<p class="hide-if-no-js"><a href="#" class="remove-hero-image">' . __('Remove image', 'toocheke-companion') . '</a></p>';
+                    echo wp_kses_post($thumbnail_html);
+                    echo '<p class="hide-if-no-js"><a href="#" class="upload-hero-image button" data-field="' . esc_attr($meta_key) . '">' . esc_html__('Change image', 'toocheke-companion') . '</a></p>';
+                    echo '<p class="hide-if-no-js"><a href="#" class="remove-hero-image">' . esc_html__('Remove image', 'toocheke-companion') . '</a></p>';
                     echo '<input type="hidden" name="' . esc_attr($meta_key) . '" value="' . esc_attr($image_id) . '">';
                 } else {
                     echo '<img src="" style="width:' . esc_attr($content_width) . 'px;height:auto;display:none;" />';
-                    echo '<p class="hide-if-no-js"><a href="#" class="upload-hero-image button" data-field="' . esc_attr($meta_key) . '">' . __('Set hero image', 'toocheke-companion') . '</a></p>';
+                    echo '<p class="hide-if-no-js"><a href="#" class="upload-hero-image button" data-field="' . esc_attr($meta_key) . '">' . esc_html__('Set hero image', 'toocheke-companion') . '</a></p>';
                     echo '<input type="hidden" name="' . esc_attr($meta_key) . '" value="">';
                 }
 
@@ -1618,7 +1620,7 @@ trait Toocheke_Companion_Metaboxes
                  if ('Toocheke Premium' === $theme->name || 'Toocheke Premium' === $theme->parent_theme) {
                     add_meta_box(
                         'toocheke_comic_pricing',
-                        __('Pricing for "Buy Comic"', 'toocheke'),
+                        __('Pricing for "Buy Comic"', 'toocheke-companion'),
                         [$this, 'toocheke_comic_pricing_metabox_callback'], 
                         'comic', 
                         'normal',
@@ -1739,13 +1741,13 @@ public function toocheke_save_comic_pricing_metabox($post_id) {
 
         if (!empty($thumbnail_html)) {
 
-            echo $thumbnail_html;
+            echo wp_kses_post($thumbnail_html);
 
             echo '<p class="hide-if-no-js">
-            <a href="javascript:;" id="'.$remove_button_id.'">'.$remove_text.'</a>
+            <a href="javascript:;" id="'.esc_attr($remove_button_id).'">'.esc_html($remove_text).'</a>
             </p>';
 
-            echo '<input type="hidden" id="'.$input_name.'" name="'.$input_name.'" value="'.esc_attr($image_id).'" />';
+            echo '<input type="hidden" id="'.esc_attr($input_name).'" name="'.esc_attr($input_name).'" value="'.esc_attr($image_id).'" />';
         }
 
         $content_width = $old_content_width;
@@ -1754,7 +1756,7 @@ public function toocheke_save_comic_pricing_metabox($post_id) {
 
         echo '<div style="
         width:100%;
-        aspect-ratio:'.$ratio.';
+        aspect-ratio:'.esc_attr($ratio).';
         background:#f6f7f7;
         border:2px dashed #ccd0d4;
         display:flex;
@@ -1806,15 +1808,15 @@ public function toocheke_save_comic_pricing_metabox($post_id) {
         echo '<img src="" style="width:100%;height:auto;border:0;display:none;margin-bottom:10px;" />';
 
         echo '<p class="hide-if-no-js">
-        <a title="'.$set_text.'"
-        href="javascript:;" id="'.$upload_button_id.'"
+        <a title="'.esc_attr($set_text).'"
+        href="javascript:;" id="'.esc_attr($upload_button_id).'"
         data-uploader_title="'.esc_attr__('Choose an image','toocheke-companion').'"
-        data-uploader_button_text="'.$set_text.'">
-        '.$set_text.'
+        data-uploader_button_text="'.esc_attr($set_text).'">
+        '.esc_html($set_text).'
         </a>
         </p>';
 
-        echo '<input type="hidden" id="'.$input_name.'" name="'.$input_name.'" value="" />';
+        echo '<input type="hidden" id="'.esc_attr($input_name).'" name="'.esc_attr($input_name).'" value="" />';
     }
 }
 

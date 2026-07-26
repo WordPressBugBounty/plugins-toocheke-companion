@@ -214,14 +214,14 @@ trait Toocheke_Companion_Taxonomy_Terms
     public function toocheke_companion_add_genre_image($taxonomy)
     { ?>
         <div class="form-field term-genre">
-            <label for="genre-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+            <label for="genre-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             <input type="hidden" id="genre-image-id" name="genre-image-id" class="custom_media_url" value="">
             <div id="genre-image-wrapper"></div>
             <p>
                 <input type="button" class="button button-secondary genres_tax_media_button" id="genres_tax_media_button"
-                    name="genres_tax_media_button" value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                    name="genres_tax_media_button" value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                 <input type="button" class="button button-secondary genres_tax_media_remove" id="genres_tax_media_remove"
-                    name="genres_tax_media_remove" value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                    name="genres_tax_media_remove" value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
             </p>
             <p>This is the featured image for the genre.</p>
         </div>
@@ -244,7 +244,7 @@ trait Toocheke_Companion_Taxonomy_Terms
     { ?>
         <tr class="form-field term-genre-wrap">
             <th scope="row">
-                <label for="genre-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+                <label for="genre-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             </th>
             <td>
                 <?php $image_id = get_term_meta($term->term_id, 'genre-image-id', true); ?>
@@ -256,9 +256,9 @@ trait Toocheke_Companion_Taxonomy_Terms
                 </div>
                 <p>
                     <input type="button" class="button button-secondary genres_tax_media_button" id="genres_tax_media_button"
-                        name="genres_tax_media_button" value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                        name="genres_tax_media_button" value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                     <input type="button" class="button button-secondary genres_tax_media_remove" id="genres_tax_media_remove"
-                        name="genres_tax_media_remove" value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                        name="genres_tax_media_remove" value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
                 </p>
                 <p>This is the featured image for the genre.</p>
             </td>
@@ -286,7 +286,7 @@ trait Toocheke_Companion_Taxonomy_Terms
         <script>
             jQuery(document).ready(function($) {
 
-                _wpMediaViewsL10n.insertIntoPost = '<?php _e("Insert", 'toocheke-companion'); ?>';
+                _wpMediaViewsL10n.insertIntoPost = '<?php echo esc_js(__("Insert", 'toocheke-companion')); ?>';
 
                 function ct_media_upload(button_class) {
                     var _custom_media = true,
@@ -351,7 +351,7 @@ trait Toocheke_Companion_Taxonomy_Terms
     public function toocheke_companion_chapter_add_order_field($taxonomy)
     {
     ?><div class="form-field term-chapter">
-            <label for="chapter-order"><?php _e('Order', 'toocheke-companion'); ?></label>
+            <label for="chapter-order"><?php esc_html_e('Order', 'toocheke-companion'); ?></label>
             <input type="number" min="1" name="chapter-order" id="chapter-order" value="1" class="chapter-order-field"
                 aria-required="true" required />
             <p>This determines what order the chapter is in.</p>
@@ -373,7 +373,7 @@ trait Toocheke_Companion_Taxonomy_Terms
                 $current_order = get_term_meta($term->term_id, 'chapter-order', true);
 
                 ?><tr class="form-field term-order-wrap">
-            <th scope="row"><label for="chapter-order"><?php _e('Order', 'toocheke-companion'); ?></label></th>
+            <th scope="row"><label for="chapter-order"><?php esc_html_e('Order', 'toocheke-companion'); ?></label></th>
             <td>
                 <input type="number" min="1" name="chapter-order" id="chapter-order"
                     value="<?php echo esc_attr($current_order); ?>" class="chapter-order-field" aria-required="true" required />
@@ -422,14 +422,14 @@ trait Toocheke_Companion_Taxonomy_Terms
             public function toocheke_companion_add_chapter_image($taxonomy)
             { ?>
         <div class="form-field term-chapter">
-            <label for="chapter-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+            <label for="chapter-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             <input type="hidden" id="chapter-image-id" name="chapter-image-id" class="custom_media_url" value="">
             <div id="chapter-image-wrapper"></div>
             <p>
                 <input type="button" class="button button-secondary chapters_tax_media_button" id="chapters_tax_media_button"
-                    name="chapters_tax_media_button" value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                    name="chapters_tax_media_button" value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                 <input type="button" class="button button-secondary chapters_tax_media_remove" id="chapters_tax_media_remove"
-                    name="chapters_tax_media_remove" value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                    name="chapters_tax_media_remove" value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
             </p>
             <p>This is the featured image for the chapter.</p>
         </div>
@@ -452,7 +452,7 @@ trait Toocheke_Companion_Taxonomy_Terms
             { ?>
         <tr class="form-field term-chapter-wrap">
             <th scope="row">
-                <label for="chapter-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+                <label for="chapter-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             </th>
             <td>
                 <?php $image_id = get_term_meta($term->term_id, 'chapter-image-id', true); ?>
@@ -465,10 +465,10 @@ trait Toocheke_Companion_Taxonomy_Terms
                 <p>
                     <input type="button" class="button button-secondary chapters_tax_media_button"
                         id="chapters_tax_media_button" name="chapters_tax_media_button"
-                        value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                        value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                     <input type="button" class="button button-secondary chapters_tax_media_remove"
                         id="chapters_tax_media_remove" name="chapters_tax_media_remove"
-                        value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                        value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
                 </p>
                 <p>This is the featured image for the chapter.</p>
             </td>
@@ -496,7 +496,7 @@ trait Toocheke_Companion_Taxonomy_Terms
         <script>
             jQuery(document).ready(function($) {
 
-                _wpMediaViewsL10n.insertIntoPost = '<?php _e("Insert", 'toocheke-companion'); ?>';
+                _wpMediaViewsL10n.insertIntoPost = '<?php echo esc_js(__("Insert", 'toocheke-companion')); ?>';
 
                 function ct_media_upload(button_class) {
                     var _custom_media = true,
@@ -561,7 +561,7 @@ trait Toocheke_Companion_Taxonomy_Terms
             public function toocheke_companion_collection_add_order_field($taxonomy)
             {
     ?><div class="form-field term-collection">
-            <label for="collection-order"><?php _e('Order', 'toocheke-companion'); ?></label>
+            <label for="collection-order"><?php esc_html_e('Order', 'toocheke-companion'); ?></label>
             <input type="number" min="1" name="collection-order" id="collection-order" value="1" class="collection-order-field"
                 aria-required="true" required />
             <p>This determines what order the collection is in.</p>
@@ -583,7 +583,7 @@ trait Toocheke_Companion_Taxonomy_Terms
                 $current_order = get_term_meta($term->term_id, 'collection-order', true);
 
                 ?><tr class="form-field term-order-wrap">
-            <th scope="row"><label for="collection-order"><?php _e('Order', 'toocheke-companion'); ?></label></th>
+            <th scope="row"><label for="collection-order"><?php esc_html_e('Order', 'toocheke-companion'); ?></label></th>
             <td>
                 <input type="number" min="1" name="collection-order" id="collection-order"
                     value="<?php echo esc_attr($current_order); ?>" class="collection-order-field" aria-required="true"
@@ -633,16 +633,16 @@ trait Toocheke_Companion_Taxonomy_Terms
             public function toocheke_companion_add_collection_image($taxonomy)
             { ?>
         <div class="form-field term-collection">
-            <label for="collection-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+            <label for="collection-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             <input type="hidden" id="collection-image-id" name="collection-image-id" class="custom_media_url" value="">
             <div id="collection-image-wrapper"></div>
             <p>
                 <input type="button" class="button button-secondary collections_tax_media_button"
                     id="collections_tax_media_button" name="collections_tax_media_button"
-                    value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                    value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                 <input type="button" class="button button-secondary collections_tax_media_remove"
                     id="collections_tax_media_remove" name="collections_tax_media_remove"
-                    value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                    value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
             </p>
             <p>This is the featured image for the collection.</p>
         </div>
@@ -665,7 +665,7 @@ trait Toocheke_Companion_Taxonomy_Terms
             { ?>
         <tr class="form-field term-collection-wrap">
             <th scope="row">
-                <label for="collection-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+                <label for="collection-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             </th>
             <td>
                 <?php $image_id = get_term_meta($term->term_id, 'collection-image-id', true); ?>
@@ -679,10 +679,10 @@ trait Toocheke_Companion_Taxonomy_Terms
                 <p>
                     <input type="button" class="button button-secondary collections_tax_media_button"
                         id="collections_tax_media_button" name="collections_tax_media_button"
-                        value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                        value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                     <input type="button" class="button button-secondary collections_tax_media_remove"
                         id="collections_tax_media_remove" name="collections_tax_media_remove"
-                        value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                        value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
                 </p>
                 <p>This is the featured image for the collection.</p>
             </td>
@@ -710,7 +710,7 @@ trait Toocheke_Companion_Taxonomy_Terms
         <script>
             jQuery(document).ready(function($) {
 
-                _wpMediaViewsL10n.insertIntoPost = '<?php _e("Insert", 'toocheke-companion'); ?>';
+                _wpMediaViewsL10n.insertIntoPost = '<?php echo esc_js(__("Insert", 'toocheke-companion')); ?>';
 
                 function ct_media_upload(button_class) {
                     var _custom_media = true,
@@ -785,16 +785,16 @@ trait Toocheke_Companion_Taxonomy_Terms
             public function toocheke_companion_add_character_image($taxonomy)
             { ?>
         <div class="form-field term-character">
-            <label for="character-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+            <label for="character-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             <input type="hidden" id="character-image-id" name="character-image-id" class="custom_media_url" value="">
             <div id="character-image-wrapper"></div>
             <p>
                 <input type="button" class="button button-secondary characters_tax_media_button"
                     id="characters_tax_media_button" name="characters_tax_media_button"
-                    value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                    value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                 <input type="button" class="button button-secondary characters_tax_media_remove"
                     id="characters_tax_media_remove" name="characters_tax_media_remove"
-                    value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                    value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
             </p>
             <p>This is the featured image for the character.</p>
         </div>
@@ -817,7 +817,7 @@ trait Toocheke_Companion_Taxonomy_Terms
             { ?>
         <tr class="form-field term-character-wrap">
             <th scope="row">
-                <label for="character-image-id"><?php _e('Image', 'toocheke-companion'); ?></label>
+                <label for="character-image-id"><?php esc_html_e('Image', 'toocheke-companion'); ?></label>
             </th>
             <td>
                 <?php $image_id = get_term_meta($term->term_id, 'character-image-id', true); ?>
@@ -831,10 +831,10 @@ trait Toocheke_Companion_Taxonomy_Terms
                 <p>
                     <input type="button" class="button button-secondary characters_tax_media_button"
                         id="characters_tax_media_button" name="characters_tax_media_button"
-                        value="<?php _e('Add Image', 'toocheke-companion'); ?>" />
+                        value="<?php esc_attr_e('Add Image', 'toocheke-companion'); ?>" />
                     <input type="button" class="button button-secondary characters_tax_media_remove"
                         id="characters_tax_media_remove" name="characters_tax_media_remove"
-                        value="<?php _e('Remove Image', 'toocheke-companion'); ?>" />
+                        value="<?php esc_attr_e('Remove Image', 'toocheke-companion'); ?>" />
                 </p>
                 <p>This is the featured image for the character.</p>
             </td>
@@ -862,7 +862,7 @@ trait Toocheke_Companion_Taxonomy_Terms
         <script>
             jQuery(document).ready(function($) {
 
-                _wpMediaViewsL10n.insertIntoPost = '<?php _e("Insert", 'toocheke-companion'); ?>';
+                _wpMediaViewsL10n.insertIntoPost = '<?php echo esc_js(__("Insert", 'toocheke-companion')); ?>';
 
                 function ct_media_upload(button_class) {
                     var _custom_media = true,
@@ -920,7 +920,7 @@ trait Toocheke_Companion_Taxonomy_Terms
             public function toocheke_companion_character_add_order_field($taxonomy)
             {
     ?><div class="form-field term-character">
-            <label for="character-order"><?php _e('Order', 'toocheke-companion'); ?></label>
+            <label for="character-order"><?php esc_html_e('Order', 'toocheke-companion'); ?></label>
             <input type="number" min="1" name="character-order" id="character-order" value="1" class="character-order-field"
                 aria-required="true" required />
             <p>This determines what order the character is in.</p>
@@ -942,7 +942,7 @@ trait Toocheke_Companion_Taxonomy_Terms
                 $current_order = get_term_meta($term->term_id, 'character-order', true);
 
                 ?><tr class="form-field term-order-wrap">
-            <th scope="row"><label for="character-order"><?php _e('Order', 'toocheke-companion'); ?></label></th>
+            <th scope="row"><label for="character-order"><?php esc_html_e('Order', 'toocheke-companion'); ?></label></th>
             <td>
                 <input type="number" min="1" name="character-order" id="character-order"
                     value="<?php echo esc_attr($current_order); ?>" class="character-order-field" aria-required="true" required />

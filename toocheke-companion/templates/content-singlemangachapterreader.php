@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
     /**
      * Template part for displaying the reader for the a single manga volume post(single-manga_volume.php)
      *
@@ -42,7 +45,7 @@
    <!--./MANGA TOP NAV-->
 
                      <!--start content-->
-                         <div class="manga-chapter-container manga-reader-container <?php echo esc_attr($two_pages_class);?> <?php echo $rtl ? 'rtl' : 'ltr'; ?>">
+                         <div class="manga-chapter-container manga-reader-container <?php echo esc_attr($two_pages_class);?> <?php echo esc_attr($rtl ? 'rtl' : 'ltr'); ?>">
                   
     <?php
     // Get swipe direction setting
@@ -61,7 +64,7 @@
         id="manga-swiper"
         class="swiper"
         init="false"
-        data-rtl="<?php echo $rtl ? '1' : '0'; ?>"
+        data-rtl="<?php echo esc_attr($rtl ? '1' : '0'); ?>"
         data-desktop-slides="<?php echo esc_attr($slides_per_view); ?>"
         zoom="true"
         pagination="true"
@@ -93,13 +96,13 @@
 <div id="manga-page-bottom-nav" class="manga-page-nav">
 <div id="manga-meta-nav">
     <div id="manga-title-bar">
-    <div class="chapter-title"><?php echo get_the_title(); ?></div>
+    <div class="chapter-title"><?php echo esc_html(get_the_title()); ?></div>
     <div class="page-wrapper"><span class="swiper-pagination">&nbsp;</span></div>
     </div>
 
 <div id="manga-comic-actions">
 <div class="manga-nav-wrapper">
-     <?php _e('Browse Chapters', 'toocheke-companion'); ?>
+     <?php esc_html_e('Browse Chapters', 'toocheke-companion'); ?>
 <?php 
 if ($chapters_query->have_posts()) : ?>
         <select onchange="document.location.href=this.options[this.selectedIndex].value" class="manga-dropdown">

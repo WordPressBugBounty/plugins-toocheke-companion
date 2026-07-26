@@ -92,7 +92,7 @@ trait Toocheke_Companion_Likes
                 // Security
                 $nonce = isset($_REQUEST['nonce']) ? sanitize_text_field($_REQUEST['nonce']) : 0;
                 if (! wp_verify_nonce($nonce, 'toocheke-likes-nonce')) {
-                    exit(__('Not permitted', 'toocheke-companion'));
+                    exit(esc_html__('Not permitted', 'toocheke-companion'));
                 }
                 // Test if javascript is disabled
                 $disabled = (isset($_REQUEST['disabled']) && $_REQUEST['disabled'] == true) ? true : false;
@@ -191,10 +191,10 @@ trait Toocheke_Companion_Likes
                     }
                     if ($is_comment == 1) {
                         update_comment_meta($post_id, "_comment_like_count", $like_count);
-                        update_comment_meta($post_id, "_comment_like_modified", date('Y-m-d H:i:s'));
+                        update_comment_meta($post_id, "_comment_like_modified", gmdate('Y-m-d H:i:s'));
                     } else {
                         update_post_meta($post_id, "_post_like_count", $like_count);
-                        update_post_meta($post_id, "_post_like_modified", date('Y-m-d H:i:s'));
+                        update_post_meta($post_id, "_post_like_modified", gmdate('Y-m-d H:i:s'));
                     }
                     $response['count']   = $this->toocheke_get_like_count($like_count);
                     $response['testing'] = $is_comment;
@@ -407,7 +407,7 @@ trait Toocheke_Companion_Likes
             { ?>
         <table class="form-table">
             <tr>
-                <th><label for="user_likes"><?php _e('You Like:', 'toocheke-companion'); ?></label></th>
+                <th><label for="user_likes"><?php esc_html_e('You Like:', 'toocheke-companion'); ?></label></th>
                 <td>
                     <?php
                     $types = get_post_types(['public' => true]);
@@ -427,7 +427,7 @@ trait Toocheke_Companion_Likes
                     if ($like_query->have_posts()): ?>
                         <p>
                             <?php while ($like_query->have_posts()): $like_query->the_post();
-                                echo $sep; ?><a href="<?php the_permalink(); ?>"
+                                echo esc_html($sep); ?><a href="<?php the_permalink(); ?>"
                                     title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
                             <?php
                                 $sep = ' &middot; ';
@@ -435,7 +435,7 @@ trait Toocheke_Companion_Likes
                             ?>
                         </p>
                     <?php else: ?>
-                        <p><?php _e('You do not like anything yet.', 'toocheke-companion'); ?></p>
+                        <p><?php esc_html_e('You do not like anything yet.', 'toocheke-companion'); ?></p>
                     <?php
                     endif;
                     wp_reset_postdata();

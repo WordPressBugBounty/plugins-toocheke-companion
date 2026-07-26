@@ -22,7 +22,7 @@ trait Toocheke_Companion_Quick_Bulk_Edit
                 switch ($column_name):
                     case 'comic_series': {
 
-                            $series = wp_dropdown_pages(['post_type' => 'series', 'selected' => $post->post_parent, 'name' => 'parent_id', 'show_option_none' => __('(No Series)', 'toocheke-companion'), 'sort_column' => 'menu_order, post_title', 'echo' => 0]);
+                            $series = wp_dropdown_pages(['post_type' => 'series', 'selected' => absint($post->post_parent), 'name' => 'parent_id', 'show_option_none' => esc_html__('(No Series)', 'toocheke-companion'), 'sort_column' => 'menu_order, post_title', 'echo' => 0]);
 
                             wp_nonce_field('toocheke_companion_quick_edit_nonce', 'toocheke_companion_nonce');
 
@@ -31,7 +31,8 @@ trait Toocheke_Companion_Quick_Bulk_Edit
 
                             echo '<label class="alignleft">
                         <span class="title">Series</span>
-                        <span class="input-text-wrap">' . (! empty($series) ? $series : '') . '</span>
+                        <span class="input-text-wrap">' . (! empty($series) ? $series : '') . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $series is core-generated <select> markup from wp_dropdown_pages(); wp_kses_post() would strip the select/option tags.
+                        '</span>
                     </label>';
                             echo '</div>';
                             echo '</fieldset>';
@@ -49,7 +50,8 @@ trait Toocheke_Companion_Quick_Bulk_Edit
 
                                 echo '<label class="alignleft">
                     <span class="title">Patreon Level</span>
-                    <span class="input-text-wrap">' . (! empty($tiers) ? $tiers : '') . '</span>
+                    <span class="input-text-wrap">' . (! empty($tiers) ? $tiers : '') . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $tiers is a <select>/<option> markup built from Patreon_Wordpress::make_tiers_select(); wp_kses_post() would strip the select/option tags.
+                    '</span>
                 </label>';
                                 echo '</div>';
                                 echo '</fieldset>';

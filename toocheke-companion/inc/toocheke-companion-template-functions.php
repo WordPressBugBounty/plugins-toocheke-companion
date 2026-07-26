@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Filter contents of single comic post
  *
@@ -233,8 +236,8 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
         $thismonth = gmdate('m', $ts);
     }
 
-    $unixmonth = mktime(0, 0, 0, $thismonth, 1, $thisyear);
-    $last_day  = date('t', $unixmonth);
+    $unixmonth = gmmktime(0, 0, 0, $thismonth, 1, $thisyear);
+    $last_day  = gmdate('t', $unixmonth);
 
     // Get the next and previous month and year with at least one post
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -248,7 +251,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
 		<caption>' . sprintf(
         $calendar_caption,
         $wp_locale->get_month($thismonth),
-        date('Y', $unixmonth)
+        gmdate('Y', $unixmonth)
     ) . '</caption>
 		<thead>
 		<tr>';
@@ -309,13 +312,13 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
     }
 
     // See how much we should pad in the beginning
-    $pad = calendar_week_mod(date('w', $unixmonth) - $week_begins);
+    $pad = calendar_week_mod(gmdate('w', $unixmonth) - $week_begins);
     if (0 != $pad) {
         $calendar_output .= "\n\t\t" . '<td colspan="' . esc_attr($pad) . '" class="pad">&nbsp;</td>';
     }
 
     $newrow      = false;
-    $daysinmonth = (int) date('t', $unixmonth);
+    $daysinmonth = (int) gmdate('t', $unixmonth);
 
     for ($day = 1; $day <= $daysinmonth; ++$day) {
         if (isset($newrow) && $newrow) {
@@ -334,7 +337,7 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
         if (in_array($day, $daywithpost)) {
             // any posts today?
             // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
-            $date_format = date(_x('F j, Y', 'daily archives date format', 'toocheke-companion'), strtotime("{$thisyear}-{$thismonth}-{$day}"));
+            $date_format = gmdate(_x('F j, Y', 'daily archives date format', 'toocheke-companion'), gmmktime(0, 0, 0, (int) $thismonth, (int) $day, (int) $thisyear));
             // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
             $label = sprintf(__('Posts published on %s', 'toocheke-companion'), $date_format);
             add_filter('day_link', 'tooocheke_universal_day_link', 10, 4);
@@ -351,12 +354,12 @@ function toocheke_universal_get_calendar($calendar_output = "", $initial = true,
         }
         $calendar_output .= '</td>';
 
-        if (6 == calendar_week_mod(date('w', mktime(0, 0, 0, $thismonth, $day, $thisyear)) - $week_begins)) {
+        if (6 == calendar_week_mod(gmdate('w', gmmktime(0, 0, 0, $thismonth, $day, $thisyear)) - $week_begins)) {
             $newrow = true;
         }
     }
 
-    $pad = 7 - calendar_week_mod(date('w', mktime(0, 0, 0, $thismonth, $day, $thisyear)) - $week_begins);
+    $pad = 7 - calendar_week_mod(gmdate('w', gmmktime(0, 0, 0, $thismonth, $day, $thisyear)) - $week_begins);
     if (0 != $pad && 7 != $pad) {
         $calendar_output .= "\n\t\t" . '<td class="pad" colspan="' . esc_attr($pad) . '">&nbsp;</td>';
     }
@@ -566,6 +569,7 @@ if (! function_exists('toocheke_universal_get_adjacent_chapter')):
 
             //create array for searching
             $all_chapters_args = [
+                'taxonomy'   => 'chapters',
                 'orderby'    => 'meta_value_num',
                 'order'      => 'ASC',
                 'meta_query' => [
@@ -576,7 +580,7 @@ if (! function_exists('toocheke_universal_get_adjacent_chapter')):
                 'hide_empty' => 1,
             ];
 
-            $all_chapters_array      = get_terms('chapters', $all_chapters_args);
+            $all_chapters_array      = get_terms($all_chapters_args);
             $filtered_chapters_array = [];
             if ($all_chapters_array) {
                 //handle chapters array creation in case there is a series

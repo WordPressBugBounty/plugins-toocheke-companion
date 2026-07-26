@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for text list archive of comics
  *
@@ -46,7 +49,7 @@ if (get_the_post_thumbnail(get_the_ID()) != '') {
 
 }
 echo '<br/>';
-echo '<span class="posted-on">Posted on <a href="' . esc_url(get_permalink(get_the_ID())) . '">' . wp_kses_data(date('F j, Y', strtotime(get_the_date()))) . '</a></span>';
+echo '<span class="posted-on">Posted on <a href="' . esc_url(get_permalink(get_the_ID())) . '">' . wp_kses_data(get_the_date('F j, Y')) . '</a></span>';
 echo '</span>';
 endwhile;
 echo '</div>';

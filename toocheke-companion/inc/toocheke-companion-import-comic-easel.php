@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
     $imported     = 0;
     $imported_tax = 0;
 
@@ -84,7 +87,7 @@
     }
 ?>
 <div class="wrap">
-<h2><?php _e('Import From Comic Easel Plugin', 'toocheke-companion'); ?></h2>
+<h2><?php esc_html_e('Import From Comic Easel Plugin', 'toocheke-companion'); ?></h2>
 <?php
     global $imported;
     if ($imported !== 1):
@@ -104,7 +107,7 @@
 <?php wp_nonce_field('toocheke-import')?>
 
 <p class="submit" style="margin-left: 10px;">
-	<input type="submit" class="button-primary" value="<?php _e('Import', 'toocheke-companion')?>" />
+	<input type="submit" class="button-primary" value="<?php esc_attr_e('Import', 'toocheke-companion')?>" />
 	<input type="hidden" name="action" value="tc-import" />
 </p>
 </form>
@@ -116,7 +119,7 @@
 <?php wp_nonce_field('toocheke-import-tax')?>
 
 <p class="submit" style="margin-left: 10px;">
-	<input type="submit" class="button-primary" value="<?php _e('Import', 'toocheke-companion')?>" />
+	<input type="submit" class="button-primary" value="<?php esc_attr_e('Import', 'toocheke-companion')?>" />
 	<input type="hidden" name="action" value="tc-import-tax" />
 </p>
 </form>

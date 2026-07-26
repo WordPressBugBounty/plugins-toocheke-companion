@@ -625,13 +625,8 @@ trait Toocheke_Companion_Notifications
 
         // Cloudflare's own widget script — only ever loaded on this one
         // admin tab, so it can't affect anything else on the site.
-        wp_enqueue_script(
-            'toocheke-turnstile-api',
-            'https://challenges.cloudflare.com/turnstile/v0/api.js',
-            [],
-            null,
-            true
-        );
+        // phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent -- Cloudflare Turnstile is a live anti-bot challenge service; it cannot be self-hosted without breaking verification.
+        wp_enqueue_script('toocheke-turnstile-api', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
 
         // filemtime() rather than the static plugin version — see the
         // matching comment on toocheke_enqueue_options_nav_assets() in
@@ -756,10 +751,10 @@ trait Toocheke_Companion_Notifications
     public function toocheke_notifications_page_dropdown_field($args)
     {
         wp_dropdown_pages([
-            'name'              => $args['option_key'],
-            'id'                => $args['option_key'],
+            'name'              => esc_attr($args['option_key']),
+            'id'                => esc_attr($args['option_key']),
             'selected'          => (int) get_option($args['option_key']),
-            'show_option_none'  => __('— Select a Page —', 'toocheke-companion'),
+            'show_option_none'  => esc_html__('— Select a Page —', 'toocheke-companion'),
             'option_none_value' => 0,
         ]);
     }
@@ -1121,6 +1116,7 @@ trait Toocheke_Companion_Notifications
         }
 
         if ($this->toocheke_notify_render_flags['turnstile_rendered']) {
+            // phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent -- Cloudflare Turnstile is a live anti-bot challenge service; it cannot be self-hosted without breaking verification.
             wp_enqueue_script('toocheke-turnstile-api', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
         }
 
@@ -1915,7 +1911,7 @@ trait Toocheke_Companion_Notifications
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#111111;font-family:Arial, Helvetica, sans-serif;"><?php echo esc_html($heading); ?></h1>
 
 <div style="margin-bottom:24px;">
-<?php echo $body_html; ?>
+<?php echo wp_kses_post($body_html); ?>
 </div>
 
 <?php if (! $hide_cta) : ?>
@@ -2102,7 +2098,7 @@ trait Toocheke_Companion_Notifications
                     printf(
                         /* translators: %d: number of errors */
                         esc_html(_n('%d email notification error has occurred:', '%d email notification errors have occurred:', $count, 'toocheke-companion')),
-                        $count
+                        absint($count)
                     );
                     ?>
                 </strong>
@@ -2360,7 +2356,7 @@ trait Toocheke_Companion_Notifications
             ]);
         }
 
-        fclose($output);
+        fclose($output); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the php://output stream handle, not a real file; WP_Filesystem has no equivalent.
         exit;
     }
 }

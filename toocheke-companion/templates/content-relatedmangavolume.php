@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
     /**
      * Template part for displaying a related volume
      *
@@ -34,12 +37,12 @@ $buy_print_url   = get_post_meta($manga_volume_id, 'buy_print_url', true);
 
         <div class="manga-data-pages">
             <span><?php echo esc_html($formatted_release_date); ?></span> |
-            <span><?php echo sprintf(_n('%s page', '%s pages', $pages, 'toocheke-companion'), esc_html($pages)); ?></span>
+            <span><?php /* translators: %s: number of pages */ echo sprintf(esc_html(_n('%s page', '%s pages', $pages, 'toocheke-companion')), esc_html($pages)); ?></span>
         </div>
 
         <a href="<?php echo esc_url(add_query_arg('reader', 'true', get_permalink())); ?>"
-           title="<?php printf(esc_attr__('Read %s', 'toocheke-companion'), get_the_title()); ?>">
-           <?php _e('READ', 'toocheke-companion'); ?>
+           title="<?php /* translators: %s: manga volume title */ printf(esc_attr__('Read %s', 'toocheke-companion'), esc_attr(get_the_title())); ?>">
+           <?php esc_html_e('READ', 'toocheke-companion'); ?>
         </a>
 
         <div class="manga-volume-purchase-options">
@@ -49,11 +52,11 @@ $buy_print_url   = get_post_meta($manga_volume_id, 'buy_print_url', true);
                 'print'   => ['url' => $buy_print_url,   'label' => __('Buy Print', 'toocheke-companion'),   'title' => __('Buy Print Copy', 'toocheke-companion')],
             ];
 
-            $site_host = parse_url(home_url(), PHP_URL_HOST);
+            $site_host = wp_parse_url(home_url(), PHP_URL_HOST);
 
             foreach ($buy_links as $link) {
                 if (!empty($link['url'])) {
-                    $link_host   = parse_url($link['url'], PHP_URL_HOST);
+                    $link_host   = wp_parse_url($link['url'], PHP_URL_HOST);
                     $is_external = $link_host && $link_host !== $site_host;
                     ?>
                     <a class="btn btn-outline-black btn-sm btn-manga-volume-buy-link"

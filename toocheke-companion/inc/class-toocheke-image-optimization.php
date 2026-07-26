@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Class Toocheke_Image_Optimization
  *
@@ -63,7 +66,7 @@ class Toocheke_Image_Optimization
      */
     public function toocheke_process_uploaded_image(array $upload, string $context): array
     {
-        if (! isset($upload['type']) || ! str_starts_with($upload['type'], 'image/')) {
+        if (! isset($upload['type']) || strpos($upload['type'], 'image/') !== 0) {
             return $upload;
         }
 
@@ -95,7 +98,7 @@ class Toocheke_Image_Optimization
         }
 
         if ($converted['path'] !== $source_path) {
-            @unlink($source_path);
+            wp_delete_file( $source_path );
         }
 
         $upload['file'] = $converted['path'];
@@ -135,7 +138,7 @@ class Toocheke_Image_Optimization
     // On Windows (LocalWP), _wp_attached_file may already be stored as an
     // absolute path. Strip the basedir prefix immediately so all subsequent
     // logic works with a clean relative path (e.g. 2026/03/photo.jpg).
-    if (str_starts_with($attached_file, $base_dir)) {
+    if (strpos($attached_file, $base_dir) === 0) {
         $attached_file = substr($attached_file, strlen($base_dir));
     }
 
@@ -254,7 +257,7 @@ class Toocheke_Image_Optimization
 
                 // Clean up the bad/empty file before falling through to WebP.
                 if (file_exists($output_path)) {
-                    @unlink($output_path);
+                    wp_delete_file( $output_path );
                 }
             }
 
@@ -311,7 +314,7 @@ class Toocheke_Image_Optimization
 
             // Clean up the bad/empty file before falling through to WebP.
             if (file_exists($output_path)) {
-                @unlink($output_path);
+                wp_delete_file( $output_path );
             }
         }
 

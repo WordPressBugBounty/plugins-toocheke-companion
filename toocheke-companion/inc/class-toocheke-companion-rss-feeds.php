@@ -276,8 +276,8 @@ trait Toocheke_Companion_RSS_Feeds
                     <guid isPermaLink="false"><?php echo esc_url(get_the_guid($post_id)); ?></guid>
                     <dc:creator><?php echo esc_html(get_the_author()); ?></dc:creator>
                     <pubDate><?php echo esc_html($pub_date); ?></pubDate>
-                    <description><![CDATA[<?php echo $excerpt; ?>]]></description>
-                    <content:encoded><![CDATA[<?php echo $content; ?>]]></content:encoded>
+                    <description><![CDATA[<?php echo $excerpt; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw HTML is expected inside CDATA; esc_html() would double-encode it. */ ?>]]></description>
+                    <content:encoded><![CDATA[<?php echo $content; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw HTML is expected inside CDATA; esc_html() would double-encode it. */ ?>]]></content:encoded>
                     <?php $this->toocheke_series_feed_output_images($post_id); ?>
                 </item>
                     <?php
@@ -379,8 +379,8 @@ trait Toocheke_Companion_RSS_Feeds
                     <guid isPermaLink="false"><?php echo esc_url(get_the_guid($post_id)); ?></guid>
                     <dc:creator><?php echo esc_html(get_the_author()); ?></dc:creator>
                     <pubDate><?php echo esc_html($pub_date); ?></pubDate>
-                    <description><![CDATA[<?php echo $excerpt; ?>]]></description>
-                    <content:encoded><![CDATA[<?php echo $content; ?>]]></content:encoded>
+                    <description><![CDATA[<?php echo $excerpt; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw HTML is expected inside CDATA; esc_html() would double-encode it. */ ?>]]></description>
+                    <content:encoded><![CDATA[<?php echo $content; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw HTML is expected inside CDATA; esc_html() would double-encode it. */ ?>]]></content:encoded>
                     <?php $this->toocheke_manga_series_feed_output_images($post_id); ?>
                 </item>
                     <?php

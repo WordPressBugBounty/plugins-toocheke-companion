@@ -44,6 +44,8 @@ trait Toocheke_Companion_Shortcodes
                 add_shortcode('toocheke-latest-manga-series', [$this, 'toocheke_latest_manga_series_shortcode']);
                 add_shortcode('toocheke-first-manga-volume', [$this, 'toocheke_first_manga_volume_shortcode']);
                 add_shortcode('toocheke-latest-manga-volume', [$this, 'toocheke_latest_manga_volume_shortcode']);
+                add_shortcode('toocheke-all-manga-volumes', [$this, 'toocheke_all_manga_volumes_shortcode']);
+                add_shortcode('toocheke-all-manga-chapters', [$this, 'toocheke_all_manga_chapters_shortcode']);
             }
 
             //Display all Series
@@ -126,6 +128,69 @@ trait Toocheke_Companion_Shortcodes
                 $output = $output . $templates->get_template_part('content', 'allchapters');
 
              return ob_get_clean();
+            }
+
+            /**
+             * All Manga Volumes shortcode.
+             *
+             * Usage: [toocheke-all-manga-volumes]
+             *        [toocheke-all-manga-volumes title="Your Title Here"]
+             *        [toocheke-all-manga-volumes sid="####" title="Your Title Here"]
+             */
+            public function toocheke_all_manga_volumes_shortcode($atts)
+            {
+                $default_atts = [
+                    "title" => null,
+                    "sid"   => null,
+                ];
+                $params    = shortcode_atts($default_atts, $atts);
+                $templates = new Toocheke_Companion_Template_Loader;
+                ob_start();
+
+                if (! empty($params['title'])) {
+                    set_query_var('title', $params['title']);
+                }
+                if (! empty($params['sid'])) {
+                    set_query_var('manga_series_id', (int) $params['sid']);
+                }
+
+                $templates->get_template_part('content', 'allmangavolumes');
+
+                return ob_get_clean();
+            }
+
+            /**
+             * All Manga Chapters shortcode.
+             *
+             * Usage: [toocheke-all-manga-chapters]
+             *        [toocheke-all-manga-chapters title="Your Title Here"]
+             *        [toocheke-all-manga-chapters sid="####" title="Your Title Here"]
+             *        [toocheke-all-manga-chapters sid="####" vid="####"]
+             */
+            public function toocheke_all_manga_chapters_shortcode($atts)
+            {
+                $default_atts = [
+                    "title" => null,
+                    "sid"   => null,
+                    "vid"   => null,
+                ];
+                $params    = shortcode_atts($default_atts, $atts);
+                $templates = new Toocheke_Companion_Template_Loader;
+                ob_start();
+
+                if (! empty($params['title'])) {
+                    set_query_var('title', $params['title']);
+                }
+                if (! empty($params['sid'])) {
+                    set_query_var('manga_series_id', (int) $params['sid']);
+                }
+                if (! empty($params['vid'])) {
+                    set_query_var('manga_volume_id', (int) $params['vid']);
+                }
+
+                $templates->get_template_part('content', 'allmangachapters');
+
+                return ob_get_clean();
             }
 
             //Display Top Ten Comics
@@ -262,7 +327,7 @@ trait Toocheke_Companion_Shortcodes
             //Display current year
             public function toocheke_current_year_shortcode()
             {
-                return date('Y');
+                return current_time('Y');
             }
 
            /**

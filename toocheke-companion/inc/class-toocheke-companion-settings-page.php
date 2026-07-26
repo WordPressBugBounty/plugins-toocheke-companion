@@ -166,102 +166,102 @@ trait Toocheke_Companion_Settings_Page
 
             <h2 class="nav-tab-wrapper toocheke-collapsible-nav" id="toocheke-nav-tab-wrapper">
                 <a href="?page=toocheke-options-page&tab=comic_display_options"
-                class="nav-tab <?php echo $active_tab == 'comic_display_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'comic_display_options' ? 'nav-tab-active' : ''); ?>">
                     Display
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=ordering_options"
-                class="nav-tab <?php echo $active_tab == 'ordering_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'ordering_options' ? 'nav-tab-active' : ''); ?>">
                     Ordering
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=comic_archive_options"
-                class="nav-tab <?php echo $active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'comic_archive_options' ? 'nav-tab-active' : ''); ?>">
                     Archive
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=navigation_options"
-                class="nav-tab <?php echo $active_tab == 'navigation_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'navigation_options' ? 'nav-tab-active' : ''); ?>">
                     Navigation
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=social_options"
-                class="nav-tab <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'social_options' ? 'nav-tab-active' : ''); ?>">
                     Social Sharing
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=support_options"
-                class="nav-tab <?php echo $active_tab == 'support_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'support_options' ? 'nav-tab-active' : ''); ?>">
                     Support Links
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=analytics_options"
-                class="nav-tab <?php echo $active_tab == 'analytics_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'analytics_options' ? 'nav-tab-active' : ''); ?>">
                     Analytics
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=top_ten_comics_options"
-                class="nav-tab <?php echo $active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'top_ten_comics_options' ? 'nav-tab-active' : ''); ?>">
                     Top 10
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=series_options"
-                class="nav-tab <?php echo $active_tab == 'series_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'series_options' ? 'nav-tab-active' : ''); ?>">
                     Series
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=comic_discussion_options"
-                class="nav-tab <?php echo $active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'comic_discussion_options' ? 'nav-tab-active' : ''); ?>">
                     Discussion
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=blog_options"
-                class="nav-tab <?php echo $active_tab == 'blog_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'blog_options' ? 'nav-tab-active' : ''); ?>">
                     Blog
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=age_options"
-                class="nav-tab <?php echo $active_tab == 'age_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'age_options' ? 'nav-tab-active' : ''); ?>">
                     Age
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=language_options"
-                class="nav-tab <?php echo $active_tab == 'language_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'language_options' ? 'nav-tab-active' : ''); ?>">
                     Language
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=comic_images_options"
-                class="nav-tab <?php echo $active_tab == 'comic_images_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'comic_images_options' ? 'nav-tab-active' : ''); ?>">
                     Images
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=rss_options"
-                class="nav-tab <?php echo $active_tab == 'rss_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'rss_options' ? 'nav-tab-active' : ''); ?>">
                     RSS
                 </a>
                 <a href="?page=toocheke-options-page&tab=comicscout_options"
-                class="nav-tab <?php echo $active_tab == 'comicscout_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'comicscout_options' ? 'nav-tab-active' : ''); ?>">
                     ComicScout
                 </a>
 
                 <a href="?page=toocheke-options-page&tab=bluesky_options"
-                class="nav-tab <?php echo $active_tab == 'bluesky_options' ? 'nav-tab-active' : ''; ?>">
+                class="nav-tab <?php echo esc_attr($active_tab == 'bluesky_options' ? 'nav-tab-active' : ''); ?>">
                     Bluesky
                 </a>
 
                 <?php if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme): ?>
                     <a href="?page=toocheke-options-page&tab=buy_options"
-                    class="nav-tab <?php echo $active_tab == 'buy_options' ? 'nav-tab-active' : ''; ?>">
+                    class="nav-tab <?php echo esc_attr($active_tab == 'buy_options' ? 'nav-tab-active' : ''); ?>">
                         Buy Comic
                     </a>
 
                     <a href="?page=toocheke-options-page&tab=sponsor_options"
-                    class="nav-tab <?php echo $active_tab == 'sponsor_options' ? 'nav-tab-active' : ''; ?>">
+                    class="nav-tab <?php echo esc_attr($active_tab == 'sponsor_options' ? 'nav-tab-active' : ''); ?>">
                         Sponsor Comic
                     </a>
 
                     <a href="?page=toocheke-options-page&tab=notification_options"
-                    class="nav-tab <?php echo $active_tab == 'notification_options' ? 'nav-tab-active' : ''; ?>">
+                    class="nav-tab <?php echo esc_attr($active_tab == 'notification_options' ? 'nav-tab-active' : ''); ?>">
                         Notifications
                     </a>
                 <?php endif; ?>
@@ -277,7 +277,7 @@ trait Toocheke_Companion_Settings_Page
                 <h2 class="nav-tab-wrapper toocheke-collapsible-nav toocheke-subnav-tab-wrapper" id="toocheke-subnav-tab-wrapper">
                     <?php foreach ($tab_subsections as $sub_slug => $sub_label) : ?>
                         <a href="?page=toocheke-options-page&tab=<?php echo esc_attr($active_tab); ?>&subsection=<?php echo esc_attr($sub_slug); ?>"
-                        class="nav-tab <?php echo $active_subsection === $sub_slug ? 'nav-tab-active' : ''; ?>">
+                        class="nav-tab <?php echo esc_attr($active_subsection === $sub_slug ? 'nav-tab-active' : ''); ?>">
                             <?php echo esc_html($sub_label); ?>
                         </a>
                     <?php endforeach; ?>
@@ -489,50 +489,50 @@ trait Toocheke_Companion_Settings_Page
                         //Option for determining whether to show both a desktop and mobile version of the comic
                         add_settings_section("toocheke_comic_devices_layout_section", "Comic Display", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether two image versions of the comic will be displayed depending on device(desktop or mobile).']);
                         add_settings_field("toocheke-comic-layout-devices", "Do you want to have two versions of your comic on each post(one for desktop users one for mobile device users)?", [$this, 'toocheke_options_devices_checkbox'], "toocheke-options-page", "toocheke_comic_devices_layout_section");
-                        register_setting("toocheke-settings", "toocheke-comic-layout-devices");
+                        register_setting("toocheke-settings", "toocheke-comic-layout-devices", ['sanitize_callback' => 'absint']);
                         break;
                     case 'ordering_options':
                         //Option for setting the order of the comics
                         add_settings_section("toocheke_comics_order_section", "Comics Ordering", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets the sorting order for comics.']);
                         add_settings_field("toocheke-comics-order", "How would you like to order your comics?", [$this, 'toocheke_comics_order_radio'], "toocheke-options-page", "toocheke_comics_order_section");
-                        register_setting("toocheke-settings", "toocheke-comics-order");
+                        register_setting("toocheke-settings", "toocheke-comics-order", ['sanitize_callback' => 'sanitize_text_field']);
 
                         add_settings_field("toocheke-comics-slider-order", "How would you like to order your comics in the slider navigation on the comic page?", [$this, 'toocheke_comics_slider_order_radio'], "toocheke-options-page", "toocheke_comics_order_section");
-                        register_setting("toocheke-settings", "toocheke-comics-slider-order");
+                        register_setting("toocheke-settings", "toocheke-comics-slider-order", ['sanitize_callback' => 'sanitize_text_field']);
 
                         //Option for setting the which comics is displayed on clicking chapter thumbnail
                         add_settings_field("toocheke-chapter-first-comic", "On clicking a chapter, which comic would you like to navigate to first?", [$this, 'toocheke_chapter_first_comic_radio'], "toocheke-options-page", "toocheke_comics_order_section");
-                        register_setting("toocheke-settings", "toocheke-chapter-first-comic");
+                        register_setting("toocheke-settings", "toocheke-chapter-first-comic", ['sanitize_callback' => 'sanitize_text_field']);
 
                         //Option for setting the which comics is displayed on clicking collection thumbnail
                         add_settings_field("toocheke-collection-first-comic", "On clicking a collection, which comic would you like to navigate to first?", [$this, 'toocheke_collection_first_comic_radio'], "toocheke-options-page", "toocheke_comics_order_section");
-                        register_setting("toocheke-settings", "toocheke-collection-first-comic");
+                        register_setting("toocheke-settings", "toocheke-collection-first-comic", ['sanitize_callback' => 'sanitize_text_field']);
 
                         //Option for setting the order of the series
                         add_settings_section("toocheke_series_order_section", "Series Ordering", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets the sorting order for series listing on the home page.']);
                         add_settings_field("toocheke-series-order", "How would you like to order your series?", [$this, 'toocheke_series_order_radio'], "toocheke-options-page", "toocheke_series_order_section");
-                        register_setting("toocheke-settings", "toocheke-series-order");
+                        register_setting("toocheke-settings", "toocheke-series-order", ['sanitize_callback' => 'sanitize_text_field']);
                         break;
                     case 'comic_archive_options':
                         //Option for setting the layout for the comic archive page
                         add_settings_section("toocheke_comics_archive_section", "Comic Archive Layout", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets the layout for the comic archive page. <h4 style="color: #2271b1;">To change the number of items shown per page on the archive page, <a href="' . esc_url(admin_url('options-reading.php')) . '" style="font-weight: bold">click here</a> and update the number for the "Blog pages show at most" field.</h4>']);
                         add_settings_field("toocheke-comics-archive", "Select the layout for the comic archive page.", [$this, 'toocheke_comics_archive_layout_select'], "toocheke-options-page", "toocheke_comics_archive_section");
-                        register_setting("toocheke-settings", "toocheke-comics-archive");
+                        register_setting("toocheke-settings", "toocheke-comics-archive", ['sanitize_callback' => [$this, 'toocheke_sanitize_layout_option']]);
                         break;
                     case 'top_ten_comics_options':
                         //Option for setting the layout for the comic archive page
                         add_settings_section("toocheke_top_10_comics_layout_section", "Top 10 Comics Page Layout", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets the layout for the top 10 comics page.']);
                         add_settings_field("toocheke-top-10-comics-layout", "Select the layout for the top 10 comic page.", [$this, 'toocheke_top_10_comics_layout_select'], "toocheke-options-page", "toocheke_top_10_comics_layout_section");
-                        register_setting("toocheke-settings", "toocheke-top-10-comics-layout");
+                        register_setting("toocheke-settings", "toocheke-top-10-comics-layout", ['sanitize_callback' => [$this, 'toocheke_sanitize_layout_option']]);
                         break;
                     case 'navigation_options':
                         if ('manga_reading' === $active_subsection) {
                         //manga option
                         add_settings_section("toocheke_manga_page_navigation_section", "Manga Page Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Configure the navigation for your manga reader.']);
                         add_settings_field("toocheke-manga-default-pages", "How many pages do you want to display by default?", [$this, 'toocheke_manga_default_pages_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-manga-default-pages");
+                        register_setting("toocheke-settings", "toocheke-manga-default-pages", ['sanitize_callback' => 'sanitize_text_field']);
                         add_settings_field("toocheke-manga-rtl", "Which reading format do you want?", [$this, 'toocheke_manga_rtl_radio'], "toocheke-options-page", "toocheke_manga_page_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-manga-rtl");
+                        register_setting("toocheke-settings", "toocheke-manga-rtl", ['sanitize_callback' => 'sanitize_text_field']);
                         }
 
                         if ('comic_navigation' === $active_subsection) {
@@ -541,7 +541,7 @@ trait Toocheke_Companion_Settings_Page
                             //Option for determining whether enable swipe navigation
                             add_settings_section("toocheke_comic_panel_swipe_navigation_section", "Comic Panel Swipe Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether a panel-by-panel swipe navigation(similar to Instagram) will be added to the comic page.']);
                             add_settings_field("toocheke-comic-panel-swipe-navigation", "Do you want to enable the ability to swipe through the comic, panel-by-panel, similar to Instgram's swipe navigation?", [$this, 'toocheke_comic_panel_swipe_navigation_checkbox'], "toocheke-options-page", "toocheke_comic_panel_swipe_navigation_section");
-                            register_setting("toocheke-settings", "toocheke-comic-panel-swipe-navigation");
+                            register_setting("toocheke-settings", "toocheke-comic-panel-swipe-navigation", ['sanitize_callback' => 'absint']);
                         }
                         //navigation buttons settings
                         add_settings_section("toocheke_comic_navigation_options_section", "Comic Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Customize your comic\'s navigation options. You can upload your own navigation button images to replace the default buttons.']);
@@ -650,52 +650,52 @@ trait Toocheke_Companion_Settings_Page
                         if ('comic_navigation' === $active_subsection) {
                         //Option for determining whether to display infinite scroll of comics on the home page.
                         add_settings_field("toocheke-infinite-scroll", "Do you want to display your comic archive as an infinite scroll(no previous/next buttons) on the homepage?", [$this, 'toocheke_infinite_scroll_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-infinite-scroll");
+                        register_setting("toocheke-settings", "toocheke-infinite-scroll", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display random navigation button
                         add_settings_field("toocheke-random-navigation", "Do you want to display the random button?", [$this, 'toocheke_random_navigation_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-random-navigation");
+                        register_setting("toocheke-settings", "toocheke-random-navigation", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display comic archive navigation button
                         add_settings_field("toocheke-comic-archive-navigation", "Do you want to display the archive button?", [$this, 'toocheke_comic_archive_navigation_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-comic-archive-navigation");
+                        register_setting("toocheke-settings", "toocheke-comic-archive-navigation", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display comic bookmark button
                         add_settings_field("toocheke-comic-bookmark", "Do you want to display a bookmark button?", [$this, 'toocheke_comic_bookmark_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-comic-bookmark");
+                        register_setting("toocheke-settings", "toocheke-comic-bookmark", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to go the next comic on clicking current comic image
                         add_settings_field("toocheke-click-comic-next", "Do you want to go to the next comic on clicking a comic(only works with images in the post)?", [$this, 'toocheke_click_comic_next_navigation_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-click-comic-next");
+                        register_setting("toocheke-settings", "toocheke-click-comic-next", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display comic navigation above comic
                         add_settings_field("toocheke-comic-nav-above-comic", "Do you want to display comic navigation buttons above the comic(only applies to traditional page layouts)", [$this, 'toocheke_comic_nav_above_comic_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-comic-nav-above-comic");
+                        register_setting("toocheke-settings", "toocheke-comic-nav-above-comic", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display chapter navigation
                         add_settings_field("toocheke-chapter-navigation-buttons", "Do you want to display chapter navigation buttons?", [$this, 'toocheke_chapter_navigation_buttons_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-chapter-navigation-buttons");
+                        register_setting("toocheke-settings", "toocheke-chapter-navigation-buttons", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display chapter dropdown below comic navigation
                         add_settings_field("toocheke-chapter-dropdown", "Do you want to display a dropdown of the Chapters below the comic navigation?", [$this, 'toocheke_chapter_dropdown_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-chapter-dropdown");
+                        register_setting("toocheke-settings", "toocheke-chapter-dropdown", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to disable keyboard comic navigation
                         add_settings_field("toocheke-keyboard", "Do you want to disable keyboard comic navigation?", [$this, 'toocheke_keyboard_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-keyboard");
+                        register_setting("toocheke-settings", "toocheke-keyboard", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to scroll past header
                         add_settings_field("toocheke-scroll-past-header", "Do you want readers to scroll past the header when navigating through the comics?", [$this, 'toocheke_scroll_past_header_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-scroll-past-header");
+                        register_setting("toocheke-settings", "toocheke-scroll-past-header", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to always display comic navigation buttons(first, previous, next, last)
                         add_settings_field("toocheke-always-show-nav-buttons", "Always show all comic navigation buttons, even if there isn’t a first, previous, next, or last comic available?", [$this, 'toocheke_always_show_nav_buttons_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                        register_setting("toocheke-settings", "toocheke-always-show-nav-buttons");
+                        register_setting("toocheke-settings", "toocheke-always-show-nav-buttons", ['sanitize_callback' => 'absint']);
 
                         if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
                             //Option for determining whether to enable navigation to early access comics
                             add_settings_field("toocheke-early-access", "Do you want to enable navigation to comics scheduled in the future?", [$this, 'toocheke_early_access_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
-                            register_setting("toocheke-settings", "toocheke-early-access");
+                            register_setting("toocheke-settings", "toocheke-early-access", ['sanitize_callback' => 'absint']);
                         }
 
                         //Chapter Navigation section
@@ -704,14 +704,14 @@ trait Toocheke_Companion_Settings_Page
                         if ('chapter_navigation' === $active_subsection) {
                         add_settings_section("toocheke_chapter_navigation_section", "Chapter Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Customize chapter-related navigation options. By default, chapter links point to the first or latest comic in the chapter (depending on your Comic Ordering settings) rather than the chapter archive page.']);
                         add_settings_field("toocheke-chapter-archive-link", "Do you want to link to Chapter archive page?", [$this, 'toocheke_chapter_archive_link_checkbox'], "toocheke-options-page", "toocheke_chapter_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-chapter-archive-link");
+                        register_setting("toocheke-settings", "toocheke-chapter-archive-link", ['sanitize_callback' => 'absint']);
                         }
 
                         if ('collection_navigation' === $active_subsection) {
                         //Collection Navigation section
                         add_settings_section("toocheke_collection_navigation_section", "Collection Navigation", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Customize collection-related navigation options. By default, collection links point to the first or latest comic in the collection (depending on your Comic Ordering settings) rather than the collection archive page.']);
                         add_settings_field("toocheke-collection-archive-link", "Do you want to link to Collection archive page?", [$this, 'toocheke_collection_archive_link_checkbox'], "toocheke-options-page", "toocheke_collection_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-collection-archive-link");
+                        register_setting("toocheke-settings", "toocheke-collection-archive-link", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to use the default comic navigation buttons
                         }
@@ -725,89 +725,89 @@ trait Toocheke_Companion_Settings_Page
 
                         if ('buttons' === $active_subsection) {
                         add_settings_field("toocheke-comics-navigation", "Do you want to use the default navigation buttons?", [$this, 'toocheke_comics_navigation_checkbox'], "toocheke-options-page", "toocheke_custom_comic_navigation_section");
-                        register_setting("toocheke-settings", "toocheke-comics-navigation");
+                        register_setting("toocheke-settings", "toocheke-comics-navigation", ['sanitize_callback' => 'absint']);
 
                         add_settings_field('toocheke-first-preview', 'Current first button', [$this, 'toocheke_first_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-first-button', 'Replace first button', [$this, 'toocheke_first_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-first-button');
+                        register_setting('toocheke-settings', 'toocheke-first-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-previous-preview', 'Current previous button', [$this, 'toocheke_previous_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-previous-button', 'Replace previous button', [$this, 'toocheke_previous_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-previous-button');
+                        register_setting('toocheke-settings', 'toocheke-previous-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-random-preview', 'Current random button', [$this, 'toocheke_random_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-random-button', 'Replace random button', [$this, 'toocheke_random_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-random-button');
+                        register_setting('toocheke-settings', 'toocheke-random-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-comic-archive-preview', 'Current comic archive button', [$this, 'toocheke_comic_archive_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-comic-archive-button', 'Replace comic archive button', [$this, 'toocheke_comic_archive_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-comic-archive-button');
+                        register_setting('toocheke-settings', 'toocheke-comic-archive-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-next-preview', 'Current next button', [$this, 'toocheke_next_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-next-button', 'Replace next button', [$this, 'toocheke_next_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-next-button');
+                        register_setting('toocheke-settings', 'toocheke-next-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-latest-preview', 'Current latest button', [$this, 'toocheke_latest_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-latest-button', 'Replace latest button', [$this, 'toocheke_latest_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-latest-button');
+                        register_setting('toocheke-settings', 'toocheke-latest-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-next-chapter-preview', 'Current next chapter button', [$this, 'toocheke_next_chapter_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-next-chapter-button', 'Replace next chapter button', [$this, 'toocheke_next_chapter_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-next-chapter-button');
+                        register_setting('toocheke-settings', 'toocheke-next-chapter-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-previous-chapter-preview', 'Current previous chapter button', [$this, 'toocheke_previous_chapter_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-previous-chapter-button', 'Replace previous chapter button', [$this, 'toocheke_previous_chapter_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-previous-chapter-button');
+                        register_setting('toocheke-settings', 'toocheke-previous-chapter-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-facebook-preview', 'Current Facebook button', [$this, 'toocheke_facebook_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-facebook-button', 'Replace Facebook button', [$this, 'toocheke_facebook_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-facebook-button');
+                        register_setting('toocheke-settings', 'toocheke-facebook-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-twitter-preview', 'Current Twitter button', [$this, 'toocheke_twitter_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-twitter-button', 'Replace Twitter button', [$this, 'toocheke_twitter_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-twitter-button');
+                        register_setting('toocheke-settings', 'toocheke-twitter-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-tumblr-preview', 'Current Tumblr button', [$this, 'toocheke_tumblr_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-tumblr-button', 'Replace Tumblr button', [$this, 'toocheke_tumblr_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-tumblr-button');
+                        register_setting('toocheke-settings', 'toocheke-tumblr-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-reddit-preview', 'Current Reddit button', [$this, 'toocheke_reddit_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-reddit-button', 'Replace Reddit button', [$this, 'toocheke_reddit_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-reddit-button');
+                        register_setting('toocheke-settings', 'toocheke-reddit-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-threads-preview', 'Current Threads button', [$this, 'toocheke_threads_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-threads-button', 'Replace Threads button', [$this, 'toocheke_threads_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-threads-button');
+                        register_setting('toocheke-settings', 'toocheke-threads-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-bluesky-preview', 'Current Bluesky button', [$this, 'toocheke_bluesky_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-bluesky-button', 'Replace Bluesky button', [$this, 'toocheke_bluesky_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-bluesky-button');
+                        register_setting('toocheke-settings', 'toocheke-bluesky-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-whatsapp-preview', 'Current WhatsApp button', [$this, 'toocheke_whatsapp_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-whatsapp-button', 'Replace WhatsApp button', [$this, 'toocheke_whatsapp_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-whatsapp-button');
+                        register_setting('toocheke-settings', 'toocheke-whatsapp-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-linkedin-preview', 'Current LinkedIn button', [$this, 'toocheke_linkedin_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-linkedin-button', 'Replace LinkedIn button', [$this, 'toocheke_linkedin_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-linkedin-button');
+                        register_setting('toocheke-settings', 'toocheke-linkedin-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-copy-preview', 'Current copy button', [$this, 'toocheke_copy_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-copy-button', 'Replace copy button', [$this, 'toocheke_copy_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-copy-button');
+                        register_setting('toocheke-settings', 'toocheke-copy-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-buymeacoffee-preview', 'Current Buy me a coffee button', [$this, 'toocheke_buymeacoffee_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-buymeacoffee-button', 'Replace Buy me a coffee button', [$this, 'toocheke_buymeacoffee_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-buymeacoffee-button');
+                        register_setting('toocheke-settings', 'toocheke-buymeacoffee-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-gumroad-preview', 'Current Gumroad button', [$this, 'toocheke_gumroad_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-gumroad-button', 'Replace Gumroad button', [$this, 'toocheke_gumroad_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-gumroad-button');
+                        register_setting('toocheke-settings', 'toocheke-gumroad-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-indiegogo-preview', 'Current Indiegogo button', [$this, 'toocheke_indiegogo_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-indiegogo-button', 'Replace Indiegogo button', [$this, 'toocheke_indiegogo_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-indiegogo-button');
+                        register_setting('toocheke-settings', 'toocheke-indiegogo-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-kickstarter-preview', 'Current Kickstarter button', [$this, 'toocheke_kickstarter_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-kickstarter-button', 'Replace Kickstarter button', [$this, 'toocheke_kickstarter_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-kickstarter-button');
+                        register_setting('toocheke-settings', 'toocheke-kickstarter-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-kofi-preview', 'Current Ko-fi button', [$this, 'toocheke_kofi_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-kofi-button', 'Replace Ko-fi button', [$this, 'toocheke_kofi_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-kofi-button');
+                        register_setting('toocheke-settings', 'toocheke-kofi-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-liberapay-preview', 'Current Liberapay button', [$this, 'toocheke_liberapay_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-liberapay-button', 'Replace Liberapay button', [$this, 'toocheke_liberapay_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-liberapay-button');
+                        register_setting('toocheke-settings', 'toocheke-liberapay-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-patreon-preview', 'Current Patreon button', [$this, 'toocheke_patreon_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-patreon-button', 'Replace Patreon button', [$this, 'toocheke_patreon_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-patreon-button');
+                        register_setting('toocheke-settings', 'toocheke-patreon-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-paypal-preview', 'Current PayPal button', [$this, 'toocheke_paypal_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-paypal-button', 'Replace PayPal button', [$this, 'toocheke_paypal_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-paypal-button');
+                        register_setting('toocheke-settings', 'toocheke-paypal-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-substack-preview', 'Current Substack button', [$this, 'toocheke_substack_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-substack-button', 'Replace Substack button', [$this, 'toocheke_substack_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-substack-button');
+                        register_setting('toocheke-settings', 'toocheke-substack-button', ['sanitize_callback' => 'esc_url_raw']);
                         add_settings_field('toocheke-tipeee-preview', 'Current Tipeee button', [$this, 'toocheke_tipeee_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-tipeee-button', 'Replace Tipeee button', [$this, 'toocheke_tipeee_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
-                        register_setting('toocheke-settings', 'toocheke-tipeee-button');
+                        register_setting('toocheke-settings', 'toocheke-tipeee-button', ['sanitize_callback' => 'esc_url_raw']);
                         }
                         break;
                     case 'social_options':
@@ -824,15 +824,15 @@ trait Toocheke_Companion_Settings_Page
                         add_settings_field("toocheke-social-share-linkedin", "Do you want to display a LinkedIn share button?", [$this, 'toocheke_social_share_linkedin_checkbox'], "toocheke-options-page", "toocheke_social_share_config_section");
                         add_settings_field("toocheke-social-share-copy", "Do you want to display a copy button?", [$this, 'toocheke_social_share_copy_checkbox'], "toocheke-options-page", "toocheke_social_share_config_section");
 
-                        register_setting("toocheke-settings", "toocheke-social-share-facebook");
-                        register_setting("toocheke-settings", "toocheke-social-share-twitter");
-                        register_setting("toocheke-settings", "toocheke-social-share-tumblr");
-                        register_setting("toocheke-settings", "toocheke-social-share-reddit");
-                        register_setting("toocheke-settings", "toocheke-social-share-threads");
-                        register_setting("toocheke-settings", "toocheke-social-share-bluesky");
-                        register_setting("toocheke-settings", "toocheke-social-share-whatsapp");
-                        register_setting("toocheke-settings", "toocheke-social-share-linkedin");
-                        register_setting("toocheke-settings", "toocheke-social-share-copy");
+                        register_setting("toocheke-settings", "toocheke-social-share-facebook", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-twitter", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-tumblr", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-reddit", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-threads", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-bluesky", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-whatsapp", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-linkedin", ['sanitize_callback' => 'absint']);
+                        register_setting("toocheke-settings", "toocheke-social-share-copy", ['sanitize_callback' => 'absint']);
                         break;
                     case 'support_options':
                         //support settings
@@ -849,58 +849,58 @@ trait Toocheke_Companion_Settings_Page
                         add_settings_field("toocheke-support-link-substack", "Substack", [$this, 'toocheke_support_link_substack_url'], "toocheke-options-page", "toocheke_support_links_config_section");
                         add_settings_field("toocheke-support-link-tipeee", "Tipeee", [$this, 'toocheke_support_link_tipeee_url'], "toocheke-options-page", "toocheke_support_links_config_section");
 
-                        register_setting("toocheke-settings", "toocheke-support-link-buymeacoffee");
-                        register_setting("toocheke-settings", "toocheke-support-link-gumroad");
-                        register_setting("toocheke-settings", "toocheke-support-link-indiegogo");
-                        register_setting("toocheke-settings", "toocheke-support-link-kickstarter");
-                        register_setting("toocheke-settings", "toocheke-support-link-kofi");
-                        register_setting("toocheke-settings", "toocheke-support-link-liberapay");
-                        register_setting("toocheke-settings", "toocheke-support-link-patreon");
-                        register_setting("toocheke-settings", "toocheke-support-link-paypal");
-                        register_setting("toocheke-settings", "toocheke-support-link-substack");
-                        register_setting("toocheke-settings", "toocheke-support-link-tipeee");
+                        register_setting("toocheke-settings", "toocheke-support-link-buymeacoffee", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-gumroad", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-indiegogo", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-kickstarter", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-kofi", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-liberapay", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-patreon", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-paypal", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-substack", ['sanitize_callback' => 'esc_url_raw']);
+                        register_setting("toocheke-settings", "toocheke-support-link-tipeee", ['sanitize_callback' => 'esc_url_raw']);
                         break;
                     case 'analytics_options':
                         //Option for determining whether to comic analytics
                         add_settings_section("toocheke_comic_analytics_section", "Comic Analytics", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines which comic analytics your want to display for each comic.']);
                         add_settings_field("toocheke-comic-likes", "Do you want to display comic likes?", [$this, 'toocheke_comic_likes_checkbox'], "toocheke-options-page", "toocheke_comic_analytics_section");
-                        register_setting("toocheke-settings", "toocheke-comic-likes");
+                        register_setting("toocheke-settings", "toocheke-comic-likes", ['sanitize_callback' => 'absint']);
                         add_settings_field("toocheke-comic-no-of-comments", "Do you want to display number of comments for comic?", [$this, 'toocheke_comic_no_of_comments_checkbox'], "toocheke-options-page", "toocheke_comic_analytics_section");
-                        register_setting("toocheke-settings", "toocheke-comic-no-of-comments");
+                        register_setting("toocheke-settings", "toocheke-comic-no-of-comments", ['sanitize_callback' => 'absint']);
                         add_settings_field("toocheke-comic-no-of-views", "Do you want to display number of views for comic?", [$this, 'toocheke_comic_no_of_views_checkbox'], "toocheke-options-page", "toocheke_comic_analytics_section");
-                        register_setting("toocheke-settings", "toocheke-comic-no-of-views");
+                        register_setting("toocheke-settings", "toocheke-comic-no-of-views", ['sanitize_callback' => 'absint']);
                         break;
                     case 'series_options':
                         //Option for determining whether to show a single comic series or multiple comic series
                         add_settings_section("toocheke_multiple_series_display_section", "Publish Multiple Comic Series", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets whether you will display a single or multiple comic series on your website.']);
                         add_settings_field("toocheke-display-multiple-series", "Do you want to publish more than one comic series?", [$this, 'toocheke_series_publish_options_checkbox'], "toocheke-options-page", "toocheke_multiple_series_display_section");
-                        register_setting("toocheke-settings", "toocheke-display-multiple-series");
+                        register_setting("toocheke-settings", "toocheke-display-multiple-series", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to show latest comic listings on a multiple series home page
                         add_settings_field("toocheke-display-latest-comics-of-all-multiple-series", "Do you want to display a list of ALL comics(for multiple series) on the home page?", [$this, 'toocheke_display_latest_comics_of_all_multiple_series_checkbox'], "toocheke-options-page", "toocheke_multiple_series_display_section");
-                        register_setting("toocheke-settings", "toocheke-display-latest-comics-of-all-multiple-series");
+                        register_setting("toocheke-settings", "toocheke-display-latest-comics-of-all-multiple-series", ['sanitize_callback' => 'absint']);
 
                         //Option for displaying regular blog posts on series landing page
                         add_settings_section("toocheke_series_landing_blog_section", "Blog Posts on Series Landing Page", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets whether you will display blog post listing on the series landing page.']);
                         add_settings_field("toocheke-series-landing-blog", "Do you want to display list of regular blog posts on the series landing page(applies to webtoon layouts)?", [$this, 'toocheke_series_landing_blog_checkbox'], "toocheke-options-page", "toocheke_series_landing_blog_section");
-                        register_setting("toocheke-settings", "toocheke-series-landing-blog");
+                        register_setting("toocheke-settings", "toocheke-series-landing-blog", ['sanitize_callback' => 'absint']);
 
                         //Option for determining which series to display on home page(applies to only traditional layouts.)
                         add_settings_section("toocheke_traditional_home_series", "Series to Display on Home Page", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This sets which series will be displayed on the home page. Please note that this only applies to the traditional layouts for the home page.']);
                         add_settings_field("toocheke-traditional-home-series", "Select the series you would like displayed on the home page", [$this, 'toocheke_traditional_home_series_dropdown'], "toocheke-options-page", "toocheke_traditional_home_series");
-                        register_setting("toocheke-settings", "toocheke-traditional-home-series");
+                        register_setting("toocheke-settings", "toocheke-traditional-home-series", ['sanitize_callback' => 'absint']);
 
                         break;
                     case 'comic_discussion_options':
                         //Option for determining whether to allow discussion on comic posts on the home page
                         add_settings_section("toocheke_comic_discussion_section", "Comic Discussion", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether to allow commenting on comic posts on the home page.']);
                         add_settings_field("toocheke-comic-discussion", "Do you want to allow commenting on comic posts on the home page?", [$this, 'toocheke_comic_discussion_checkbox'], "toocheke-options-page", "toocheke_comic_discussion_section");
-                        register_setting("toocheke-settings", "toocheke-comic-discussion");
+                        register_setting("toocheke-settings", "toocheke-comic-discussion", ['sanitize_callback' => 'absint']);
                         if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
                             //Option for determining whether to allow discussion on comic posts on the home page
                             add_settings_section("toocheke_paywalled_discussion_section", "Paywalled Discussion", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether to allow commenting only for paying patrons.']);
                             add_settings_field("toocheke-paywalled-discussion", "Do you want to allow commenting only for patrons?", [$this, 'toocheke_paywalled_discussion_checkbox'], "toocheke-options-page", "toocheke_paywalled_discussion_section");
-                            register_setting("toocheke-settings", "toocheke-paywalled-discussion");
+                            register_setting("toocheke-settings", "toocheke-paywalled-discussion", ['sanitize_callback' => 'absint']);
                             break;
                         }
                         break;
@@ -909,31 +909,31 @@ trait Toocheke_Companion_Settings_Page
                         //Option for determining whether to show hide blog posts
                         add_settings_section("toocheke_hide_blog_section", "Hide Blogs", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether or not to display the latest blog posts section in the landing/home pages).']);
                         add_settings_field("toocheke-hide-blog", "Do you want to hide blog posts on your comics homepage/landing page?", [$this, 'toocheke_hide_blog_checkbox'], "toocheke-options-page", "toocheke_hide_blog_section");
-                        register_setting("toocheke-settings", "toocheke-hide-blog");
+                        register_setting("toocheke-settings", "toocheke-hide-blog", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to show blog post on webtoon layout
                         add_settings_section("toocheke_display_blog_on_webtoon", "Display Comic's Blog Post on Webtoon Layouts", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether or not to display the accompanying blog post for a comic in the webtoon layouts.']);
                         add_settings_field("toocheke-dspay-blog-on-webtoon", "Do you want to display the blog post on webtoon layout?", [$this, 'toocheke_display_blog_webtoon_checkbox'], "toocheke-options-page", "toocheke_display_blog_on_webtoon");
-                        register_setting("toocheke-settings", "toocheke-dspay-blog-on-webtoon");
+                        register_setting("toocheke-settings", "toocheke-dspay-blog-on-webtoon", ['sanitize_callback' => 'absint']);
 
                         break;
                     case 'age_options':
                         //Option for determining whether to display popup for mature audiences
                         add_settings_section("toocheke_age_verification_section", "Age Verification", [$this, 'toocheke_age_verification_message'], "toocheke-options-page");
                         add_settings_field("toocheke-age-verification", "Do you want to add a pop-up window to your website and verify the age of the visitor?", [$this, 'toocheke_age_verification_checkbox'], "toocheke-options-page", "toocheke_age_verification_section");
-                        register_setting("toocheke-settings", "toocheke-age-verification");
+                        register_setting("toocheke-settings", "toocheke-age-verification", ['sanitize_callback' => 'absint']);
                         break;
                     case 'language_options':
                         //Option for determining whether to display a bilingual language comic
                         add_settings_section("toocheke_bilingual_display_section", "Bilingual Display", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether to display a bilingual version of your comic']);
                         add_settings_field("toocheke-bilingual-display", "Do you want to publish a bilingual comic?", [$this, 'toocheke_bilingual_display_checkbox'], "toocheke-options-page", "toocheke_bilingual_display_section");
-                        register_setting("toocheke-settings", "toocheke-bilingual-display");
+                        register_setting("toocheke-settings", "toocheke-bilingual-display", ['sanitize_callback' => 'absint']);
                         break;
                     case 'comic_images_options':
                         //Option for determining whether to allow the click to enlarge behavior for images
                         add_settings_section("toocheke_image_click_section", "Allow Click to Enlarge for Images", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether you can click an image to enlarge on comic pages']);
                         add_settings_field("toocheke-image-click", "Do you want to enable the click to enlarge feature for comic images?", [$this, 'toocheke_image_click_checkbox'], "toocheke-options-page", "toocheke_image_click_section");
-                        register_setting("toocheke-settings", "toocheke-image-click");
+                        register_setting("toocheke-settings", "toocheke-image-click", ['sanitize_callback' => 'absint']);
 
                         //Options for optimizing images
                         add_settings_section("toocheke_image_optimization_section", "Optimizaton of Images", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Automatically optimize uploaded images by converting them to AVIF when supported, or WebP as a fallback. This reduces file sizes and saves server disk space while maintaining image quality.']);
@@ -968,11 +968,11 @@ trait Toocheke_Companion_Settings_Page
                         
                         add_settings_section("toocheke_image_protect_section", "Protection of Comic Images", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Helps prevent other websites from displaying your comic images by blocking direct access (hotlink protection).']);
                         add_settings_field("toocheke-image-protection", "Do you want to protect the images in your comic post?", [$this, 'toocheke_image_protection_checkbox'], "toocheke-options-page", "toocheke_image_protect_section");
-                        register_setting("toocheke-settings", "toocheke-image-protection");
+                        register_setting("toocheke-settings", "toocheke-image-protection", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to protect images on future scheduled posts
                         add_settings_field("toocheke-future-post-image-protection", "Do you want to protect the images in future, scheduled comic posts?", [$this, 'toocheke_future_image_protection_checkbox'], "toocheke-options-page", "toocheke_image_protect_section");
-                        register_setting("toocheke-settings", "toocheke-future-post-image-protection");
+                        register_setting("toocheke-settings", "toocheke-future-post-image-protection", ['sanitize_callback' => 'absint']);
                         break;
                         break;
                     
@@ -980,7 +980,7 @@ trait Toocheke_Companion_Settings_Page
                         //Option for determining whether to add comics to main RSS feed
                         add_settings_section("toocheke_comics_to_main_rss_section", "Add comic posts to main feed?", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether the comic posts will be added to the main feed: ' . esc_url(get_bloginfo('url') . '/feed')]);
                         add_settings_field("toocheke-comics-to-main-rss", "Do you want to add comic posts to the main feed?", [$this, 'toocheke_comics_to_main_rss_checkbox'], "toocheke-options-page", "toocheke_comics_to_main_rss_section");
-                        register_setting("toocheke-settings", "toocheke-comics-to-main-rss");
+                        register_setting("toocheke-settings", "toocheke-comics-to-main-rss", ['sanitize_callback' => 'absint']);
                         break;
                     case 'comicscout_options':
                         //Option for determining whether to add comics to main RSS feed
@@ -995,7 +995,8 @@ trait Toocheke_Companion_Settings_Page
 
                         register_setting(
                             "toocheke-settings",
-                            "toocheke-comicscout-global-social-share-image"
+                            "toocheke-comicscout-global-social-share-image",
+                            ['sanitize_callback' => 'absint']
                         );
                         break;
                     case 'bluesky_options':
@@ -1048,9 +1049,9 @@ trait Toocheke_Companion_Settings_Page
 
                             add_settings_field("toocheke-enable-paypal-sandbox", "Sandbox Mode?", [$this, 'toocheke_enable_paypal_sandbox_checkbox'], "toocheke-options-page", "toocheke_sponsor_comic_paypal_settings_section");
 
-                            register_setting("toocheke-settings", "toocheke-paypal-client-id");
-                            register_setting("toocheke-settings", "toocheke-paypal-client-secret");
-                            register_setting("toocheke-settings", "toocheke-enable-paypal-sandbox");
+                            register_setting("toocheke-settings", "toocheke-paypal-client-id", ['sanitize_callback' => 'sanitize_text_field']);
+                            register_setting("toocheke-settings", "toocheke-paypal-client-secret", ['sanitize_callback' => 'sanitize_text_field']);
+                            register_setting("toocheke-settings", "toocheke-enable-paypal-sandbox", ['sanitize_callback' => 'absint']);
 
                             add_settings_section("toocheke_comic_sponsor_pricing_section", "Pricing", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Enter the cost per day you wish to charge your sponsors.']);
                             //Currency field
@@ -1084,7 +1085,7 @@ trait Toocheke_Companion_Settings_Page
                                 ]
                             );
 
-                            register_setting("toocheke-settings", 'toocheke-comic-sponsorship-price', 'absint');
+                            register_setting("toocheke-settings", 'toocheke-comic-sponsorship-price', ['sanitize_callback' => 'absint']);
                         }
                         break;
                     //Options for buying a comic
@@ -1096,9 +1097,9 @@ trait Toocheke_Companion_Settings_Page
                             add_settings_field("toocheke-global-buy-comic", "Do you want to set the pricing globally", [$this, 'toocheke_global_buy_comic_checkbox'], "toocheke-options-page", "toocheke_buy_comic_options_section");
                             add_settings_field("toocheke-original-art", "Do you wish to offer sales of the original art for each comic?", [$this, 'toocheke_buy_original_checkbox'], "toocheke-options-page", "toocheke_buy_comic_options_section");
                             add_settings_field("toocheke-print", "Do you wish to offer sales of the print for each comic?", [$this, 'toocheke_buy_print_checkbox'], "toocheke-options-page", "toocheke_buy_comic_options_section");
-                            register_setting("toocheke-settings", "toocheke-original-art");
-                            register_setting("toocheke-settings", "toocheke-print");
-                            register_setting("toocheke-settings", "toocheke-global-buy-comic");
+                            register_setting("toocheke-settings", "toocheke-original-art", ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", "toocheke-print", ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", "toocheke-global-buy-comic", ['sanitize_callback' => 'absint']);
                             //PayPal Fields section
                             add_settings_section("toocheke_paypal_settings_section", "PayPal Settings", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => '  Enter the following settings for your PayPal account.']);
                             add_settings_field(
@@ -1126,16 +1127,16 @@ trait Toocheke_Companion_Settings_Page
                                 ]
                             );
 
-                            register_setting("toocheke-settings", "toocheke-paypal-email");
-                            register_setting("toocheke-settings", "toocheke-comic-title");
+                            register_setting("toocheke-settings", "toocheke-paypal-email", ['sanitize_callback' => 'sanitize_email']);
+                            register_setting("toocheke-settings", "toocheke-comic-title", ['sanitize_callback' => 'sanitize_text_field']);
                             //Original art section
-                            register_setting("toocheke-settings", "toocheke-original-description");
-                            register_setting("toocheke-settings", 'toocheke-original-us-price', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-original-us-shipping', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-original-canada-price', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-original-canada-shipping', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-original-international-price', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-original-international-shipping', 'absint');
+                            register_setting("toocheke-settings", "toocheke-original-description", ['sanitize_callback' => 'wp_kses_post']);
+                            register_setting("toocheke-settings", 'toocheke-original-us-price', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-original-us-shipping', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-original-canada-price', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-original-canada-shipping', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-original-international-price', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-original-international-shipping', ['sanitize_callback' => 'absint']);
                             add_settings_section("toocheke_original_art_info_section", "Original art information", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Enter the following fields for selling a comic\'s original.']);
                             add_settings_field(
                                 'toocheke-original-description',
@@ -1222,13 +1223,13 @@ trait Toocheke_Companion_Settings_Page
                                 ]
                             );
                             //Print section
-                            register_setting("toocheke-settings", "toocheke-print-description");
-                            register_setting("toocheke-settings", 'toocheke-print-us-price', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-print-us-shipping', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-print-canada-price', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-print-canada-shipping', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-print-international-price', 'absint');
-                            register_setting("toocheke-settings", 'toocheke-print-international-shipping', 'absint');
+                            register_setting("toocheke-settings", "toocheke-print-description", ['sanitize_callback' => 'wp_kses_post']);
+                            register_setting("toocheke-settings", 'toocheke-print-us-price', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-print-us-shipping', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-print-canada-price', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-print-canada-shipping', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-print-international-price', ['sanitize_callback' => 'absint']);
+                            register_setting("toocheke-settings", 'toocheke-print-international-shipping', ['sanitize_callback' => 'absint']);
                             add_settings_field(
                                 'toocheke-print-description',
                                 'Description of prints',
@@ -1334,7 +1335,7 @@ trait Toocheke_Companion_Settings_Page
             
             public function toocheke_buy_comic_display_message()
             {
-                echo '<div class="notice notice-info inline"><p>To use the \'Buy Comic\' features, you will require a PayPal business account. Within your PayPal account, you will need to enter the <b>Instant Payment Notification(IPN)</b> setting. This is what PayPal uses to notify the website that a purchase has been made. Make sure to enter the <b style="color: #ff0000;">Notification URL</b>.</p><p> <a href="https://developer.paypal.com/api/nvp-soap/ipn/IPNSetup/" target="_blank">Here</a> is a tutorial on how to access the setting. <a href="https://www.paypal.com/merchantnotification/ipn/preference/edit" target="_blank">This link</a> should take you directly to where you need to update the URL(once you are logged in). Make sure to enter the following URL:<p><b style="color:#0000ff">' . get_site_url() . '/?action=IPN_Handler</b></p></div><hr/>';
+                echo '<div class="notice notice-info inline"><p>To use the \'Buy Comic\' features, you will require a PayPal business account. Within your PayPal account, you will need to enter the <b>Instant Payment Notification(IPN)</b> setting. This is what PayPal uses to notify the website that a purchase has been made. Make sure to enter the <b style="color: #ff0000;">Notification URL</b>.</p><p> <a href="https://developer.paypal.com/api/nvp-soap/ipn/IPNSetup/" target="_blank">Here</a> is a tutorial on how to access the setting. <a href="https://www.paypal.com/merchantnotification/ipn/preference/edit" target="_blank">This link</a> should take you directly to where you need to update the URL(once you are logged in). Make sure to enter the following URL:<p><b style="color:#0000ff">' . esc_url(get_site_url()) . '/?action=IPN_Handler</b></p></div><hr/>';
             }
 
             public function toocheke_sponsor_comic_display_message()
@@ -1588,7 +1589,7 @@ trait Toocheke_Companion_Settings_Page
     ?>
         <input class="upload-custom-button" type="button" value="Choose an image" id="upload-<?php echo esc_attr($slug); ?>-button"
             data-hidden="<?php echo esc_attr($option_key); ?>" data-image="<?php echo esc_attr($slug); ?>-image">
-        <input type="hidden" id="<?php echo esc_attr($option_key); ?>" name="<?php echo esc_attr($option_key); ?>" value="<?php echo $button_value ?>" />
+        <input type="hidden" id="<?php echo esc_attr($option_key); ?>" name="<?php echo esc_attr($option_key); ?>" value="<?php echo esc_attr($button_value); ?>" />
     <?php
             }
 
@@ -1624,7 +1625,7 @@ trait Toocheke_Companion_Settings_Page
             {
                 $option_key = 'toocheke-support-link-' . $slug;
     ?>
-        <input type="url" name="<?php echo esc_attr($option_key); ?>" value="<?php echo get_option($option_key); ?>" />
+        <input type="url" name="<?php echo esc_attr($option_key); ?>" value="<?php echo esc_attr(get_option($option_key)); ?>" />
     <?php
             }
 
@@ -1646,7 +1647,7 @@ trait Toocheke_Companion_Settings_Page
              */
             public function toocheke_render_section_message($section)
             {
-                echo $section['message'] ?? '';
+                echo wp_kses_post($section['message'] ?? '');
             }
 
             public function toocheke_select_dropdown_generator(array $args)
@@ -1674,9 +1675,9 @@ trait Toocheke_Companion_Settings_Page
             {
                 printf(
                     '<input type="number" id="%s" name="%s" value="%d" />',
-                    $args['name'],
-                    $args['name'],
-                    get_option($args['name'], 0) // 2 is the default number of slides
+                    esc_attr($args['name']),
+                    esc_attr($args['name']),
+                    (int) get_option($args['name'], 0) // 2 is the default number of slides
                 );
             }
 
@@ -1684,9 +1685,9 @@ trait Toocheke_Companion_Settings_Page
             {
                 printf(
                     '<input type="text" id="%s" name="%s" value="%s" />',
-                    $args['name'],
-                    $args['name'],
-                    get_option($args['name'], '') // 2 is the default number of slides
+                    esc_attr($args['name']),
+                    esc_attr($args['name']),
+                    esc_attr(get_option($args['name'], '')) // 2 is the default number of slides
                 );
             }
 
@@ -1694,9 +1695,9 @@ trait Toocheke_Companion_Settings_Page
             {
                 printf(
                     '<input placeholder="Email address" type="email" id="%s" name="%s" value="%s" />',
-                    $args['name'],
-                    $args['name'],
-                    get_option($args['name'], '') // 2 is the default number of slides
+                    esc_attr($args['name']),
+                    esc_attr($args['name']),
+                    esc_attr(get_option($args['name'], '')) // 2 is the default number of slides
                 );
             }
 
@@ -1741,12 +1742,13 @@ trait Toocheke_Companion_Settings_Page
                         while ($series_query->have_posts()): $series_query->the_post();
                             $post_id = get_the_ID();
                             $title   = get_the_title();
-                            $options_markup .= sprintf('<option value="%s" %s>%s</option>', $post_id, selected($selected_series_id, $post_id, false), $title);
+                            $options_markup .= sprintf('<option value="%s" %s>%s</option>', esc_attr($post_id), selected($selected_series_id, $post_id, false), esc_html($title));
                         endwhile;
                         $series_query = null;
                         wp_reset_postdata();
                     endif;
                 endif;
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $options_markup is built here from escaped pieces (title via esc_html, id via esc_attr); wp_kses_post() would strip the option tags.
                 printf('<select name="toocheke-traditional-home-series" id="toocheke-traditional-home-series">%1$s</select>', $options_markup);
             }
 
@@ -1842,7 +1844,7 @@ trait Toocheke_Companion_Settings_Page
                     max="100"
                     step="1"
                 />
-                <span class="description"><?php esc_html_e('Enter a value between 1 and 100.', 'toocheke'); ?></span>
+                <span class="description"><?php esc_html_e('Enter a value between 1 and 100.', 'toocheke-companion'); ?></span>
                 <?php
             }
 
@@ -1860,13 +1862,31 @@ trait Toocheke_Companion_Settings_Page
                     add_settings_error(
                         'toocheke-settings',
                         'invalid-quality',
-                        __('Image quality must be between 1 and 100. The value has been reset to 75.', 'toocheke'),
+                        __('Image quality must be between 1 and 100. The value has been reset to 75.', 'toocheke-companion'),
                         'error'
                     );
                     return 75;
                 }
 
                 return $int;
+            }
+
+            /**
+             * Sanitizes the array-shaped layout options (submitted as
+             * option_name[layout_type]).
+             *
+             * @param  mixed $value Raw input from the settings form.
+             * @return array
+             */
+            public function toocheke_sanitize_layout_option($value)
+            {
+                if (is_array($value) && isset($value['layout_type'])) {
+                    $value['layout_type'] = sanitize_text_field($value['layout_type']);
+                } else {
+                    $value = [];
+                }
+
+                return $value;
             }
 
             public function toocheke_future_image_protection_checkbox()
@@ -2527,7 +2547,7 @@ trait Toocheke_Companion_Settings_Page
     ?>
         <tr class="form-field">
             <th valign="top" scope="row">
-                <label for="wysiwyg-description"><?php _e('Description', 'toocheke-companion'); ?></label>
+                <label for="wysiwyg-description"><?php esc_html_e('Description', 'toocheke-companion'); ?></label>
             </th>
             <td>
                 <script type="text/javascript">
@@ -2561,12 +2581,12 @@ trait Toocheke_Companion_Settings_Page
 
         ?>
         <p>
-            <label><?php _e('Creator', 'toocheke-companion'); ?>:</label>
+            <label><?php esc_html_e('Creator', 'toocheke-companion'); ?>:</label>
             <input type="text" name="manga_creator" value="<?php echo esc_attr($creator); ?>" style="width:100%" />
         </p>
 
         <p>
-            <label><?php _e('Status', 'toocheke-companion'); ?>:</label>
+            <label><?php esc_html_e('Status', 'toocheke-companion'); ?>:</label>
             <select name="manga_status">
                 <option value="Ongoing" <?php selected($status, 'Ongoing'); ?>>Ongoing</option>
                 <option value="Completed" <?php selected($status, 'Completed'); ?>>Completed</option>
@@ -2574,7 +2594,7 @@ trait Toocheke_Companion_Settings_Page
             </select>
         </p>
         <p>
-            <label><?php _e('Release Year', 'toocheke-companion'); ?>:</label>
+            <label><?php esc_html_e('Release Year', 'toocheke-companion'); ?>:</label>
             <input type="number" name="manga_release_year" value="<?php echo esc_attr($release_year); ?>" />
         </p>
         <p>
@@ -2669,7 +2689,7 @@ trait Toocheke_Companion_Settings_Page
                         <a class="button manga-chapter-gallery-remove" href="#"
                             data-hidden="manga_chapter_pages"
                             data-id="<?php echo esc_attr($id); ?>">
-                            <?php _e('Remove', 'toocheke-companion'); ?>
+                            <?php esc_html_e('Remove', 'toocheke-companion'); ?>
                         </a>
                     </li>
             <?php endif;
@@ -2681,7 +2701,7 @@ trait Toocheke_Companion_Settings_Page
             value="<?php echo esc_attr(join(',', $page_ids)); ?>" />
 
         <a href="#" class="button manga-page-upload-button">
-            <?php _e('Add Images', 'toocheke-companion'); ?>
+            <?php esc_html_e('Add Images', 'toocheke-companion'); ?>
         </a>
     <?php
             }
@@ -3696,7 +3716,7 @@ private function toocheke_render_dismissible_info($notice_id, $html_content)
         return;
     }
     echo '<div class="toocheke-info-notice" data-notice-id="' . esc_attr($notice_id) . '" style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px;margin-bottom:10px;">';
-    echo $html_content;
+    echo wp_kses_post($html_content);
     echo '<button type="button" class="toocheke-dismiss-notice" data-notice-id="' . esc_attr($notice_id) . '">';
     echo '<span class="screen-reader-text">' . esc_html__('Dismiss this tip', 'toocheke-companion') . '</span>';
     echo '</button>';

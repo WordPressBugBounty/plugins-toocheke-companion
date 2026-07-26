@@ -230,7 +230,7 @@ ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
                     foreach ($series_posts as $series) {
                         printf(
                             '<option value="%d"%s>%s</option>',
-                            $series->ID,
+                            absint($series->ID),
                             selected($selected_series, $series->ID, false),
                             esc_html($series->post_title)
                         );

@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for displaying list of comics
  *
@@ -6,7 +9,7 @@
  *
  * @package Toocheke
  */
-$randomNumber = rand();
+$randomNumber = wp_rand();
 $templates = new Toocheke_Companion_Template_Loader;
 $companion = new Toocheke_Companion_Comic_Features();
 $series_id = null;

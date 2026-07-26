@@ -161,10 +161,10 @@ trait Toocheke_Companion_Bluesky
             add_settings_section('toocheke_bluesky_posting_section', 'Automatic Posting', [$this, 'toocheke_bluesky_posting_section_message'], 'toocheke-options-page');
 
             add_settings_field('toocheke-bluesky-enable-comics', 'Post comics to Bluesky?', [$this, 'toocheke_bluesky_enable_comics_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_posting_section');
-            register_setting('toocheke-settings', 'toocheke-bluesky-enable-comics');
+            register_setting('toocheke-settings', 'toocheke-bluesky-enable-comics', ['sanitize_callback' => 'absint']);
 
             add_settings_field('toocheke-bluesky-enable-manga-chapters', 'Post manga chapters to Bluesky?', [$this, 'toocheke_bluesky_enable_manga_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_posting_section');
-            register_setting('toocheke-settings', 'toocheke-bluesky-enable-manga-chapters');
+            register_setting('toocheke-settings', 'toocheke-bluesky-enable-manga-chapters', ['sanitize_callback' => 'absint']);
 
             $this->toocheke_bluesky_register_filter_fields('auto', 'toocheke_bluesky_posting_section');
         }
@@ -174,7 +174,7 @@ trait Toocheke_Companion_Bluesky
             add_settings_section('toocheke_bluesky_format_section', 'Post Format', [$this, 'toocheke_bluesky_format_section_message'], 'toocheke-options-page');
 
             add_settings_field('toocheke-bluesky-post-format', 'How should posts appear on Bluesky?', [$this, 'toocheke_bluesky_post_format_radio'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
-            register_setting('toocheke-settings', 'toocheke-bluesky-post-format');
+            register_setting('toocheke-settings', 'toocheke-bluesky-post-format', ['sanitize_callback' => 'sanitize_text_field']);
 
             add_settings_field('toocheke-bluesky-message-template', 'Message Template', [$this, 'toocheke_bluesky_message_template_field'], 'toocheke-options-page', 'toocheke_bluesky_format_section');
             register_setting('toocheke-settings', 'toocheke-bluesky-message-template', ['sanitize_callback' => 'sanitize_textarea_field']);
@@ -188,14 +188,14 @@ trait Toocheke_Companion_Bluesky
             add_settings_section('toocheke_bluesky_random_section', 'Random Archive Posting', [$this, 'toocheke_bluesky_random_section_message'], 'toocheke-options-page');
 
             add_settings_field('toocheke-bluesky-random-comics', 'Randomly re-post comics from the archive?', [$this, 'toocheke_bluesky_random_comics_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
-            register_setting('toocheke-settings', 'toocheke-bluesky-random-comics');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-comics', ['sanitize_callback' => 'absint']);
 
             add_settings_field('toocheke-bluesky-random-manga-chapters', 'Randomly re-post manga chapters from the archive?', [$this, 'toocheke_bluesky_random_manga_checkbox'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
-            register_setting('toocheke-settings', 'toocheke-bluesky-random-manga-chapters');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-manga-chapters', ['sanitize_callback' => 'absint']);
 
             add_settings_field('toocheke-bluesky-random-frequency', 'Post every...', [$this, 'toocheke_bluesky_random_frequency_field'], 'toocheke-options-page', 'toocheke_bluesky_random_section');
-            register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-number');
-            register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-unit');
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-number', ['sanitize_callback' => 'absint']);
+            register_setting('toocheke-settings', 'toocheke-bluesky-random-frequency-unit', ['sanitize_callback' => 'sanitize_text_field']);
 
             $this->toocheke_bluesky_register_filter_fields('random', 'toocheke_bluesky_random_section');
         }
@@ -343,7 +343,7 @@ trait Toocheke_Companion_Bluesky
                     $option_name  = "toocheke-bluesky-{$context}-{$type}-filter-{$key}";
                     $selected_ids = array_map('absint', (array) get_option($option_name, []));
                     ?>
-                    <details class="toocheke-bluesky-filter-group"<?php echo $selected_ids ? ' open' : ''; ?>>
+                    <details class="toocheke-bluesky-filter-group"<?php echo esc_attr($selected_ids ? ' open' : ''); ?>>
                         <summary>
                             <?php
                             printf(
@@ -363,7 +363,7 @@ trait Toocheke_Companion_Bluesky
                                 $item_title = isset($item->post_title) ? $item->post_title : $item->name;
                                 $is_selected = in_array($item_id, $selected_ids, true);
                                 ?>
-                                <label class="toocheke-pill<?php echo $is_selected ? ' is-selected' : ''; ?>">
+                                <label class="toocheke-pill<?php echo esc_attr($is_selected ? ' is-selected' : ''); ?>">
                                     <input type="checkbox" name="<?php echo esc_attr($option_name); ?>[]" value="<?php echo esc_attr($item_id); ?>" <?php checked($is_selected); ?> />
                                     <?php echo esc_html($item_title); ?>
                                 </label>
@@ -511,6 +511,7 @@ trait Toocheke_Companion_Bluesky
                     <?php
                     printf(
                         wp_kses(
+                            /* translators: %s: app passwords settings URL */
                             __('Bluesky is not connected yet. Add your handle and app password above — you can create an app password <a href="%s" target="_blank" rel="noopener noreferrer">here</a>.', 'toocheke-companion'),
                             ['a' => ['href' => [], 'target' => [], 'rel' => []]]
                         ),
@@ -1977,20 +1978,20 @@ trait Toocheke_Companion_Bluesky
 
         $file_size = filesize($tmp_file);
         if (false === $file_size || $file_size < 100) {
-            @unlink($tmp_file);
+            wp_delete_file( $tmp_file );
             return new WP_Error('toocheke_bluesky_image_empty', 'Downloaded image was empty or unreadable.');
         }
 
         // Bluesky's blob size limit is 1MB; stay a little under it for safety.
         if ($file_size > 976 * 1024) {
-            @unlink($tmp_file);
+            wp_delete_file( $tmp_file );
             return new WP_Error('toocheke_bluesky_image_too_large', 'Image exceeds Bluesky\'s 1MB image limit (' . round($file_size / 1024) . 'KB).');
         }
 
         $image_info = @getimagesize($tmp_file);
         $mime       = $image_info['mime'] ?? 'image/jpeg';
         $image_data = file_get_contents($tmp_file);
-        @unlink($tmp_file);
+        wp_delete_file( $tmp_file );
 
         if (! $image_data) {
             return new WP_Error('toocheke_bluesky_image_read', 'Could not read the downloaded image.');
@@ -2102,7 +2103,7 @@ trait Toocheke_Companion_Bluesky
                     printf(
                         /* translators: %d: number of errors */
                         esc_html(_n('%d Bluesky posting error has occurred:', '%d Bluesky posting errors have occurred:', $count, 'toocheke-companion')),
-                        $count
+                        absint($count)
                     );
                     ?>
                 </strong>

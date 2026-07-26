@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for text list archive of comics
  *
@@ -55,7 +58,7 @@ foreach ($collections as $collection) {
             }
             ?>
             <div class="comic-archive-item">
-  <span class="comic-archive-date"><?php echo wp_kses_data(date('F j, Y', strtotime($comic->post_date))); ?></span>
+  <span class="comic-archive-date"><?php echo wp_kses_data(mysql2date('F j, Y', $comic->post_date)); ?></span>
   <span class="comic-archive-title"><a href="<?php echo esc_url($comic_url); ?>" title="<?php echo esc_attr($comic->post_title) ?>"><?php echo wp_kses_data($comic->post_title) ?></a></span>
   </div>
 

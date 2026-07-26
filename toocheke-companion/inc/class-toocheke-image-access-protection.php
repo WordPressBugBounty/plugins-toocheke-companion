@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Toocheke Image Access Protection
  *
@@ -365,7 +368,8 @@ class Toocheke_Image_Access_Protection
         header('Cache-Control: private, max-age=3600');
         header('X-Robots-Tag: noindex, nofollow');
 
-        readfile($real_path);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw binary image bytes, escaping would corrupt the file.
+        echo $this->filesystem()->get_contents($real_path);
 
         exit;
     }
@@ -373,15 +377,27 @@ class Toocheke_Image_Access_Protection
     /**
      * Check if the referer is valid (not a hotlink)
      */
+    private function filesystem(): \WP_Filesystem_Base
+    {
+        global $wp_filesystem;
+
+        if (empty($wp_filesystem)) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+
+        return $wp_filesystem;
+    }
+
     private function is_valid_referer()
     {
         $referer   = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        $site_host = parse_url(site_url(), PHP_URL_HOST);
-        $home_host = parse_url(home_url(), PHP_URL_HOST);
+        $site_host = wp_parse_url(site_url(), PHP_URL_HOST);
+        $home_host = wp_parse_url(home_url(), PHP_URL_HOST);
 
         // If referer is present, check it matches our domain
         if (! empty($referer)) {
-            $referer_host = parse_url($referer, PHP_URL_HOST);
+            $referer_host = wp_parse_url($referer, PHP_URL_HOST);
             if ($referer_host === $site_host || $referer_host === $home_host) {
                 return true;
             }
@@ -455,7 +471,8 @@ class Toocheke_Image_Access_Protection
         header('Cache-Control: public, max-age=86400'); // Cache for 24 hours
         header('X-Robots-Tag: noindex, nofollow');
 
-        readfile($denied_image);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw binary image bytes, escaping would corrupt the file.
+        echo $this->filesystem()->get_contents($denied_image);
         exit;
     }
 }

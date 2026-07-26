@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
     /**
  * Template part for displaying first manga series
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
@@ -150,7 +153,13 @@
         esc_html($manga_creator)
     );
     }
-    echo wpautop(get_the_content());
+    echo wp_kses(
+        wpautop(get_the_content()),
+        array_merge(
+            wp_kses_allowed_html('post'),
+            ['iframe' => ['src' => true, 'width' => true, 'height' => true, 'frameborder' => true, 'allow' => true, 'allowfullscreen' => true, 'title' => true, 'loading' => true]]
+        )
+    );
 ?>
 
      <?php
@@ -178,18 +187,18 @@
                      <div class="manga-row row">
                         <div class="col-lg-12">
                             <!--Series Information-->
-<h2><?php _e('Series Information', 'toocheke-companion'); ?></h2>
+<h2><?php esc_html_e('Series Information', 'toocheke-companion'); ?></h2>
 <div class="manga-info-table">
 
   <div class="manga-info-row">
     <div class="manga-info-col">
-      <span class="manga-info-key"><?php _e('Status', 'toocheke-companion'); ?></span>
+      <span class="manga-info-key"><?php esc_html_e('Status', 'toocheke-companion'); ?></span>
       <span class="manga-info-value">
         <?php echo esc_html($manga_status ?? ''); ?>
       </span>
     </div>
     <div class="manga-info-col">
-      <span class="manga-info-key"><?php _e('Rating', 'toocheke-companion'); ?></span>
+      <span class="manga-info-key"><?php esc_html_e('Rating', 'toocheke-companion'); ?></span>
       <span class="manga-info-value">
         <?php echo esc_html($manga_rating ?? ''); ?>
       </span>
@@ -199,7 +208,7 @@
   <?php if (! empty($genres) && ! is_wp_error($genres)): ?>
     <div class="manga-info-row">
         <div class="manga-info-col">
-            <span class="manga-info-key"><?php _e('Genres', 'toocheke-companion'); ?></span>
+            <span class="manga-info-key"><?php esc_html_e('Genres', 'toocheke-companion'); ?></span>
             <div class="manga-info-tags">
                 <?php foreach ($genres as $genre):
                         $genre_slug = sanitize_title($genre->name);
@@ -218,7 +227,7 @@
 <?php if (! empty($publishers) && ! is_wp_error($publishers)): ?>
     <div class="manga-info-row">
         <div class="manga-info-col">
-            <span class="manga-info-key"><?php _e('Publishers', 'toocheke-companion'); ?></span>
+            <span class="manga-info-key"><?php esc_html_e('Publishers', 'toocheke-companion'); ?></span>
             <div class="manga-info-tags">
 
                             <?php foreach ($publishers as $publisher):
@@ -240,7 +249,7 @@
  <hr class="toocheke-hr manga-hr" />
 
          <!--Volumes-->
-         <h2><?php _e('Volumes', 'toocheke-companion'); ?></h2>
+         <h2><?php esc_html_e('Volumes', 'toocheke-companion'); ?></h2>
          <?php
 
              $args = [
@@ -265,9 +274,9 @@
 <h4 class="mb-4 font-weight-normal">
     <em>
         <?php
-            /* translators: %s: number of volumes */
             echo sprintf(
-                _n('%s Volume', '%s Volumes', $volume_count, 'toocheke-companion'),
+                /* translators: %s: number of volumes */
+                esc_html(_n('%s Volume', '%s Volumes', $volume_count, 'toocheke-companion')),
                 esc_html($volume_count)
             );
         ?>

@@ -110,6 +110,7 @@ trait Toocheke_Companion_Frontend_Display
                     $html = $html . "<a id='copy-link' data-url='" . esc_url($comic_url) . "' href='javascript:;' title='Copy link'>" . wp_kses($copy_button, $allowed_tags) . "</a>";
                 }
 
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $html is built from esc_url()'d hrefs and wp_kses()'d icon/image markup above; wp_kses_post() would strip the target="_blank" attribute these share links rely on.
                 echo $html;
             }
 
@@ -214,6 +215,7 @@ trait Toocheke_Companion_Frontend_Display
                 if (! empty($tipeee_url)) {
                     $html = $html . "<a href='" . esc_url($tipeee_url) . "' title='Support with Tipeee' target='_blank'>" . wp_kses($tipeee_button, $allowed_tags) . "</a>";
                 }
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $html is built from esc_url()'d hrefs and wp_kses()'d icon/image markup above; wp_kses_post() would strip the target="_blank" attribute these share links rely on.
                 echo $html;
             }
 
@@ -963,17 +965,19 @@ trait Toocheke_Companion_Frontend_Display
                 global $wpdb;
 
                 if ($query->is_main_query() && ! empty($query->query['s'])) {
-                    $sql = "
+                    $like   = '%' . $wpdb->esc_like($query->query['s']) . '%';
+                    $search = preg_replace(
+                        "#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
+                        $wpdb->prepare(
+                            "
                 or exists (
                     select * from {$wpdb->postmeta} where post_id={$wpdb->posts}.ID
                     and meta_key in ('desktop_comic_editor', 'comic_blog_post_editor', 'mobile_comic_2nd_language_editor', 'comic_2nd_language_blog_post_editor', 'desktop_comic_2nd_language_editor', 'transcript')
                     and meta_value like %s
                 )
-            ";
-                    $like   = '%' . $wpdb->esc_like($query->query['s']) . '%';
-                    $search = preg_replace(
-                        "#\({$wpdb->posts}.post_title LIKE [^)]+\)\K#",
-                        $wpdb->prepare($sql, $like),
+            ",
+                            $like
+                        ),
                         $search
                     );
                 }
@@ -1103,7 +1107,7 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
                 'www.youtube-nocookie.com'
             );
             
-            $parsed = parse_url($src);
+            $parsed = wp_parse_url($src);
             if (isset($parsed['host'])) {
                 foreach ($allowed_domains as $domain) {
                     if (strpos($parsed['host'], $domain) !== false) {

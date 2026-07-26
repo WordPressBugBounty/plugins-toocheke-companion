@@ -109,6 +109,21 @@ class Toocheke_Future_Comic_Image_Protection
     }
 
     /**
+     * Returns the WP_Filesystem instance, initialising it if needed.
+     */
+    private function filesystem(): \WP_Filesystem_Base
+    {
+        global $wp_filesystem;
+
+        if (empty($wp_filesystem)) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+
+        return $wp_filesystem;
+    }
+
+    /**
      * Creates the directory (and an .htaccess + index.php) if it doesn't exist.
      * Returns true on success.
      */
@@ -120,7 +135,7 @@ class Toocheke_Future_Comic_Image_Protection
             }
         }
 
-        if (! is_writable($dir)) {
+        if (! $this->filesystem()->is_writable($dir)) {
             return false;
         }
 
@@ -299,9 +314,9 @@ class Toocheke_Future_Comic_Image_Protection
         $private_path = $this->get_private_path($attachment_id, $file);
 
         // Move the file FIRST before deleting the attachment record.
-        if (! rename($file, $private_path)) {
+        if (! $this->filesystem()->move($file, $private_path, true)) {
             if (copy($file, $private_path)) {
-                @unlink($file);
+                wp_delete_file( $file );
             } else {
                 //error_log( 'Toocheke: could not move file to private storage: ' . $file );
                 return;
@@ -427,9 +442,9 @@ class Toocheke_Future_Comic_Image_Protection
         }
 
         // Move file back — fall back to copy+delete across filesystem boundaries.
-        if (! rename($private_path, $original_file)) {
+        if (! $this->filesystem()->move($private_path, $original_file, true)) {
             if (copy($private_path, $original_file)) {
-                @unlink($private_path);
+                wp_delete_file( $private_path );
             } else {
                 //error_log( 'Toocheke: could not restore file from ' . $private_path . ' to ' . $original_file );
                 return;
@@ -527,7 +542,7 @@ class Toocheke_Future_Comic_Image_Protection
                 if ((int) ($entry['attachment_id'] ?? 0) === $attachment_id) {
                     $private_path = $this->normalize_path($entry['private_path'] ?? '');
                     if ($private_path && file_exists($private_path)) {
-                        @unlink($private_path);
+                        wp_delete_file( $private_path );
                         //error_log( 'Toocheke: cleaned up private file for deleted attachment ' . $attachment_id );
                     }
                 } else {

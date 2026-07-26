@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
     /**
  * Template part for displaying comic archive
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/

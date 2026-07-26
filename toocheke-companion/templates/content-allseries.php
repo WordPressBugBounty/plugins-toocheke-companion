@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for displaying all series
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
@@ -62,8 +65,8 @@ if (post_type_exists('series')):
 				                        </a>
 				                        <div class="series-rollover">
 				                            <a class="series-link" href="<?php echo esc_url($series_link); ?>">
-				                                <h3><?php echo $series_title; ?></h3>
-				                                <?php echo $series_excerpt; ?>
+				                                <h3><?php echo esc_html($series_title); ?></h3>
+				                                <?php echo esc_html($series_excerpt); ?>
 				                            </a>
 
 

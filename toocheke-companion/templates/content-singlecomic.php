@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for displaying single comic
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
@@ -44,7 +47,7 @@ $allowed_tags = array(
 echo '<div id="' . esc_attr($wrapper_id) . '">';
 echo '<div id="spliced-comic">';
 echo '<span class="default-lang">';
-echo get_the_content();
+echo wp_kses(get_the_content(), $allowed_tags);
 echo '</span>';
 echo '</div>';
 echo '<div id="unspliced-comic">';

@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 /**
  * Template part for text list archive of comics
  *
@@ -74,7 +77,7 @@ foreach ($collections as $collection) {
 
             }
             echo '<br/>';
-            echo '<span class="posted-on">Posted on <a href="' . esc_url($comic_url) . '">' . wp_kses_data(date('F j, Y', strtotime($comic->post_date))) .'</a></span>';
+            echo '<span class="posted-on">Posted on <a href="' . esc_url($comic_url) . '">' . wp_kses_data(mysql2date('F j, Y', $comic->post_date)) .'</a></span>';
             echo '</span>';
         } // foreach($collections_posts
         echo '</div>';

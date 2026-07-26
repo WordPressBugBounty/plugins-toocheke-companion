@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
     /**
      * Template part for displaying the content for the a single manga volume post(single-manga_volume.php)
      *
@@ -204,18 +207,18 @@ if ($manga_series_id) {
                      <div class="manga-row">
                         <div class="col-lg-12">
                             <!--Volume Information-->
-<h2><?php _e('Volume Information', 'toocheke-companion'); ?></h2>
+<h2><?php esc_html_e('Volume Information', 'toocheke-companion'); ?></h2>
 <div class="manga-info-table">
 
   <div class="manga-info-row">
     <div class="manga-info-col">
-      <span class="manga-info-key"><?php _e('Release Date', 'toocheke-companion'); ?></span>
+      <span class="manga-info-key"><?php esc_html_e('Release Date', 'toocheke-companion'); ?></span>
       <span class="manga-info-value">
         <?php echo esc_html($volume_formatted_release_date ?? ''); ?>
       </span>
     </div>
     <div class="manga-info-col">
-      <span class="manga-info-key"><?php _e('ISBN', 'toocheke-companion'); ?></span>
+      <span class="manga-info-key"><?php esc_html_e('ISBN', 'toocheke-companion'); ?></span>
       <span class="manga-info-value">
         <?php echo esc_html($volume_isbn ?? ''); ?>
       </span>
@@ -224,13 +227,13 @@ if ($manga_series_id) {
 
     <div class="manga-info-row">
     <div class="manga-info-col">
-      <span class="manga-info-key"><?php _e('Rating', 'toocheke-companion'); ?></span>
+      <span class="manga-info-key"><?php esc_html_e('Rating', 'toocheke-companion'); ?></span>
       <span class="manga-info-value">
         <?php echo esc_html($volume_rating ?? ''); ?>
       </span>
     </div>
     <div class="manga-info-col">
-      <span class="manga-info-key"><?php _e('Pages', 'toocheke-companion'); ?></span>
+      <span class="manga-info-key"><?php esc_html_e('Pages', 'toocheke-companion'); ?></span>
       <span class="manga-info-value">
         <?php echo esc_html($volume_pages ?? ''); ?>
       </span>
@@ -243,7 +246,7 @@ if ($manga_series_id) {
 
  <?php if($volume_buy_digital_url || $volume_buy_print_url):?>
        <!--Volume Purchasing-->
-       <h2><?php _e('Buy', 'toocheke-companion'); ?></h2>
+       <h2><?php esc_html_e('Buy', 'toocheke-companion'); ?></h2>
       
         <div class="manga-volume-purchase-options">
 <?php
@@ -261,11 +264,11 @@ if ($manga_series_id) {
     ];
 
     // Get the site's host for comparison
-    $site_host = parse_url(home_url(), PHP_URL_HOST);
+    $site_host = wp_parse_url(home_url(), PHP_URL_HOST);
 
     foreach ($buy_links as $link):
         if (! empty($link['url'])):
-            $link_host   = parse_url($link['url'], PHP_URL_HOST);
+            $link_host   = wp_parse_url($link['url'], PHP_URL_HOST);
             $is_external = $link_host && $link_host !== $site_host;
         ?>
 		        <a class="btn btn-outline-black btn-lg btn-manga-volume-buy-link"
@@ -333,13 +336,14 @@ if ($manga_series_id) {
           <!--./Previous and Next Volumes-->
           
          <!--Chapters-->
-         <h2><?php _e('Chapters', 'toocheke-companion'); ?></h2>
+         <h2><?php esc_html_e('Chapters', 'toocheke-companion'); ?></h2>
          <?php
 
              $args = [
                  'post_type'      => 'manga_chapter',
                  'posts_per_page' => -1,
-                 'orderby'        => 'chapter_number', // assuming you store a numeric meta 'chapter_number'
+                 'meta_key'       => 'chapter_number',
+                 'orderby'        => 'meta_value_num',
                  'order'          => 'ASC',
                  'meta_query'     => [
                      [
@@ -358,9 +362,9 @@ if ($manga_series_id) {
 <h4 class="mb-4 font-weight-normal">
     <em>
         <?php
-            /* translators: %s: number of chapters */
             echo sprintf(
-                _n('%s Chapter', '%s Chapters', $chapter_count, 'toocheke-companion'),
+                /* translators: %s: number of chapters */
+                esc_html(_n('%s Chapter', '%s Chapters', $chapter_count, 'toocheke-companion')),
                 esc_html($chapter_count)
             );
         ?>
@@ -368,59 +372,9 @@ if ($manga_series_id) {
     </h4>
 
     <div class="manga-related-list-container">
-        <?php while ($query->have_posts()): $query->the_post(); ?>
-	        <?php
-                    $manga_chapter_id        = get_the_ID();
-                    $release_date           = get_post_meta($manga_chapter_id, 'release_date', true);
-                    $pages                  = get_post_meta($manga_chapter_id, 'pages', true);
-                    //$notes                  = get_post_meta($manga_chapter_id, 'notes', true);
-               
-
-
-
-
-                    $formatted_release_date = false;
-                    if ($release_date) {
-                        $date_obj               = new DateTime($release_date);
-                        $formatted_release_date = $date_obj->format('M. d, Y'); // Mar. 05, 2019
-                    }
-               
-
-                ?>
-	            <div class="manga-related-item-container fade-in">
-	                 <a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>">
-	                <div class="manga-related-item-thumbnail manga-thumbnail">
-
-	                    <?php if (has_post_thumbnail()): ?>
-	                        <?php the_post_thumbnail('full'); ?>
-	                    <?php else: ?>
-                        <img src="<?php echo esc_url(plugins_url('toocheke-companion/img/no-image.png')); ?>" alt="<?php the_title_attribute(); ?>" />
-                    <?php endif; ?>
-
-                </div>
-                </a>
-                <div class="manga-related-info-container">
-                     <a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>">
-                        <h3 class="manga-related-info-title"><?php the_title(); ?></h3>
-                    </a>
-                    <div class="manga-data-pages"><span><?php echo esc_html($formatted_release_date ?? ''); ?></span> | <span><?php
-    /* translators: %s: number of pages */
-    echo sprintf(
-        _n('%s page', '%s pages', $pages, 'toocheke-companion'),
-        esc_html($pages)
-);
-?></span></div>
-        <a href="<?php echo esc_url(get_permalink()); ?>"
-   title="<?php printf( esc_attr__( 'Read %s', 'toocheke-companion' ), get_the_title() ); ?>">
-
-   <?php _e('READ', 'toocheke-companion'); ?>
-</a>
-
-
-                </div>
-
-                    </div>
-        <?php endwhile; ?>
+        <?php while ($query->have_posts()): $query->the_post();
+                    $templates->get_template_part('content', 'relatedmangachapter');
+        endwhile; ?>
     </div>
     <?php wp_reset_postdata(); ?>
 <?php endif; ?>

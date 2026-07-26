@@ -1,5 +1,8 @@
 <?php
-$randomNumber = rand();
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+$randomNumber = wp_rand();
 $comic_order ='DESC';
 if (get_query_var('comic_order')) {
     $comic_order = get_query_var('comic_order');

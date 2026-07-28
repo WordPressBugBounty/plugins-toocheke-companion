@@ -1982,10 +1982,10 @@ trait Toocheke_Companion_Bluesky
             return new WP_Error('toocheke_bluesky_image_empty', 'Downloaded image was empty or unreadable.');
         }
 
-        // Bluesky's blob size limit is 1MB; stay a little under it for safety.
-        if ($file_size > 976 * 1024) {
+        // Bluesky's blob size limit is 2MB; stay a little under it for safety.
+        if ($file_size > 976 * 2048) {
             wp_delete_file( $tmp_file );
-            return new WP_Error('toocheke_bluesky_image_too_large', 'Image exceeds Bluesky\'s 1MB image limit (' . round($file_size / 1024) . 'KB).');
+            return new WP_Error('toocheke_bluesky_image_too_large', 'Image exceeds Bluesky\'s 2MB image limit (' . round($file_size / 2048) . 'KB).');
         }
 
         $image_info = @getimagesize($tmp_file);

@@ -1963,6 +1963,13 @@ trait Toocheke_Companion_Bluesky
         return ['token' => $body['accessJwt'], 'did' => $body['did']];
     }
 
+    /**
+     * Bluesky's blob size limit (2MB as of their April 2026 update). We stay
+     * a little under it for safety since this is an undocumented margin,
+     * not a hard protocol constant.
+     */
+    const BLUESKY_MAX_IMAGE_BYTES = 1950 * 1024;
+
     private function toocheke_bluesky_upload_image($image_url, $token)
     {
         if (empty($image_url)) {
@@ -1982,10 +1989,21 @@ trait Toocheke_Companion_Bluesky
             return new WP_Error('toocheke_bluesky_image_empty', 'Downloaded image was empty or unreadable.');
         }
 
-        // Bluesky's blob size limit is 1MB; stay a little under it for safety.
-        if ($file_size > 976 * 1024) {
+        if ($file_size > self::BLUESKY_MAX_IMAGE_BYTES) {
+            $shrunk = $this->toocheke_bluesky_shrink_image_to_fit($tmp_file, self::BLUESKY_MAX_IMAGE_BYTES);
+
+            if (is_wp_error($shrunk)) {
+                wp_delete_file( $tmp_file );
+                return new WP_Error(
+                    'toocheke_bluesky_image_too_large',
+                    'Image exceeds Bluesky\'s 2MB image limit (' . round($file_size / 1024) . 'KB) and could not be shrunk to fit: ' . $shrunk->get_error_message()
+                );
+            }
+
+            // toocheke_bluesky_shrink_image_to_fit() wrote a new temp file;
+            // stop tracking the original so we don't delete it twice.
             wp_delete_file( $tmp_file );
-            return new WP_Error('toocheke_bluesky_image_too_large', 'Image exceeds Bluesky\'s 1MB image limit (' . round($file_size / 1024) . 'KB).');
+            $tmp_file = $shrunk;
         }
 
         $image_info = @getimagesize($tmp_file);
@@ -2023,6 +2041,145 @@ trait Toocheke_Companion_Bluesky
             'width'  => isset($image_info[0]) ? (int) $image_info[0] : 0,
             'height' => isset($image_info[1]) ? (int) $image_info[1] : 0,
         ];
+    }
+
+    /**
+     * Shrink an oversized image down to fit within $max_bytes, writing the
+     * result to a new temp file (the caller is responsible for deleting
+     * both the original and the returned file).
+     *
+     * Strategy — dimensions first, quality as a last resort:
+     *
+     *   1. Step the long edge down through 4000 -> 3000 -> 2000 -> 1500 ->
+     *      1000px (skipping any cap the image is already smaller than),
+     *      re-encoding at a solid quality (85) each time. 4000px is
+     *      Bluesky's own maximum render resolution, so this isn't an
+     *      arbitrary guess — anything above that is wasted bytes Bluesky
+     *      would only downscale anyway. Cutting pixel count this way drops
+     *      file size fast without the macro-blocking/artifacting that
+     *      comes from crushing quality on a still-huge image.
+     *   2. Only if the smallest dimension step still doesn't fit (a very
+     *      high-entropy image, or one that was already small on disk),
+     *      fall back to stepping quality down (70 -> 55 -> 40) at whatever
+     *      the last-tried dimensions were.
+     *
+     * Uses wp_get_image_editor() — WordPress core's own GD/Imagick
+     * abstraction — so this adds no new dependency and no extra library
+     * weight to the plugin.
+     *
+     * @param string $source_path Path to the downloaded original.
+     * @param int    $max_bytes   Target ceiling in bytes.
+     * @return string|WP_Error   Path to a new temp file under $max_bytes, or WP_Error if it couldn't get there.
+     */
+    private function toocheke_bluesky_shrink_image_to_fit($source_path, $max_bytes)
+    {
+        $editor = wp_get_image_editor($source_path);
+
+        if (is_wp_error($editor)) {
+            return new WP_Error('toocheke_bluesky_no_editor', 'No image editor (GD/Imagick) available on this server: ' . $editor->get_error_message());
+        }
+
+        $size        = $editor->get_size();
+        $orig_width  = $size['width'] ?? 0;
+        $orig_height = $size['height'] ?? 0;
+        $long_edge   = max($orig_width, $orig_height);
+
+        // Bluesky's own max render resolution is 4000px on the long edge;
+        // the smaller steps below are just further fallback if that alone
+        // isn't enough to clear the byte limit.
+        $dimension_caps  = [4000, 3000, 2000, 1500, 1000];
+        $last_dimensions = null;
+
+        if ($long_edge > 0) {
+            foreach ($dimension_caps as $cap) {
+                if ($long_edge <= $cap) {
+                    continue; // Already at or under this cap; don't upscale.
+                }
+
+                $dimensions = $this->toocheke_bluesky_scale_to_long_edge($orig_width, $orig_height, $cap);
+                $last_dimensions = $dimensions;
+
+                $result = $this->toocheke_bluesky_try_save_under_limit($source_path, $max_bytes, 85, $dimensions);
+                if (! is_wp_error($result)) {
+                    return $result;
+                }
+            }
+        }
+
+        // Dimension steps alone weren't enough (or the image was already
+        // small on disk despite its byte size). Fall back to quality
+        // reduction at whatever the smallest dimensions we tried were.
+        foreach ([70, 55, 40] as $quality) {
+            $result = $this->toocheke_bluesky_try_save_under_limit($source_path, $max_bytes, $quality, $last_dimensions);
+            if (! is_wp_error($result)) {
+                return $result;
+            }
+        }
+
+        return new WP_Error('toocheke_bluesky_shrink_failed', 'Could not compress the image under the size limit even after reducing dimensions and quality.');
+    }
+
+    /**
+     * Scale [$width, $height] down so its longest edge equals $long_edge,
+     * preserving aspect ratio.
+     *
+     * @return array [width, height]
+     */
+    private function toocheke_bluesky_scale_to_long_edge($width, $height, $long_edge)
+    {
+        if ($width >= $height) {
+            $new_width  = $long_edge;
+            $new_height = (int) round($height * ($long_edge / $width));
+        } else {
+            $new_height = $long_edge;
+            $new_width  = (int) round($width * ($long_edge / $height));
+        }
+
+        return [max(1, $new_width), max(1, $new_height)];
+    }
+
+    /**
+     * One attempt: re-encode $source_path at $quality (and optionally resized
+     * to $dimensions = [width, height]) and check if the result fits under
+     * $max_bytes. Returns the temp file path on success, cleaning up after
+     * itself on failure so callers never leak temp files from failed attempts.
+     *
+     * @param string     $source_path
+     * @param int        $max_bytes
+     * @param int        $quality
+     * @param array|null $dimensions  [width, height] or null to keep original size.
+     * @return string|WP_Error
+     */
+    private function toocheke_bluesky_try_save_under_limit($source_path, $max_bytes, $quality, $dimensions)
+    {
+        $editor = wp_get_image_editor($source_path);
+        if (is_wp_error($editor)) {
+            return $editor;
+        }
+
+        $editor->set_quality($quality);
+
+        if (null !== $dimensions) {
+            $resized = $editor->resize($dimensions[0], $dimensions[1], false);
+            if (is_wp_error($resized)) {
+                return $resized;
+            }
+        }
+
+        $saved = $editor->save();
+        if (is_wp_error($saved)) {
+            return $saved;
+        }
+
+        $new_path = $saved['path'];
+        $new_size = filesize($new_path);
+
+        if (false === $new_size || $new_size > $max_bytes) {
+            wp_delete_file( $new_path );
+            return new WP_Error('toocheke_bluesky_still_too_large', 'Still too large at this quality/size.');
+        }
+
+        return $new_path;
     }
 
     private function toocheke_bluesky_create_record($record, $token, $did)

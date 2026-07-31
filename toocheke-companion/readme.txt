@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.11
+Stable tag: 2.12
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -162,9 +162,12 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 == Changelog ==
 
+= 2.12 =
+* SECURITY: Fixed a stored cross-site scripting vulnerability (CVE-2026-15604) where the series background color field was saved without sanitization and could be exploited by a Contributor-level account.
+
 = 2.11 =
-* NEW: Added `[toocheke-all-manga-volumes]` and `[toocheke-all-manga-chapters]` shortcodes, so you can display a grid of manga volumes or Chapters.
-* UPDATE: General security and code-quality improvements throughout the plugin.
+* NEW: Added `[toocheke-all-manga-volumes]` and `[toocheke-all-manga-chapters]` shortcodes, so you can display a grid of manga volumes or chapters anywhere on your site, with optional filtering by series (and by volume, for chapters).
+* UPDATE: General security and code-quality improvements throughout the plugin — safer handling of displayed content, more consistent data validation on saved settings, and translation-readiness cleanup.
 
 = 2.10 =
 * UPDATE: Changed layout for email subscription form

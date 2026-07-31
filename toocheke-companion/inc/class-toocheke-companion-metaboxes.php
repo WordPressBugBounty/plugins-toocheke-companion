@@ -77,7 +77,7 @@ trait Toocheke_Companion_Metaboxes
 
                 /* Get the posted data and sanitize it for use as an HTML class. */
                 if (isset($_POST['comic-title-2nd-language-display'])) {
-                    $data = $_POST['comic-title-2nd-language-display'];
+                    $data = sanitize_text_field(wp_unslash($_POST['comic-title-2nd-language-display']));
                     update_post_meta($post_id, 'comic-title-2nd-language-display', $data);
                 }
             }
@@ -480,7 +480,7 @@ trait Toocheke_Companion_Metaboxes
 
                 /* Get the posted data and sanitize it for use as an HTML class. */
                 if (isset($_POST['comic-hovertext'])) {
-                    $data = $_POST['comic-hovertext'];
+                    $data = sanitize_text_field(wp_unslash($_POST['comic-hovertext']));
                     update_post_meta($post_id, 'comic-hovertext', $data);
                 }
             }
@@ -542,7 +542,7 @@ trait Toocheke_Companion_Metaboxes
 
                 /* Get the posted data and sanitize it for use as an HTML class. */
                 if (isset($_POST['comic-transcript'])) {
-                    $data = $_POST['comic-transcript'];
+                    $data = wp_kses_post(wp_unslash($_POST['comic-transcript']));
                     update_post_meta($post_id, 'transcript', $data);
                 }
             }
@@ -958,8 +958,13 @@ trait Toocheke_Companion_Metaboxes
                 if (! isset($_POST['series_bg_color']) || ! wp_verify_nonce($_POST['toocheke_series_bg_color_meta_box_nonce'], 'toocheke_series_bg_color_meta_box')) {
                     return;
                 }
-                $series_bg_color = (isset($_POST['series_bg_color']) && $_POST['series_bg_color'] != '') ? $_POST['series_bg_color'] : '';
-                update_post_meta($post_id, 'series_bg_color', $series_bg_color);
+
+                if (! current_user_can('edit_post', $post_id)) {
+                    return;
+                }
+
+                $sanitized_color = sanitize_hex_color(wp_unslash($_POST['series_bg_color']));
+                update_post_meta($post_id, 'series_bg_color', $sanitized_color ? $sanitized_color : '');
             }
 
             /**
@@ -1016,7 +1021,7 @@ trait Toocheke_Companion_Metaboxes
                     }
                 }
                 if (isset($_POST['series_sidebar_content'])) {
-                    $data = $_POST['series_sidebar_content'];
+                    $data = wp_kses_post(wp_unslash($_POST['series_sidebar_content']));
                     update_post_meta($post_id, 'series_sidebar_content', $data);
                 }
             }

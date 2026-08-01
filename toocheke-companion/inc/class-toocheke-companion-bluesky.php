@@ -1967,8 +1967,16 @@ trait Toocheke_Companion_Bluesky
      * Bluesky's blob size limit (2MB as of their April 2026 update). We stay
      * a little under it for safety since this is an undocumented margin,
      * not a hard protocol constant.
+     *
+     * NOTE: this is a method, not a class constant, because this file is a
+     * trait (see `trait Toocheke_Companion_Bluesky` above) and traits
+     * cannot have constants until PHP 8.2 — a class constant here fatals
+     * with "Traits cannot have constants" on any older PHP version.
      */
-    const BLUESKY_MAX_IMAGE_BYTES = 1950 * 1024;
+    private function toocheke_bluesky_max_image_bytes()
+    {
+        return 1950 * 1024;
+    }
 
     private function toocheke_bluesky_upload_image($image_url, $token)
     {
@@ -1989,8 +1997,9 @@ trait Toocheke_Companion_Bluesky
             return new WP_Error('toocheke_bluesky_image_empty', 'Downloaded image was empty or unreadable.');
         }
 
-        if ($file_size > self::BLUESKY_MAX_IMAGE_BYTES) {
-            $shrunk = $this->toocheke_bluesky_shrink_image_to_fit($tmp_file, self::BLUESKY_MAX_IMAGE_BYTES);
+        if ($file_size > $this->toocheke_bluesky_max_image_bytes()) {
+            $max_bytes = $this->toocheke_bluesky_max_image_bytes();
+            $shrunk = $this->toocheke_bluesky_shrink_image_to_fit($tmp_file, $max_bytes);
 
             if (is_wp_error($shrunk)) {
                 wp_delete_file( $tmp_file );

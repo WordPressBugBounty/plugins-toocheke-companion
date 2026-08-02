@@ -441,6 +441,7 @@ trait Toocheke_Companion_Settings_Page
                         'chapter_navigation'    => 'Chapter Navigation',
                         'collection_navigation' => 'Collection Navigation',
                         'permalinks'            => 'Permalinks',
+                        'continue_reading'      => 'Continue Reading',
                     ],
                     'bluesky_options' => [
                         'connection'        => 'Connection',
@@ -808,6 +809,12 @@ trait Toocheke_Companion_Settings_Page
                         add_settings_field('toocheke-tipeee-preview', 'Current Tipeee button', [$this, 'toocheke_tipeee_button_preview'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         add_settings_field('toocheke-tipeee-button', 'Replace Tipeee button', [$this, 'toocheke_tipeee_button_upload'], 'toocheke-options-page', 'toocheke_custom_comic_navigation_section');
                         register_setting('toocheke-settings', 'toocheke-tipeee-button', ['sanitize_callback' => 'esc_url_raw']);
+                        }
+
+                        if ('continue_reading' === $active_subsection) {
+                        add_settings_section("toocheke_continue_reading_section", "Continue Reading", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'When enabled, Toocheke tracks which comics, manga volumes and manga chapters each reader has already read.']);
+                        add_settings_field("toocheke-continue-reading-tracking", "Allow readers to track their reading progress?", [$this, 'toocheke_continue_reading_tracking_checkbox'], "toocheke-options-page", "toocheke_continue_reading_section");
+                        register_setting("toocheke-settings", "toocheke-continue-reading-tracking", ['sanitize_callback' => 'absint']);
                         }
                         break;
                     case 'social_options':
@@ -1917,6 +1924,11 @@ trait Toocheke_Companion_Settings_Page
             public function toocheke_comic_panel_swipe_navigation_checkbox()
             {
                 $this->toocheke_render_checkbox_field('toocheke-comic-panel-swipe-navigation', false);
+            }
+
+            public function toocheke_continue_reading_tracking_checkbox()
+            {
+                $this->toocheke_render_checkbox_field('toocheke-continue-reading-tracking', false);
             }
 
             public function toocheke_social_share_facebook_checkbox()

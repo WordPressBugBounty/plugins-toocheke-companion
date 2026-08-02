@@ -738,6 +738,127 @@ trait Toocheke_Companion_Frontend_Display
             }
 
             /**
+             * Resolves the series a given comic or manga chapter belongs to,
+             * for Continue Reading tracking purposes.
+             *
+             * Comics carry their series both as the post's parent AND,
+             * optionally, as a ?sid= query string that the site's own
+             * navigation links already thread through a reading session
+             * (see content-comicnavigation.php) -- the querystring takes
+             * priority since it's the more explicit signal of what the
+             * reader is actually browsing, with post_parent as a fallback
+             * for direct/bookmarked links that never carried ?sid=.
+             *
+             * Manga chapters store their series directly as post meta, no
+             * querystring involved.
+             *
+             * @return int 0 if no series context could be resolved.
+             */
+            private function toocheke_resolve_series_id_for_continue_reading($post_id)
+            {
+                $post_type = get_post_type($post_id);
+
+                if ('comic' === $post_type) {
+                    $series_id = isset($_GET['sid']) ? absint($_GET['sid']) : 0;
+                    if (! $series_id) {
+                        $series_id = wp_get_post_parent_id($post_id);
+                    }
+                    return $series_id;
+                }
+
+                if (in_array($post_type, ['manga_chapter', 'manga_volume'], true)) {
+                    return (int) get_post_meta($post_id, 'series_id', true);
+                }
+
+                return 0;
+            }
+
+            /**
+             * True only when the current request is a manga_volume singular
+             * page AND it's actually being viewed in reader mode (?reader=true)
+             * -- the same check the plugin already uses elsewhere to decide
+             * whether to render the reader template instead of the volume's
+             * normal info page. A volume's info page isn't "reading" it, so
+             * it shouldn't record progress; only the reader view should.
+             */
+            private function toocheke_is_manga_volume_in_reader_mode()
+            {
+                return is_singular('manga_volume') && isset($_GET['reader']) && 'true' === $_GET['reader'];
+            }
+
+            /**
+             * Enqueues the Continue Reading tracker on every front-end page --
+             * it has two jobs: recording this series' reading position (only
+             * possible on a singular comic/manga chapter, or a manga volume
+             * specifically in reader mode, so that part of the localized data
+             * is conditional) and filling in any Continue Reading buttons
+             * present on the page (the shortcode or nav-bar button could
+             * appear anywhere -- a sidebar widget, an archive page, the
+             * homepage -- so the script itself has to be available everywhere
+             * rather than guessing where those are used).
+             */
+            public function toocheke_universal_set_continue_reading()
+            {
+                if (! get_option('toocheke-continue-reading-tracking')) {
+                    return;
+                }
+
+                wp_enqueue_script(
+                    'toocheke-continue-reading',
+                    plugins_url('toocheke-companion' . '/js/continue-reading.js'),
+                    [],
+                    TOOCHEKE_COMPANION_VERSION,
+                    true
+                );
+
+                wp_enqueue_style(
+                    'toocheke-read-indicator',
+                    plugins_url('toocheke-companion' . '/css/toocheke-read-indicator.css'),
+                    [],
+                    TOOCHEKE_COMPANION_VERSION
+                );
+
+                $is_trackable_volume = $this->toocheke_is_manga_volume_in_reader_mode();
+
+                if (! is_singular(['comic', 'manga_chapter']) && ! $is_trackable_volume) {
+                    return;
+                }
+
+                $post_id   = get_the_ID();
+                $post_type = get_post_type($post_id);
+                $series_id = $this->toocheke_resolve_series_id_for_continue_reading($post_id);
+
+                // Note: no early-return when $series_id is 0/falsy here.
+                // Standalone comics with no parent series should still be
+                // recorded as read -- they just have nowhere for a
+                // series-level "continue reading" pointer to point to. The
+                // JS side treats seriesId === 0 as "don't touch the series
+                // store, but do mark this post as read."
+                $url = get_permalink($post_id);
+                if ($is_trackable_volume) {
+                    // Keep the recorded link pointing back into reader mode,
+                    // not the volume's plain info page.
+                    $url = add_query_arg('reader', 'true', $url);
+                } elseif ('comic' === $post_type && $series_id) {
+                    // Comics rely on ?sid= to stay locked to a specific series
+                    // as the reader navigates prev/next/random from here (see
+                    // content-comicnavigation.php) -- carry it forward on the
+                    // saved link too, using the resolved series ID so this
+                    // still works even if the reader arrived without ?sid= in
+                    // the URL and it was inferred from the comic's parent.
+                    $url = add_query_arg('sid', $series_id, $url);
+                }
+
+                wp_localize_script('toocheke-continue-reading', 'toochekeContinueReading', [
+                    'postId'      => (int) $post_id,
+                    'url'         => (string) $url,
+                    'title'       => (string) get_the_title($post_id),
+                    'seriesId'    => (int) $series_id,
+                    'seriesTitle' => $series_id ? (string) get_the_title($series_id) : '',
+                ]);
+            }
+
+            /**
              * AJAX handler that records a single post view. Called by
              * js/view-tracker.js at most once per post per visitor per 7-day
              * window, tracked client-side via localStorage rather than a cookie.

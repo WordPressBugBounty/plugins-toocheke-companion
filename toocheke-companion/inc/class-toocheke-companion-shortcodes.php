@@ -46,6 +46,7 @@ trait Toocheke_Companion_Shortcodes
                 add_shortcode('toocheke-latest-manga-volume', [$this, 'toocheke_latest_manga_volume_shortcode']);
                 add_shortcode('toocheke-all-manga-volumes', [$this, 'toocheke_all_manga_volumes_shortcode']);
                 add_shortcode('toocheke-all-manga-chapters', [$this, 'toocheke_all_manga_chapters_shortcode']);
+                add_shortcode('toocheke-continue-reading', [$this, 'toocheke_continue_reading_shortcode']);
             }
 
             //Display all Series
@@ -646,6 +647,89 @@ public function toocheke_enqueue_manga_filter_script()
                 ob_start();
                 $templates->get_template_part('content', 'latestmangavolume', ['volume_order' => 'DESC']);
                 return ob_get_clean();
+            }
+
+            /**
+             * Auto-detects the series a Continue Reading button should target
+             * when no explicit sid attribute is given -- based on whatever
+             * series/comic/manga series/manga chapter page it's currently
+             * being displayed on. Returns 0 if there's no series context to
+             * detect (e.g. shortcode placed in a sitewide sidebar).
+             */
+            private function toocheke_detect_continue_reading_series_context()
+            {
+                if (is_singular('series') || is_singular('manga_series')) {
+                    return get_the_ID();
+                }
+
+                if (is_singular('comic')) {
+                    $series_id = isset($_GET['sid']) ? absint($_GET['sid']) : 0;
+                    return $series_id ? $series_id : wp_get_post_parent_id(get_the_ID());
+                }
+
+                if (is_singular(['manga_chapter', 'manga_volume'])) {
+                    return (int) get_post_meta(get_the_ID(), 'series_id', true);
+                }
+
+                $query_series_id = get_query_var('series_id');
+                return $query_series_id ? (int) $query_series_id : 0;
+            }
+
+            /**
+             * Continue Reading shortcode.
+             *
+             * Usage: [toocheke-continue-reading]
+             *        [toocheke-continue-reading sid="####"]
+             *        [toocheke-continue-reading class="btn btn-danger btn-xs"]
+             *
+             * Renders a link that, before JS runs (or if it's disabled),
+             * points to the first comic in the target series -- or the comic
+             * archive if no series context applies -- so the button is
+             * always useful. js/continue-reading.js then checks localStorage
+             * on page load and, if this visitor has a saved reading position
+             * for the relevant series, overrides the link and label to
+             * resume there instead.
+             */
+            public function toocheke_continue_reading_shortcode($atts)
+            {
+                if (! get_option('toocheke-continue-reading-tracking')) {
+                    return '';
+                }
+
+                $default_atts = [
+                    'sid'   => null,
+                    'class' => 'btn btn-danger btn-sc-continue-reading',
+                ];
+                $params = shortcode_atts($default_atts, $atts);
+
+                $series_id = ! empty($params['sid'])
+                    ? (int) $params['sid']
+                    : $this->toocheke_detect_continue_reading_series_context();
+
+                $fallback_url = '';
+
+                if ($series_id) {
+                    $first_comic = get_posts([
+                        'post_parent'    => $series_id,
+                        'post_type'      => 'comic',
+                        'post_status'    => 'publish',
+                        'posts_per_page' => 1,
+                        'orderby'        => 'post_date',
+                        'order'          => 'ASC',
+                    ]);
+                    if (! empty($first_comic)) {
+                        $fallback_url = get_permalink($first_comic[0]);
+                    }
+                }
+
+                if (! $fallback_url) {
+                    $archive_link = get_post_type_archive_link('comic');
+                    $fallback_url = $archive_link ? $archive_link : home_url('/');
+                }
+
+                $sid_attr = $series_id ? ' data-sid="' . esc_attr($series_id) . '"' : '';
+
+                return '<a href="' . esc_url($fallback_url) . '" class="' . esc_attr($params['class']) . '" data-toocheke-continue-reading' . $sid_attr . ' data-continue-text="' . esc_attr__('Continue Reading', 'toocheke-companion') . '">' . esc_html__('Start Reading', 'toocheke-companion') . '</a>';
             }
 
 }

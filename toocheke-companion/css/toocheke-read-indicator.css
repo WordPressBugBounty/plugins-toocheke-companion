@@ -1,0 +1,22 @@
+/**
+ * Toocheke Companion - read-indicator styling
+ *
+ * Uses opacity rather than a specific text/background color so this looks
+ * correct regardless of whatever color scheme a site has configured via
+ * the Customizer (both Toocheke and Toocheke Premium let the site owner
+ * set their own light or dark colors, and a fixed color here could end up
+ * with poor contrast against either). Opacity just fades whatever's
+ * already there -- thumbnail, title, metadata -- uniformly, so it reads
+ * correctly no matter the palette.
+ *
+ * Applied via js/continue-reading.js, which adds this class to comic list
+ * items (identified by id="post-{ID}") the visitor has already read,
+ * based on their own localStorage reading history.
+ */
+.toocheke-comic-read {
+    opacity: 0.6;
+}
+
+.toocheke-comic-read:hover {
+    opacity: 0.85;
+}

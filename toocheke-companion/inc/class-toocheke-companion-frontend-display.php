@@ -614,13 +614,10 @@ trait Toocheke_Companion_Frontend_Display
 
             public function toocheke_universal_excerpt_length($length)
             {
-                global $post;
                 $theme = wp_get_theme(); // gets the current theme
                 if ('Toocheke Premium' !== $theme->name && 'Toocheke Premium' !== $theme->parent_theme && 'Toocheke' !== $theme->name && 'Toocheke' !== $theme->parent_theme) {
-                    if ($post->post_type == 'series') {
+                    if ('manga_series' === get_post_type()) {
                         return 15;
-                    } else {
-                        return $length;
                     }
                 }
                 return $length;

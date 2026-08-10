@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.0
-Stable tag: 2.14
+Stable tag: 2.15
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,12 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.15 =
+* FIX: PHP warning in excerpt length filter when no post is in context, which could bloat error_log files over time.
+
+= 2.14 =
+* UPDATE: Overall code optmization
 
 = 2.13 =
 * FIX: Resolved a fatal error ("Traits cannot have constants") that could occur on PHP versions older than 8.2.

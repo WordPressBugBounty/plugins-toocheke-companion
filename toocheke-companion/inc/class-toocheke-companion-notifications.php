@@ -20,6 +20,7 @@ if (! defined('TOOCHEKE_NOTIFICATIONS_DB_VERSION')) {
 // this one constant, matching the pattern TOOCHEKE_BLUESKY_API_BASE
 // uses in class-toocheke-companion-bluesky.php.
 if (! defined('TOOCHEKE_TURNSTILE_VERIFY_URL')) {
+    // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- This is a server-side wp_remote_post() endpoint for verifying a Turnstile token, not a front-end asset (JS/CSS/image) being offloaded to a remote host.
     define('TOOCHEKE_TURNSTILE_VERIFY_URL', 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
 }
 
@@ -510,6 +511,7 @@ trait Toocheke_Companion_Notifications
             . '<li>' . esc_html__('Add your site\'s domain to the widget.', 'toocheke-companion') . '</li>'
             . '<li>' . esc_html__('Copy the Site Key and Secret Key it gives you into the two fields below.', 'toocheke-companion') . '</li>'
             . '</ol>'
+            // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Plain informational link to Cloudflare's product page in admin-only settings copy; nothing is being loaded from a remote host.
             . '<p><a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer">'
             . esc_html__('Cloudflare Turnstile', 'toocheke-companion')
             . '</a></p>';

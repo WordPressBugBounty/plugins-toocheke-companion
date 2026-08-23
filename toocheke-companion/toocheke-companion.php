@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.16
+ * Version:     2.17
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.16');
+    define('TOOCHEKE_COMPANION_VERSION', '2.17');
 }
 
 /**
@@ -263,6 +263,10 @@ class Toocheke_Companion_Comic_Features
         add_action('save_post_series', [$this, 'toocheke_series_sidebar_content_save_postdata']);
         if (is_admin()) { add_action('add_meta_boxes', [$this, 'toocheke_series_comic_order_add_metabox'], 16); }
         add_action('save_post_series', [$this, 'toocheke_series_comic_order_save']);
+        if (is_admin()) { add_action('add_meta_boxes', [$this, 'toocheke_series_before_comic_meta_box'], 17); }
+        add_action('save_post_series', [$this, 'toocheke_series_before_comic_save_postdata']);
+        if (is_admin()) { add_action('add_meta_boxes', [$this, 'toocheke_series_after_comic_meta_box'], 18); }
+        add_action('save_post_series', [$this, 'toocheke_series_after_comic_save_postdata']);
 
         add_filter('pre_get_posts', [$this, 'toocheke_companion_comics_sort']);
 

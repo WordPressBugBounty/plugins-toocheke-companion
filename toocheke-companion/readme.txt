@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.16
+Stable tag: 2.17
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.17 =
+* NEW: Added "Series Before Comic" and "Series After Comic" fields to the Series edit screen, letting you add custom content — ad banners, social links, promos — that displays before or after every comic in that series.
 
 = 2.16 =
 * FIX: Restored Manga slider progressbar indicator which was corrupted in bundled Swiper library.

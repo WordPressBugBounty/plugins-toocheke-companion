@@ -986,6 +986,7 @@ trait Toocheke_Companion_Metaboxes
             //Displaying the meta box
             public function toocheke_series_sidebar_content($post)
             {
+                wp_nonce_field('toocheke_series_sidebar_content_meta_box', 'series_sidebar_content_nonce');
                 echo "<h4 style='color: #2271b1;'>Override the global sidebar here.</h4>";
                 $content = get_post_meta($post->ID, 'series_sidebar_content', true);
 
@@ -1000,29 +1001,136 @@ trait Toocheke_Companion_Metaboxes
             //This function saves the data you put in the meta box
             public function toocheke_series_sidebar_content_save_postdata($post_id)
             {
-
-                if (isset($_POST['series_sidebar_content_nonce']) && isset($_POST['series'])) {
-
-                    //Not save if the user hasn't submitted changes
-                    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-                        return;
-                    }
-
-                    // Verifying whether input is coming from the proper form
-                    if (! wp_verify_nonce($_POST['series_sidebar_content_nonce'])) {
-                        return;
-                    }
-
-                    // Making sure the user has permission
-                    if ('post' == $_POST['series']) {
-                        if (! current_user_can('edit_post', $post_id)) {
-                            return;
-                        }
-                    }
+                if (! isset($_POST['series_sidebar_content_nonce'])) {
+                    return;
                 }
+
+                if (! wp_verify_nonce($_POST['series_sidebar_content_nonce'], 'toocheke_series_sidebar_content_meta_box')) {
+                    return;
+                }
+
+                //Not save if the user hasn't submitted changes
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                    return;
+                }
+
+                if (! current_user_can('edit_post', $post_id)) {
+                    return;
+                }
+
                 if (isset($_POST['series_sidebar_content'])) {
                     $data = wp_kses_post(wp_unslash($_POST['series_sidebar_content']));
                     update_post_meta($post_id, 'series_sidebar_content', $data);
+                }
+            }
+
+            /**
+             * Series Before Comic Metabox
+             */
+            public function toocheke_series_before_comic_meta_box()
+            {
+                add_meta_box(
+                    'series-before-comic',
+                    __('Series Before Comic', 'toocheke-companion'),
+                    [$this, 'toocheke_series_before_comic'],
+                    'series',
+                    "normal",
+                    "high"
+                );
+            }
+
+            //Displaying the meta box
+            public function toocheke_series_before_comic($post)
+            {
+                wp_nonce_field('toocheke_series_before_comic_meta_box', 'toocheke_series_before_comic_nonce');
+                echo "<h4 style='color: #2271b1;'>Content displayed before the comic in this series.</h4>";
+                $content = get_post_meta($post->ID, 'series_before_comic', true);
+
+                //This function adds the WYSIWYG Editor
+                wp_editor(
+                    $content,
+                    'series_before_comic',
+                    ["media_buttons" => true, 'wpautop' => true]
+                );
+            }
+
+            //This function saves the data you put in the meta box
+            public function toocheke_series_before_comic_save_postdata($post_id)
+            {
+                if (! isset($_POST['toocheke_series_before_comic_nonce'])) {
+                    return;
+                }
+
+                if (! wp_verify_nonce($_POST['toocheke_series_before_comic_nonce'], 'toocheke_series_before_comic_meta_box')) {
+                    return;
+                }
+
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                    return;
+                }
+
+                if (! current_user_can('edit_post', $post_id)) {
+                    return;
+                }
+
+                if (isset($_POST['series_before_comic'])) {
+                    $data = wp_kses_post(wp_unslash($_POST['series_before_comic']));
+                    update_post_meta($post_id, 'series_before_comic', $data);
+                }
+            }
+
+            /**
+             * Series After Comic Metabox
+             */
+            public function toocheke_series_after_comic_meta_box()
+            {
+                add_meta_box(
+                    'series-after-comic',
+                    __('Series After Comic', 'toocheke-companion'),
+                    [$this, 'toocheke_series_after_comic'],
+                    'series',
+                    "normal",
+                    "high"
+                );
+            }
+
+            //Displaying the meta box
+            public function toocheke_series_after_comic($post)
+            {
+                wp_nonce_field('toocheke_series_after_comic_meta_box', 'toocheke_series_after_comic_nonce');
+                echo "<h4 style='color: #2271b1;'>Content displayed after the comic in this series.</h4>";
+                $content = get_post_meta($post->ID, 'series_after_comic', true);
+
+                //This function adds the WYSIWYG Editor
+                wp_editor(
+                    $content,
+                    'series_after_comic',
+                    ["media_buttons" => true, 'wpautop' => true]
+                );
+            }
+
+            //This function saves the data you put in the meta box
+            public function toocheke_series_after_comic_save_postdata($post_id)
+            {
+                if (! isset($_POST['toocheke_series_after_comic_nonce'])) {
+                    return;
+                }
+
+                if (! wp_verify_nonce($_POST['toocheke_series_after_comic_nonce'], 'toocheke_series_after_comic_meta_box')) {
+                    return;
+                }
+
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                    return;
+                }
+
+                if (! current_user_can('edit_post', $post_id)) {
+                    return;
+                }
+
+                if (isset($_POST['series_after_comic'])) {
+                    $data = wp_kses_post(wp_unslash($_POST['series_after_comic']));
+                    update_post_meta($post_id, 'series_after_comic', $data);
                 }
             }
 

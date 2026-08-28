@@ -39,13 +39,22 @@ class Toocheke_Image_Optimization
     private bool $avif_supported;
 
     /**
+     * User's preferred output format: 'auto' (AVIF with WebP fallback),
+     * 'avif', or 'webp'. Loaded from saved option, defaults to 'auto'.
+     *
+     * @var string
+     */
+    private string $format_preference;
+
+    /**
      * Constructor — loads options, detects format support, registers hooks.
      */
     public function __construct()
     {
-        $this->avif_quality   = absint(get_option('toocheke-avif-quality', 50));
-        $this->webp_quality   = absint(get_option('toocheke-webp-quality', 75));
-        $this->avif_supported = $this->toocheke_server_supports_avif();
+        $this->avif_quality      = absint(get_option('toocheke-avif-quality', 50));
+        $this->webp_quality      = absint(get_option('toocheke-webp-quality', 75));
+        $this->avif_supported    = $this->toocheke_server_supports_avif();
+        $this->format_preference = get_option('toocheke-image-format-preference', 'auto');
 
         add_filter('wp_handle_upload', [$this, 'toocheke_process_uploaded_image'], 10, 2);
         add_filter('wp_generate_attachment_metadata', [$this, 'toocheke_fix_attachment_metadata'], 10, 2);
@@ -241,8 +250,9 @@ class Toocheke_Image_Optimization
             // Proportional resize if wider than MAX_WIDTH.
             $this->toocheke_maybe_resize_imagick($imagick);
 
-            // Attempt AVIF first if the server supports it.
-            if ($this->avif_supported) {
+            // Attempt AVIF first if the server supports it and the user
+            // hasn't explicitly forced WebP.
+            if ($this->avif_supported && $this->format_preference !== 'webp') {
                 $output_path = $this->toocheke_swap_extension($source_path, 'avif');
                 $imagick->setImageFormat('avif');
                 $imagick->setImageCompressionQuality($this->avif_quality);
@@ -300,8 +310,9 @@ class Toocheke_Image_Optimization
         // Proportional resize if wider than MAX_WIDTH.
         $image = $this->toocheke_maybe_resize_gd($image);
 
-        // Attempt AVIF first if the server supports it.
-        if ($this->avif_supported && function_exists('imageavif')) {
+        // Attempt AVIF first if the server supports it and the user
+        // hasn't explicitly forced WebP.
+        if ($this->avif_supported && $this->format_preference !== 'webp' && function_exists('imageavif')) {
             $output_path = $this->toocheke_swap_extension($source_path, 'avif');
 
             if (imageavif($image, $output_path, $this->avif_quality)

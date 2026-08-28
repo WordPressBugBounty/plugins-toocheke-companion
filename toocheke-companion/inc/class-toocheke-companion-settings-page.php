@@ -971,6 +971,18 @@ trait Toocheke_Companion_Settings_Page
                             'sanitize_callback' => [$this, 'toocheke_sanitize_image_quality'],
                         ]);
 
+                        add_settings_field(
+                            "toocheke-image-format-preference",
+                            "Preferred Image Format",
+                            [$this, 'toocheke_image_format_preference_radio'],
+                            "toocheke-options-page",
+                            "toocheke_image_optimization_section"
+                        );
+                        register_setting("toocheke-settings", "toocheke-image-format-preference", [
+                            'sanitize_callback' => [$this, 'toocheke_sanitize_image_format_preference'],
+                            'default'           => 'auto',
+                        ]);
+
                         //Option for determining whether to protect images
                         
                         add_settings_section("toocheke_image_protect_section", "Protection of Comic Images", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'Helps prevent other websites from displaying your comic images by blocking direct access (hotlink protection).']);
@@ -1876,6 +1888,69 @@ trait Toocheke_Companion_Settings_Page
                 }
 
                 return $int;
+            }
+
+            /**
+             * Renders the "Preferred Image Format" radio field.
+             * If the server doesn't support AVIF, the AVIF option is disabled
+             * with an explanatory note rather than hidden, so the setting
+             * still reflects the user's choice even if it can't take effect
+             * on this server.
+             */
+            public function toocheke_image_format_preference_radio()
+            {
+                $current = get_option('toocheke-image-format-preference', 'auto');
+
+                // Server capability detection mirrors
+                // Toocheke_Image_Optimization::toocheke_server_supports_avif();
+                // duplicated here so the settings screen doesn't need that
+                // class instantiated just to render this field.
+                $avif_supported = false;
+                if (extension_loaded('imagick')) {
+                    try {
+                        $avif_supported = ! empty(\Imagick::queryFormats('AVIF'));
+                    } catch (\ImagickException $e) {
+                        $avif_supported = false;
+                    }
+                } elseif (extension_loaded('gd')) {
+                    $avif_supported = function_exists('imageavif');
+                }
+                ?>
+                <label>
+                    <input type="radio" name="toocheke-image-format-preference" value="auto"
+                        <?php checked('auto', $current, true); ?>> Auto (AVIF when supported, WebP otherwise)
+                </label><br>
+                <label>
+                    <input type="radio" name="toocheke-image-format-preference" value="avif"
+                        <?php checked('avif', $current, true); ?> <?php disabled(! $avif_supported); ?>> AVIF only
+                    <?php if (! $avif_supported) : ?>
+                        <span class="description"><?php esc_html_e('(not supported on this server — will fall back to WebP)', 'toocheke-companion'); ?></span>
+                    <?php endif; ?>
+                </label><br>
+                <label>
+                    <input type="radio" name="toocheke-image-format-preference" value="webp"
+                        <?php checked('webp', $current, true); ?>> WebP only
+                </label>
+                <?php
+            }
+
+            /**
+             * Sanitize the image format preference: only 'auto', 'avif', or
+             * 'webp' are accepted; anything else resets to 'auto'.
+             *
+             * @param  mixed $value Raw input from the settings form.
+             * @return string
+             */
+            public function toocheke_sanitize_image_format_preference($value)
+            {
+                $allowed = ['auto', 'avif', 'webp'];
+                $value   = sanitize_text_field($value);
+
+                if (! in_array($value, $allowed, true)) {
+                    return 'auto';
+                }
+
+                return $value;
             }
 
             /**

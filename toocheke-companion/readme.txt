@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.17
+Stable tag: 2.18
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.18 =
+* NEW: Added a "Preferred Image Format" option under image optimization settings, letting you force AVIF-only or WebP-only output instead of the automatic AVIF-with-WebP-fallback behavior.
 
 = 2.17 =
 * NEW: Added "Series Before Comic" and "Series After Comic" fields to the Series edit screen, letting you add custom content — ad banners, social links, promos — that displays before or after every comic in that series.

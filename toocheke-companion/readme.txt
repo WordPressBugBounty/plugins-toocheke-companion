@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.18
+Stable tag: 2.19
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,11 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.19 =
+* UPDATE: Added importing of comments for the Webcomic plugin
+* NEW: Manga reader now uses the image's alternative text (if set in the Media Library) for the alt attribute on each page, falling back to "Page X of [Chapter/Volume Title]" when none is set — improving screen reader support.
+* UPDATE: Enabled Swiper's accessibility module in the manga reader, adding page-position announcements and proper ARIA labeling for screen reader navigation.
 
 = 2.18 =
 * NEW: Added a "Preferred Image Format" option under image optimization settings, letting you force AVIF-only or WebP-only output instead of the automatic AVIF-with-WebP-fallback behavior.

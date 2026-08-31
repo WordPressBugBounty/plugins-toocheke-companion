@@ -77,6 +77,10 @@ jQuery(document).ready(function ($) {
             pagination: { type: 'progressbar' },
             simulateTouch: true,
             allowTouchMove: true,
+            a11y: {
+                enabled: true,
+                slideLabelMessage: 'Page {{index}} of {{slidesLength}}',
+            },
         });
 
         swiperEl.initialize();

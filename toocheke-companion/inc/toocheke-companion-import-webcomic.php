@@ -133,6 +133,77 @@ if ( ! defined( 'ABSPATH' ) ) {
 
     }
 
+    /**
+     * Imports all comments (approved and pending) from an original
+     * Webcomic-plugin post onto its newly created Toocheke comic post.
+     *
+     * Runs in two passes because wp_insert_comment() assigns a new
+     * comment ID, so any threaded replies need their comment_parent
+     * remapped only after every comment in the thread has been
+     * inserted and has a known new ID.
+     *
+     * @param  int $old_post_id Original Webcomic post ID.
+     * @param  int $new_post_id Newly created 'comic' post ID.
+     * @return void
+     */
+    function toocheke_import_comments($old_post_id, $new_post_id)
+    {
+        $old_comments = get_comments([
+            'post_id' => $old_post_id,
+            'status'  => 'all', // Approved + pending; excludes spam/trash.
+            'order'   => 'ASC',
+        ]);
+
+        if (empty($old_comments)) {
+            return;
+        }
+
+        $id_map = [];
+
+        // Pass 1: insert every comment as top-level for now, recording the
+        // old comment ID -> new comment ID mapping as we go.
+        foreach ($old_comments as $old_comment) {
+            $commentdata = [
+                'comment_post_ID'      => $new_post_id,
+                'comment_author'       => $old_comment->comment_author,
+                'comment_author_email' => $old_comment->comment_author_email,
+                'comment_author_url'   => $old_comment->comment_author_url,
+                'comment_author_IP'    => $old_comment->comment_author_IP,
+                'comment_date'         => $old_comment->comment_date,
+                'comment_date_gmt'     => $old_comment->comment_date_gmt,
+                'comment_content'      => $old_comment->comment_content,
+                'comment_approved'     => $old_comment->comment_approved,
+                'comment_agent'        => $old_comment->comment_agent,
+                'comment_type'         => $old_comment->comment_type,
+                'comment_parent'       => 0, // Resolved in pass two, if needed.
+                'user_id'              => $old_comment->user_id,
+            ];
+
+            $new_comment_id = wp_insert_comment($commentdata);
+
+            if ($new_comment_id) {
+                $id_map[$old_comment->comment_ID] = $new_comment_id;
+            }
+        }
+
+        // Pass 2: now that every comment has a new ID, remap comment_parent
+        // for replies so threading is preserved.
+        foreach ($old_comments as $old_comment) {
+            if ((int) $old_comment->comment_parent === 0) {
+                continue;
+            }
+
+            if (! isset($id_map[$old_comment->comment_ID], $id_map[$old_comment->comment_parent])) {
+                continue;
+            }
+
+            wp_update_comment([
+                'comment_ID'     => $id_map[$old_comment->comment_ID],
+                'comment_parent' => $id_map[$old_comment->comment_parent],
+            ]);
+        }
+    }
+
     function toocheke_import_comic_posts($webcomic_data, $no_of_series = 1)
     {
         global $wpdb;
@@ -241,6 +312,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                         add_post_meta($new_post_id, $key, maybe_unserialize($value));
                     }
                 }
+
+                // Copy comments
+                toocheke_import_comments($comic_post->ID, $new_post_id);
 
                 // Assign storyline terms to 'chapters'
                 $storyline_terms = wp_get_object_terms($comic_post->ID, $storyline_tax, ['fields' => 'slugs']);

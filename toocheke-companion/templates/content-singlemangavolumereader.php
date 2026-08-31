@@ -97,12 +97,21 @@ if ( ! defined( 'ABSPATH' ) ) {
         keyboard="true"
         events-prefix="swiper-">
 
-                    <?php foreach ($all_images as $img_id): 
-                        $img_url = wp_get_attachment_image_url($img_id, 'full'); ?>
+                    <?php $page_number = 0; ?>
+                    <?php foreach ($all_images as $img_id):
+                        $page_number++;
+                        $img_url = wp_get_attachment_image_url($img_id, 'full');
+                        $raw_alt = trim((string) get_post_meta($img_id, '_wp_attachment_image_alt', true));
+                        $img_alt = $raw_alt !== '' ? $raw_alt : sprintf(
+                            /* translators: 1: page number, 2: volume title */
+                            __('Page %1$d of %2$s', 'toocheke-companion'),
+                            $page_number,
+                            get_the_title()
+                        ); ?>
                         <?php if ($img_url): ?>
                             <swiper-slide>
                                  <div class="swiper-zoom-container">                                
-                                <img src="<?php echo esc_url($img_url); ?>" alt="" />
+                                <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr($img_alt); ?>" />
                         </div>
                                 </swiper-slide>
                         <?php endif; ?>

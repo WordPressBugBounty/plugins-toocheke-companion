@@ -11,6 +11,7 @@ $templates = new Toocheke_Companion_Template_Loader;
 $companion = new Toocheke_Companion_Comic_Features();
 $latest_collection_id   = null !== get_query_var('latest_collection_id') ? (int) get_query_var('latest_collection_id') : 0;
 $below_comic = null !== get_query_var('below_comic') ? (int) get_query_var('below_comic') : 0;
+$display_minimal_comic_nav_above_comic = null !== get_query_var('display_minimal') ? (int) get_query_var('display_minimal') : 0;
 $display_default = get_option('toocheke-comics-navigation') && 1 == get_option('toocheke-comics-navigation');
 $display_random_button = get_option('toocheke-random-navigation') && 1 == get_option('toocheke-random-navigation');
 $display_likes = get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes');
@@ -76,6 +77,7 @@ if ($always_show || 'ASC' === $comic_order) {
 
 }
 ?>
+ <?php if(!$display_minimal_comic_nav_above_comic ):?>
     <div id="chapter-navigation">
         <?php
         global $post;
@@ -141,6 +143,7 @@ endif;
          
 
 	                  </div>
+                        <?php endif; ?>
 </div>
 <?php
 if (($allow_home_comments === '1' && is_home() && $below_comic) || ($allow_home_comments === '1' && is_singular('series'))) {
@@ -154,6 +157,7 @@ global $withcomments;
     comments_template();
     ?>
     </div>
+  
 </div>
 <?php
 }

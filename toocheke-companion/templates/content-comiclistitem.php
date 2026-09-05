@@ -64,8 +64,17 @@ if ($post_thumbnail_id) {
 </div>
                                     <div class="comic-info">
                                     <?php
-isset($show_comic_number) ? $comic_number = $show_comic_number ? "#" . wp_kses_data(get_post_meta($post->ID, 'incr_number', true)) . ". " : "" : "";
-
+$comic_number = "";
+if (isset($show_comic_number) && $show_comic_number) {
+    // If a series is the current browsing context ($series_id, from the
+    // 'series_id' query var), show this comic's position WITHIN that
+    // series ('incr_number_series'). Otherwise show its GLOBAL position
+    // across every published comic ('incr_number'). Both fields are kept
+    // in sync by toocheke_update_comic_post_numbers().
+    $comic_number = $series_id
+        ? "#" . wp_kses_data(get_post_meta($post->ID, 'incr_number_series', true)) . ". "
+        : "#" . wp_kses_data(get_post_meta($post->ID, 'incr_number', true)) . ". ";
+}
 ?>
                                    <div class="comic-title-wrapper">
                                    <p class="comic-title"><span class="comic-number"><?php echo wp_kses_data($comic_number) ?></span> <?php echo wp_kses_data(get_the_title()); ?></p>

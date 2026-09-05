@@ -8,6 +8,18 @@ jQuery(document).ready(function ($) {
 		$('#toocheke-comics-navigation').closest('tr').siblings().hide();
 	}
 
+	/* Comic Navigation — "minimal above-comic nav" row depends on the
+	   "display nav above comic" checkbox. Unlike the block above, this
+	   is a single sibling row, not "everything else on the page", so it
+	   hides on its own rather than via .siblings(). */
+	if (!$('#toocheke-comic-nav-above-comic').is(":checked")) {
+		$('#toocheke-comic-nav-above-comic-minimal').closest('tr').hide();
+	}
+
+	$('#toocheke-comic-nav-above-comic').click(function () {
+		$('#toocheke-comic-nav-above-comic-minimal').closest('tr').animate({ height: 'toggle', opacity: 'toggle' }, 'slow');
+	});
+
 	$('.upload-custom-button').on('click', function (e) {
 		e.preventDefault();
 		hiddenField = $(this).data('hidden');

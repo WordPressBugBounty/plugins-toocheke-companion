@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.19
+ * Version:     2.20
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.19');
+    define('TOOCHEKE_COMPANION_VERSION', '2.20');
 }
 
 /**
@@ -170,9 +170,18 @@ class Toocheke_Companion_Comic_Features
         add_action('toocheke_get_sharing_buttons', [$this, 'toocheke_add_sharing_icons']);
         add_action('toocheke_get_support_buttons', [$this, 'toocheke_add_support_icons']);
         add_action('after_setup_theme', [$this, 'toocheke_default_image_settings']);
-        add_action('publish_post', [$this, 'toocheke_update_comic_post_numbers'], 11);
-        add_action('deleted_post', [$this, 'toocheke_update_comic_post_numbers']);
-        add_action('edit_post', [$this, 'toocheke_update_comic_post_numbers']);
+        /*
+         * Comic numbering ('incr_number' / 'incr_number_series'):
+         * O(1)-per-event maintenance instead of a full-table recalculation.
+         * See toocheke_comic_numbering_on_status_transition(),
+         * toocheke_comic_numbering_on_post_updated(), and
+         * toocheke_comic_numbering_on_before_delete() in
+         * class-toocheke-companion-comic-sort-filter.php for the full
+         * design notes.
+         */
+        add_action('transition_post_status', [$this, 'toocheke_comic_numbering_on_status_transition'], 10, 3);
+        add_action('post_updated', [$this, 'toocheke_comic_numbering_on_post_updated'], 10, 3);
+        add_action('before_delete_post', [$this, 'toocheke_comic_numbering_on_before_delete']);
         add_action('save_post', [$this, 'toocheke_desktop_comic_editor_save_postdata']);
         if (is_admin()) { add_action('admin_init', [$this, 'toocheke_desktop_comic_editor_meta_box']); }
         add_action('save_post', [$this, 'toocheke_comic_blog_post_editor_save_postdata']);

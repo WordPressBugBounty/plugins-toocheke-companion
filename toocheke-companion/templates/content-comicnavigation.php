@@ -20,6 +20,7 @@ $display_random_button = get_option('toocheke-random-navigation') && 1 == get_op
 $display_likes = get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes');
 $display_no_views = get_option('toocheke-comic-no-of-views') && 1 == get_option('toocheke-comic-no-of-views');
 $display_no_of_comments = get_option('toocheke-comic-no-of-comments') && 1 == get_option('toocheke-comic-no-of-comments');
+$display_minimal_comic_nav_above_comic = null !== get_query_var('display_minimal') ? (int) get_query_var('display_minimal') : 0;
 $allowed_tags = array(
     'a' => array(
         'class' => array(),
@@ -51,6 +52,7 @@ $button = $display_default ? '<i class="fas fa-lg fa-random"></i>' : '<img class
         title="Random Comic"><?php echo wp_kses($button, $allowed_tags) ?></a>
     <?php echo wp_kses(toocheke_universal_adjacent_comic_link(get_the_ID(), $collection_id, 'next', $display_default, $series_id), $allowed_tags); ?>
     <?php echo wp_kses(toocheke_universal_get_comic_link('DESC', 'forward', $collection_id, $display_default, 'latest', $series_id), $allowed_tags); ?>
+    <?php if(!$display_minimal_comic_nav_above_comic ):?>
     <div id="chapter-navigation">
         <?php
 $templates->get_template_part('content', 'chaptersdropdown');
@@ -117,5 +119,5 @@ if ($display_likes) {
 ?>
            
                   </div>
-
+<?php endif;?>
 </div>

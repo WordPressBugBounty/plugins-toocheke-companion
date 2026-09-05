@@ -72,7 +72,7 @@ if ($chapters) {
         'posts_per_page' => 1,
         'post_type' => 'comic',
         'orderby' => 'post_date',
-        'order' => $comic_order,
+        'order' => $chapter_comic_order,
         "tax_query" => array(
             array(
                 'taxonomy' => "chapters",

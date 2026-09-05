@@ -349,6 +349,30 @@ trait Toocheke_Companion_Settings_Page
             endif;
             ?>
 
+            <?php
+            // Anti-flash for the Comic Navigation subtab: js/media.js shows/hides
+            // the "minimal navigation above comic" row (#toocheke-comic-nav-above-comic-minimal)
+            // based on whether "Display comic navigation buttons above the comic"
+            // (#toocheke-comic-nav-above-comic) is checked, via a click handler and a
+            // document-ready check -- same class of flash as the Buttons subtab above.
+            // This applies the CURRENTLY SAVED value server-side immediately, so
+            // there's nothing to flash in the first place; media.js still fully
+            // handles the live, before-saving toggle once the page has loaded.
+            if (
+                'navigation_options' === $active_tab
+                && 'comic_navigation' === $active_subsection
+                && ! get_option('toocheke-comic-nav-above-comic')
+            ) :
+                ?>
+                <style>
+                    #toocheke-options-wrap .form-table tr:has(#toocheke-comic-nav-above-comic-minimal) {
+                        display: none;
+                    }
+                </style>
+                <?php
+            endif;
+            ?>
+
             <form method="post" action="<?php echo esc_url(add_query_arg(array_filter(['tab' => $active_tab, 'subsection' => $active_subsection]), admin_url('options.php'))); ?>">
                 <?php
                 // Two groups get displayed here:
@@ -672,6 +696,14 @@ trait Toocheke_Companion_Settings_Page
                         //Option for determining whether to display comic navigation above comic
                         add_settings_field("toocheke-comic-nav-above-comic", "Do you want to display comic navigation buttons above the comic(only applies to traditional page layouts)", [$this, 'toocheke_comic_nav_above_comic_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
                         register_setting("toocheke-settings", "toocheke-comic-nav-above-comic", ['sanitize_callback' => 'absint']);
+
+                        //Option for determining whether the above-comic navigation shows only the minimal arrow buttons
+                        //instead of replicating the full nav (chapter/social/analytics) that appears below the comic.
+                        //Always registered/rendered here; its row's visibility is driven by "toocheke-comic-nav-above-comic"
+                        //(see the anti-flash <style> in toocheke_display_options_page() and the click handler in js/media.js).
+                        //Defaults to unchecked (off).
+                        add_settings_field("toocheke-comic-nav-above-comic-minimal", "Do you want the navigation buttons above the comic to be minimal(arrows only, no chapter/social/like buttons)?", [$this, 'toocheke_comic_nav_above_comic_minimal_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
+                        register_setting("toocheke-settings", "toocheke-comic-nav-above-comic-minimal", ['sanitize_callback' => 'absint']);
 
                         //Option for determining whether to display chapter navigation
                         add_settings_field("toocheke-chapter-navigation-buttons", "Do you want to display chapter navigation buttons?", [$this, 'toocheke_chapter_navigation_buttons_checkbox'], "toocheke-options-page", "toocheke_comic_navigation_options_section");
@@ -2124,6 +2156,11 @@ trait Toocheke_Companion_Settings_Page
             public function toocheke_comic_nav_above_comic_checkbox()
             {
                 $this->toocheke_render_checkbox_field('toocheke-comic-nav-above-comic', true);
+            }
+
+            public function toocheke_comic_nav_above_comic_minimal_checkbox()
+            {
+                $this->toocheke_render_checkbox_field('toocheke-comic-nav-above-comic-minimal', true);
             }
 
             public function toocheke_chapter_navigation_buttons_checkbox()

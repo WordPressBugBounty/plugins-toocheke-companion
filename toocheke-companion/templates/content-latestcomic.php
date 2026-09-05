@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $templates = new Toocheke_Companion_Template_Loader;
 $display_comic_nav_above_comic = get_option('toocheke-comic-nav-above-comic') && 1 == get_option('toocheke-comic-nav-above-comic');
+$display_minimal_comic_nav_above_comic = get_option('toocheke-comic-nav-above-comic-minimal') && 1 == get_option('toocheke-comic-nav-above-comic-minimal');
 $latest_collection_id = 0;
 $series_id = get_query_var('series_id');
 $comic_order = 'DESC';
@@ -48,6 +49,7 @@ $comic_post = $post;
         }
         set_query_var('below_comic', 0);
         set_query_var('comic_order', $comic_order);
+        set_query_var('display_minimal', $display_minimal_comic_nav_above_comic );
 
         $templates->get_template_part('content', 'traditionalcomicnavigation');
     }
@@ -85,6 +87,7 @@ $comic_post = $post;
     }
     set_query_var('below_comic', 1);
     set_query_var('comic_order', $comic_order);
+     set_query_var('display_minimal', 0 );
     $templates->get_template_part('content', 'traditionalcomicnavigation');
     $post = $comic_post;
     ?>

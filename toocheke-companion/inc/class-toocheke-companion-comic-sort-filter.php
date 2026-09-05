@@ -81,34 +81,282 @@ trait Toocheke_Companion_Comic_Sort_Filter
             }
 
             /**
-             * Post Number.
+             * Full recalculation of comic numbering -- NOT hooked to save/delete
+             * anymore (see toocheke_comic_numbering_on_status_transition(),
+             * toocheke_comic_numbering_on_post_updated(), and
+             * toocheke_comic_numbering_on_before_delete() below for the
+             * incremental, O(1)-per-event replacement that is). This full-table
+             * version is kept as a manual/one-off utility -- e.g. to run once
+             * after a bulk import, or if numbering ever needs a from-scratch
+             * rebuild -- since it recomputes every published comic in one pass
+             * rather than a single comic's position.
              */
             public function toocheke_update_comic_post_numbers()
             {
                 /* numbering the published posts, starting with 1 for oldest;
-        / creates and updates custom field 'incr_number';
+        / creates and updates custom field 'incr_number' -- the comic's GLOBAL
+        / position across every published comic, regardless of series (this is
+        / the original, unscoped behavior);
+        / also creates and updates custom field 'incr_number_series' -- the
+        / comic's position within its own series only, where a comic's series
+        / is its post_parent (the same post_parent-as-series convention used
+        / elsewhere in this plugin -- see e.g. class-toocheke-companion-bluesky.php,
+        / -notifications.php, -rss-feeds.php). Comics with no parent
+        / (post_parent = 0, i.e. not in a series) are counted together as
+        / their own "no series" group for incr_number_series.
+        / Both counters are derived from the same post_date-ASC pass, so a
+        / series' subsequence of that pass is still oldest-first -- no
+        / separate query/ordering needed for the series counter.
         / to show in post (within the loop) use <?php echo get_post_meta($post->ID,'incr_number',true); ?>
-        / alchymyth 2010 */
+        / alchymyth 2010; incr_number_series added later */
                 global $wpdb;
-                //$querystr = "SELECT $wpdb->posts.* FROM $wpdb->posts
-                //WHERE $wpdb->posts.post_status = 'publish'
-                //AND $wpdb->posts.post_type = 'comic'
-                //ORDER BY $wpdb->posts.post_date ASC";
-                //$pageposts = $wpdb->get_results( $wpdb->get_results( $wpdb->prepare( $querystr, OBJECT))); // WPCS: unprepared SQL OK
-                //$pageposts = $wpdb->get_results($querystr, OBJECT); // WPCS: unprepared SQL OK
 
                 $pageposts = $wpdb->get_results("SELECT $wpdb->posts.* FROM $wpdb->posts
 WHERE $wpdb->posts.post_status = 'publish'
 AND $wpdb->posts.post_type = 'comic'
 ORDER BY $wpdb->posts.post_date ASC"); // WPCS: unprepared SQL OK
+
                 $counts = 0;
+                $series_counts = []; // keyed by post_parent (series ID); 0 = no series
+
                 if ($pageposts):
                     foreach ($pageposts as $post):
                         $counts++;
-                        add_post_meta($post->ID, 'incr_number', $counts, true);
                         update_post_meta($post->ID, 'incr_number', $counts);
+
+                        $series_id = (int) $post->post_parent;
+                        if (! isset($series_counts[$series_id])) {
+                            $series_counts[$series_id] = 0;
+                        }
+                        $series_counts[$series_id]++;
+                        update_post_meta($post->ID, 'incr_number_series', $series_counts[$series_id]);
                     endforeach;
                 endif;
+            }
+
+            /**
+             * Incremental comic numbering.
+             *
+             * Maintains 'incr_number' (a comic's GLOBAL position across every
+             * published comic) and 'incr_number_series' (its position within
+             * its own series, i.e. its post_parent -- see the post_parent-as-
+             * series convention used elsewhere in this plugin) WITHOUT
+             * recalculating the whole comic table on every save. Each hook
+             * below does a small, fixed number of targeted queries, so the
+             * cost of a single publish/edit/delete stays flat (O(1)) whether
+             * the site has dozens of comics or tens of thousands.
+             *
+             * Three primitives, composed by the hooks below:
+             *   - toocheke_comic_numbering_insert()  -- a comic ENTERING the
+             *     numbered set (new publish, restored from trash, a draft
+             *     finally published). Counts how many published comics sort
+             *     before it (globally, and within its series), shifts
+             *     everyone from that position onward up by 1, then writes
+             *     its own two values directly.
+             *   - toocheke_comic_numbering_remove()  -- a comic LEAVING the
+             *     numbered set (unpublished, trashed, force-deleted). Reads
+             *     its own current numbers (still accurate at this point --
+             *     nothing has touched them yet), shifts everyone after it
+             *     down by 1, then clears its own two values.
+             *   - A "move" (post_date and/or post_parent changed while
+             *     staying published) is simply remove() using the OLD
+             *     date/parent, followed by insert() using the NEW ones --
+             *     no separate "move" SQL needed. remove() runs first and
+             *     excludes the moving post from its own shift, so insert()'s
+             *     position count (run against the now-already-closed-up
+             *     table) is accurate, and its shift-up correctly opens a gap
+             *     at the new position.
+             *
+             * Hooked from toocheke-companion.php:
+             *   - transition_post_status : detects entering/leaving 'publish'
+             *   - post_updated           : detects post_date/post_parent
+             *                              changes for a comic that was, and
+             *                              still is, published
+             *   - before_delete_post     : safety net for a force-delete of a
+             *                              still-published comic that skips
+             *                              trash entirely (deleted_post fires
+             *                              too late -- the post's meta is
+             *                              already gone by then)
+             */
+
+            /**
+             * transition_post_status callback.
+             */
+            public function toocheke_comic_numbering_on_status_transition($new_status, $old_status, $post)
+            {
+                if (! $post || 'comic' !== $post->post_type || $new_status === $old_status) {
+                    return; // wrong post type, or not an actual transition
+                }
+
+                $was_published = ('publish' === $old_status);
+                $is_published  = ('publish' === $new_status);
+
+                if (! $was_published && $is_published) {
+                    // Entering the set: new publish, restored from trash, or a draft finally published.
+                    $this->toocheke_comic_numbering_insert($post->ID, $post->post_date, (int) $post->post_parent);
+                } elseif ($was_published && ! $is_published) {
+                    // Leaving the set: unpublished, trashed, etc.
+                    $this->toocheke_comic_numbering_remove($post->ID, (int) $post->post_parent);
+                }
+                // publish -> publish isn't a real transition (caught by the
+                // $new_status === $old_status check above); a comic that STAYS
+                // published but moves position is handled by post_updated instead.
+            }
+
+            /**
+             * post_updated callback. Only relevant when the comic was
+             * published both before and after the save (entering/leaving
+             * publish is handled by the status-transition hook above) and its
+             * post_date or post_parent actually changed underneath it.
+             */
+            public function toocheke_comic_numbering_on_post_updated($post_id, $post_after, $post_before)
+            {
+                if ('comic' !== $post_after->post_type) {
+                    return;
+                }
+                if ('publish' !== $post_after->post_status || 'publish' !== $post_before->post_status) {
+                    return; // entering/leaving 'publish' is handled by transition_post_status
+                }
+
+                $date_changed   = ($post_after->post_date !== $post_before->post_date);
+                $parent_changed = ((int) $post_after->post_parent !== (int) $post_before->post_parent);
+
+                if (! $date_changed && ! $parent_changed) {
+                    return; // nothing position-relevant changed (e.g. just editing dialogue) -- zero extra queries
+                }
+
+                // remove() using the OLD parent (needed for the series shift
+                // regardless of whether it's the date or the parent that
+                // changed), then insert() using the NEW date/parent.
+                $this->toocheke_comic_numbering_remove($post_id, (int) $post_before->post_parent);
+                $this->toocheke_comic_numbering_insert($post_id, $post_after->post_date, (int) $post_after->post_parent);
+            }
+
+            /**
+             * before_delete_post callback. Safety net for a force-delete of a
+             * still-published comic that skips trash entirely -- the far more
+             * common trash-then-delete path is already handled by the
+             * status-transition hook when the comic moves to 'trash', so by
+             * the time an actual delete happens the post is usually no
+             * longer 'publish' and this is a no-op.
+             */
+            public function toocheke_comic_numbering_on_before_delete($post_id)
+            {
+                $post = get_post($post_id);
+                if (! $post || 'comic' !== $post->post_type || 'publish' !== $post->post_status) {
+                    return; // wasn't published/numbered in the first place -- nothing to shift
+                }
+
+                $this->toocheke_comic_numbering_remove($post_id, (int) $post->post_parent);
+            }
+
+            /**
+             * Comic ENTERING the numbered set. Computes its global position
+             * (and its position within its own series), shifts everyone from
+             * that position onward up by 1, then writes its own two values.
+             */
+            public function toocheke_comic_numbering_insert($post_id, $post_date, $parent_id)
+            {
+                global $wpdb;
+
+                $global_number = 1 + (int) $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$wpdb->posts}
+                     WHERE post_type = 'comic' AND post_status = 'publish'
+                       AND (post_date < %s OR (post_date = %s AND ID < %d))",
+                    $post_date,
+                    $post_date,
+                    $post_id
+                ));
+
+                $series_number = 1 + (int) $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$wpdb->posts}
+                     WHERE post_type = 'comic' AND post_status = 'publish' AND post_parent = %d
+                       AND (post_date < %s OR (post_date = %s AND ID < %d))",
+                    $parent_id,
+                    $post_date,
+                    $post_date,
+                    $post_id
+                ));
+
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$wpdb->postmeta} pm
+                     INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+                     SET pm.meta_value = CAST(pm.meta_value AS UNSIGNED) + 1
+                     WHERE pm.meta_key = 'incr_number'
+                       AND p.post_type = 'comic' AND p.post_status = 'publish'
+                       AND CAST(pm.meta_value AS UNSIGNED) >= %d
+                       AND pm.post_id != %d",
+                    $global_number,
+                    $post_id
+                ));
+
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$wpdb->postmeta} pm
+                     INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+                     SET pm.meta_value = CAST(pm.meta_value AS UNSIGNED) + 1
+                     WHERE pm.meta_key = 'incr_number_series'
+                       AND p.post_type = 'comic' AND p.post_status = 'publish' AND p.post_parent = %d
+                       AND CAST(pm.meta_value AS UNSIGNED) >= %d
+                       AND pm.post_id != %d",
+                    $parent_id,
+                    $series_number,
+                    $post_id
+                ));
+
+                update_post_meta($post_id, 'incr_number', $global_number);
+                update_post_meta($post_id, 'incr_number_series', $series_number);
+            }
+
+            /**
+             * Comic LEAVING the numbered set. Reads its own current numbers
+             * (still accurate -- nothing has touched them yet), shifts
+             * everyone after it down by 1, then clears its own two values so
+             * nothing stale lingers if it's ever displayed by mistake.
+             *
+             * $parent_id must be the comic's series AT THE TIME its current
+             * 'incr_number_series' was computed -- the caller passes the OLD
+             * parent explicitly (rather than this re-reading the post's
+             * current post_parent) since by the time this runs during a
+             * "move" the post's own row may already reflect a NEW parent.
+             */
+            public function toocheke_comic_numbering_remove($post_id, $parent_id)
+            {
+                global $wpdb;
+
+                $old_global_number = (int) get_post_meta($post_id, 'incr_number', true);
+                $old_series_number = (int) get_post_meta($post_id, 'incr_number_series', true);
+
+                if ($old_global_number > 0) {
+                    $wpdb->query($wpdb->prepare(
+                        "UPDATE {$wpdb->postmeta} pm
+                         INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+                         SET pm.meta_value = CAST(pm.meta_value AS UNSIGNED) - 1
+                         WHERE pm.meta_key = 'incr_number'
+                           AND p.post_type = 'comic' AND p.post_status = 'publish'
+                           AND CAST(pm.meta_value AS UNSIGNED) > %d
+                           AND pm.post_id != %d",
+                        $old_global_number,
+                        $post_id
+                    ));
+                }
+
+                if ($old_series_number > 0) {
+                    $wpdb->query($wpdb->prepare(
+                        "UPDATE {$wpdb->postmeta} pm
+                         INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+                         SET pm.meta_value = CAST(pm.meta_value AS UNSIGNED) - 1
+                         WHERE pm.meta_key = 'incr_number_series'
+                           AND p.post_type = 'comic' AND p.post_status = 'publish' AND p.post_parent = %d
+                           AND CAST(pm.meta_value AS UNSIGNED) > %d
+                           AND pm.post_id != %d",
+                        $parent_id,
+                        $old_series_number,
+                        $post_id
+                    ));
+                }
+
+                delete_post_meta($post_id, 'incr_number');
+                delete_post_meta($post_id, 'incr_number_series');
             }
 
             /**

@@ -661,3 +661,7 @@ Universal theme styles
 		line-height: 1.35em;
 }
 
+/* Click-to-next comic wrapper */
+.click-to-next-wrapper[data-next-href] {
+    cursor: pointer;
+}

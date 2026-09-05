@@ -254,6 +254,7 @@ trait Toocheke_Companion_Frontend_Display
                     wp_enqueue_style('toocheke-universal-styles');
                     wp_register_style('toocheke-manga-styles', plugins_url('toocheke-companion/css/manga.css'), [], TOOCHEKE_COMPANION_VERSION);
                     wp_enqueue_style('toocheke-manga-styles');
+                    wp_enqueue_script('toocheke-universal-functions', plugins_url('toocheke-companion' . '/js/universal-functions.js'), ['jquery'], TOOCHEKE_COMPANION_VERSION, true);
                 }
             }
 

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.19
+Stable tag: 2.20
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,11 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.20 =
+* UPDATE: Added an option for minimal comic navigation above the comic.
+* UPDATE: Improved the performance of comic numbering sorting.
+* FIX: Clicking the comic image now correctly navigates to the next comic.
 
 = 2.19 =
 * UPDATE: Added importing of comments for the Webcomic plugin

@@ -19,7 +19,7 @@ $chapter_args = array(
     'taxonomy' => 'chapters',
     'style' => 'none',
     'orderby' => 'meta_value_num',
-    'order' => $comic_order,
+    'order'      => 'ASC',
     'meta_query' => array(
         array(
             'key' => 'chapter-order',

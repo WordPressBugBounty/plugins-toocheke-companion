@@ -791,3 +791,55 @@ function toocheke_universal_catch_that_image_alt($comic)
     }
     return $first_img;
 }
+ function toocheke_universal_get_next_comic_link($current_post_id, $collection_id, $series_id = null)
+    {
+        $permalink  = '';
+        $next_title = '';
+        // Info
+        $postIDs = [];
+
+        $args = [
+            'post_parent' => $series_id,
+            'post_type'   => 'comic',
+            'nopaging'    => true,
+            'offset'      => 0,
+            'orderby'     => 'post_date',
+            'order'       => 'ASC',
+            'post_status' => 'publish'];
+
+        if ($collection_id > 0) {
+            $args['tax_query'] = [
+                [
+                    'taxonomy' => 'collections',
+                    'field'    => 'term_id',
+                    'terms'    => $collection_id,
+                ],
+            ];
+        }
+
+        $comic_posts = get_posts($args);
+
+        // Get post IDs
+        foreach ($comic_posts as $thepost):
+            $postIDs[] = $thepost->ID;
+        endforeach;
+
+        // Get prev and next post ID
+        $currentIndex = array_search($current_post_id, $postIDs);
+
+        if ($currentIndex < count($comic_posts) - 1) {
+            $nextID     = $postIDs[$currentIndex + 1];
+            $next_title = esc_attr($comic_posts[$currentIndex + 1]->post_title);
+        }
+
+        // Return information
+        if (! empty($nextID)):
+            $permalink = esc_url($collection_id > 0 ? add_query_arg('col', $collection_id, get_permalink($nextID)) : get_permalink($nextID));
+            //add series id parameter
+            if ($series_id) {
+                $permalink = add_query_arg('sid', $series_id, $permalink);
+            }
+
+        endif;
+        return [$permalink, $next_title];
+    }

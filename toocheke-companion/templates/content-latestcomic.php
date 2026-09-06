@@ -14,6 +14,7 @@ $display_comic_nav_above_comic = get_option('toocheke-comic-nav-above-comic') &&
 $display_minimal_comic_nav_above_comic = get_option('toocheke-comic-nav-above-comic-minimal') && 1 == get_option('toocheke-comic-nav-above-comic-minimal');
 $latest_collection_id = 0;
 $series_id = get_query_var('series_id');
+$click_to_next_comic = get_option('toocheke-click-comic-next') && 1 == get_option('toocheke-click-comic-next');
 $comic_order = 'DESC';
 if (get_query_var('comic_order')) {
     $comic_order = get_query_var('comic_order');
@@ -37,6 +38,18 @@ global $post;
 
 while ($single_comic_query->have_posts()): $single_comic_query->the_post();
 $comic_post = $post;
+$next_link = toocheke_universal_get_next_comic_link($post->ID, 0, $series_id);
+$has_next_link = (strlen($next_link[0]) > 0 && $click_to_next_comic);
+$print_click_to_next_attrs = function () use ($next_link, $has_next_link) {
+    if (! $has_next_link) {
+        return;
+    }
+    printf(
+        ' data-next-href="%1$s" data-next-title="%2$s" title="%2$s"',
+        esc_attr($next_link[0]),
+        esc_attr($next_link[1])
+    );
+};
     ?>
 				<div id="comic" class="single-comic-wrapper">
 
@@ -68,13 +81,21 @@ $comic_post = $post;
     echo '<div id="' . esc_attr($wrapper_id) . '">';
     echo '<div id="spliced-comic">';
     echo '<span class="default-lang">';
+    echo '<div class="click-to-next-wrapper"';
+$print_click_to_next_attrs();
+echo '>';
     the_content();
+    echo '</div>';
     echo '</span>';
     echo '</div>';
     echo '<div id="unspliced-comic">';
 
     echo '<span class="default-lang">';
+    echo '<div class="click-to-next-wrapper"';
+$print_click_to_next_attrs();
+echo '>';
     echo wp_kses(get_post_meta($post->ID, 'desktop_comic_editor', true), $allowed_tags);
+    echo '</div>';
     echo '</span>';
 
     echo '</div>';

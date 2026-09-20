@@ -936,8 +936,10 @@ trait Toocheke_Companion_Notifications
         if (! $subscriber) {
             return $this->toocheke_notifications_message_box('error', __('This unsubscribe link is invalid or has expired.', 'toocheke-companion'));
         }
+        $identity_line = $this->toocheke_notifications_identity_line($subscriber->email);
+
         if ('unsubscribed' === $subscriber->status) {
-            return $this->toocheke_notifications_message_box('warning', __('This email address is already unsubscribed.', 'toocheke-companion'));
+            return $identity_line . $this->toocheke_notifications_message_box('warning', __('This email address is already unsubscribed.', 'toocheke-companion'));
         }
 
         global $wpdb;
@@ -948,7 +950,7 @@ trait Toocheke_Companion_Notifications
             ['id' => $subscriber->id]
         );
 
-        return $this->toocheke_notifications_message_box('success', __('You\'ve been unsubscribed. Sorry to see you go!', 'toocheke-companion'));
+        return $identity_line . $this->toocheke_notifications_message_box('success', __('You\'ve been unsubscribed. Sorry to see you go!', 'toocheke-companion'));
     }
 
     /**
@@ -974,8 +976,10 @@ trait Toocheke_Companion_Notifications
         if (! $subscriber) {
             return $this->toocheke_notifications_message_box('error', __('This link is invalid or has expired.', 'toocheke-companion'));
         }
+        $identity_line = $this->toocheke_notifications_identity_line($subscriber->email);
+
         if ('unsubscribed' === $subscriber->status) {
-            return $this->toocheke_notifications_message_box('warning', __('This email address is unsubscribed. Sign up again if you\'d like to resubscribe.', 'toocheke-companion'));
+            return $identity_line . $this->toocheke_notifications_message_box('warning', __('This email address is unsubscribed. Sign up again if you\'d like to resubscribe.', 'toocheke-companion'));
         }
 
         $current_prefs = $subscriber->series_prefs ? (array) json_decode($subscriber->series_prefs, true) : [];
@@ -1009,6 +1013,7 @@ trait Toocheke_Companion_Notifications
 
         ob_start();
         ?>
+        <?php echo $identity_line; // phpcs:ignore -- already escaped in toocheke_notifications_identity_line() ?>
         <form class="toocheke-notify-manage-form">
             <input type="hidden" name="token" value="<?php echo esc_attr($token); ?>" />
             <p>
@@ -1088,6 +1093,51 @@ trait Toocheke_Companion_Notifications
             esc_attr($colors['background']),
             esc_attr($colors['color']),
             esc_html($message)
+        );
+    }
+
+    /**
+     * Masks an email address for display on unsubscribe/manage pages,
+     * e.g. "ian@unfedartist.com" -> "i***@unfedartist.com". Shown so a
+     * subscriber (or someone a newsletter was forwarded to) can confirm
+     * *which* address a token-based link belongs to, without exposing
+     * the full address on a page that requires no login to view.
+     *
+     * Local parts of 1 character are masked as a single asterisk
+     * rather than left bare, since a bare single character plus domain
+     * is often enough to fully identify common short addresses.
+     */
+    private function toocheke_notifications_mask_email($email)
+    {
+        $at_pos = strrpos($email, '@');
+        if (false === $at_pos) {
+            return $email; // Not a well-formed email; show as-is rather than mangle it.
+        }
+
+        $local  = substr($email, 0, $at_pos);
+        $domain = substr($email, $at_pos); // includes the "@"
+
+        $visible = mb_substr($local, 0, 1);
+        return ('' === $visible ? '*' : $visible) . '***' . $domain;
+    }
+
+    /**
+     * Renders the "Email preferences for i***@example.com" identity
+     * line shown above the outcome message on the unsubscribe and
+     * manage-preferences pages, so a subscriber can confirm the link
+     * belongs to them before (or after) it takes effect.
+     */
+    private function toocheke_notifications_identity_line($email)
+    {
+        return sprintf(
+            '<p class="toocheke-notify-identity" style="color:#666;margin-bottom:8px;">%s</p>',
+            esc_html(
+                sprintf(
+                    /* translators: %s: masked email address, e.g. i***@example.com */
+                    __('Email preferences for %s', 'toocheke-companion'),
+                    $this->toocheke_notifications_mask_email($email)
+                )
+            )
         );
     }
 

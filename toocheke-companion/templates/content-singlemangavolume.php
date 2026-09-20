@@ -286,6 +286,52 @@ if ($manga_series_id) {
         <!--./Volume Purchasing-->
 
     <?php endif;?>
+      <!--Chapters-->
+         <h2><?php esc_html_e('Chapters', 'toocheke-companion'); ?></h2>
+         <?php
+
+             $args = [
+                 'post_type'      => 'manga_chapter',
+                 'posts_per_page' => -1,
+                 'meta_key'       => 'chapter_number',
+                 'orderby'        => 'meta_value_num',
+                 'order'          => 'ASC',
+                 'meta_query'     => [
+                     [
+                         'key'     => 'volume_id',
+                         'value'   => $manga_volume_id,
+                         'compare' => '=',
+                         'type'    => 'NUMERIC',
+                     ],
+                 ],
+             ];
+
+             $query        = new WP_Query($args);
+             $chapter_count = $query->found_posts; // number of chapters
+
+         if ($chapter_count > 0): ?>
+<h4 class="mb-4 font-weight-normal">
+    <em>
+        <?php
+            echo sprintf(
+                /* translators: %s: number of chapters */
+                esc_html(_n('%s Chapter', '%s Chapters', $chapter_count, 'toocheke-companion')),
+                esc_html($chapter_count)
+            );
+        ?>
+        </em>
+    </h4>
+
+    <div class="manga-related-list-container">
+        <?php while ($query->have_posts()): $query->the_post();
+                    $templates->get_template_part('content', 'relatedmangachapter');
+        endwhile; ?>
+    </div>
+    <?php wp_reset_postdata(); ?>
+      <hr class="toocheke-hr manga-hr" />
+<?php endif; ?>
+
+                 <!--./Chapters-->
          <!--Previous and Next Volumes-->
          <?php if($previous_volume || $next_volume):?>
              <div class="manga-related-list-container">
@@ -331,55 +377,11 @@ if ($manga_series_id) {
                  
          
             </div>
-              <hr class="toocheke-hr manga-hr" />
+            
             <?php endif;?>
           <!--./Previous and Next Volumes-->
           
-         <!--Chapters-->
-         <h2><?php esc_html_e('Chapters', 'toocheke-companion'); ?></h2>
-         <?php
-
-             $args = [
-                 'post_type'      => 'manga_chapter',
-                 'posts_per_page' => -1,
-                 'meta_key'       => 'chapter_number',
-                 'orderby'        => 'meta_value_num',
-                 'order'          => 'ASC',
-                 'meta_query'     => [
-                     [
-                         'key'     => 'volume_id',
-                         'value'   => $manga_volume_id,
-                         'compare' => '=',
-                         'type'    => 'NUMERIC',
-                     ],
-                 ],
-             ];
-
-             $query        = new WP_Query($args);
-             $chapter_count = $query->found_posts; // number of chapters
-
-         if ($chapter_count > 0): ?>
-<h4 class="mb-4 font-weight-normal">
-    <em>
-        <?php
-            echo sprintf(
-                /* translators: %s: number of chapters */
-                esc_html(_n('%s Chapter', '%s Chapters', $chapter_count, 'toocheke-companion')),
-                esc_html($chapter_count)
-            );
-        ?>
-        </em>
-    </h4>
-
-    <div class="manga-related-list-container">
-        <?php while ($query->have_posts()): $query->the_post();
-                    $templates->get_template_part('content', 'relatedmangachapter');
-        endwhile; ?>
-    </div>
-    <?php wp_reset_postdata(); ?>
-<?php endif; ?>
-
-                 <!--./Chapters-->
+       
 
                         </div>
                      </div>

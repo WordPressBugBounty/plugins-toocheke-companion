@@ -35,7 +35,7 @@ trait Toocheke_Companion_Shortcodes
                 add_shortcode('toocheke-location-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
                 add_shortcode('toocheke-character-archive', [$this, 'toocheke_taxonomy_archive_shortcode']);
                 add_shortcode('toocheke-characters', [$this, 'toocheke_characters_shortcode']);
-                add_shortcode('toocheke-current-year', 'toocheke_current_year_shortcode');
+                add_shortcode('toocheke-current-year', [$this, 'toocheke_current_year_shortcode']);
                 add_shortcode('toocheke-all-manga-series', [$this, 'toocheke_all_manga_series_shortcode']);
                 add_shortcode('toocheke-popular-manga-series', [$this, 'toocheke_popular_manga_series_shortcode']);
                 add_shortcode('toocheke-popular-manga-volumes', [$this, 'toocheke_popular_manga_volumes_shortcode']);

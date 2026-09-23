@@ -2,7 +2,7 @@
 /**
  * Toocheke Companion — Import from Tapas.io.
  *
- * Lets a comic creator migrate one or more series off Tapas.io into this site's own 'series'/'comic' post types.
+ * Lets a comic creator migrate one or more series off Tapas.io 
  *
  */
 
@@ -139,6 +139,14 @@ trait Toocheke_Companion_Import_Tapas
                 <?php esc_html_e('Enter one or more Tapas series URLs, e.g. https://tapas.io/series/your-series-name — each will become its own Series post here, with every episode imported underneath it as a Comic post, in order.', 'toocheke-companion'); ?>
             </p>
 
+            <p class="toocheke-tapas-agreement">
+                <label>
+                    <input type="checkbox" id="toocheke-tapas-agree" />
+                    <b style="color:#c00;"><?php esc_html_e('Yes, I confirm I have the legal right to import these comics — I own the copyright, or I have the copyright holder\'s permission.', 'toocheke-companion'); ?></b>
+                </label><br />
+                <span class="description"><?php esc_html_e('This import feature is offered in good faith. Please respect the copyright of the comics you import.', 'toocheke-companion'); ?></span>
+            </p>
+
             <div id="toocheke-tapas-url-rows" class="toocheke-tapas-url-rows">
                 <div class="toocheke-tapas-url-row">
                     <input type="url" class="regular-text toocheke-tapas-url-input" placeholder="https://tapas.io/series/your-series-name" />
@@ -150,7 +158,7 @@ trait Toocheke_Companion_Import_Tapas
             </p>
 
             <p class="submit">
-                <button type="button" id="toocheke-tapas-start" class="button button-primary"><?php esc_html_e('Start Import', 'toocheke-companion'); ?></button>
+                <button type="button" id="toocheke-tapas-start" class="button button-primary" disabled><?php esc_html_e('Start Import', 'toocheke-companion'); ?></button>
                 <button type="button" id="toocheke-tapas-resume" class="button button-primary" style="<?php echo $has_existing_job ? '' : 'display:none;'; ?>"><?php esc_html_e('Resume Import', 'toocheke-companion'); ?></button>
                 <button type="button" id="toocheke-tapas-discard" class="button" style="<?php echo $has_existing_job ? '' : 'display:none;'; ?>"><?php esc_html_e('Discard & Start Over', 'toocheke-companion'); ?></button>
             </p>

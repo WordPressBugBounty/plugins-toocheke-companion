@@ -15,6 +15,7 @@ jQuery(document).ready(function ($) {
     var $rows      = $('#toocheke-tapas-url-rows');
     var $addRow    = $('#toocheke-tapas-add-row');
     var $start     = $('#toocheke-tapas-start');
+    var $agree     = $('#toocheke-tapas-agree');
     var $resume    = $('#toocheke-tapas-resume');
     var $discard   = $('#toocheke-tapas-discard');
     var $progress  = $('#toocheke-tapas-progress');
@@ -192,10 +193,14 @@ jQuery(document).ready(function ($) {
     }
 
     function setButtonsRunning(isRunning) {
-        $start.prop('disabled', isRunning);
+        $start.prop('disabled', isRunning || !$agree.is(':checked'));
         $resume.prop('disabled', isRunning);
         $discard.prop('disabled', isRunning);
     }
+
+    $agree.on('change', function () {
+        $start.prop('disabled', !$agree.is(':checked'));
+    });
 
     function loop() {
         if (!running) {

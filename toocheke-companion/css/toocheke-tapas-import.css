@@ -5,6 +5,15 @@
  * class-toocheke-companion-import-tapas.php).
  */
 
+.toocheke-tapas-agreement {
+    margin: 16px 0;
+}
+
+.toocheke-tapas-agreement .description {
+    display: block;
+    margin-top: 4px;
+}
+
 .toocheke-tapas-url-rows {
     margin-top: 8px;
     max-width: 700px;

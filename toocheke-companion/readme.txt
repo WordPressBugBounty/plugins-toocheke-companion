@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.23
+Stable tag: 2.24
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.24 =
+* NEW: The Tapas import now requires confirming you have the legal right to import the comics before it will start.
 
 = 2.23 =
 * NEW: Added ability to import comic series from Tapas.io. Access it under Toocheke → Import: Tapas.

@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.22
+ * Version:     2.23
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.22');
+    define('TOOCHEKE_COMPANION_VERSION', '2.23');
 }
 
 /**
@@ -55,6 +55,7 @@ require_once __DIR__ . '/inc/class-toocheke-companion-frontend-display.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-bluesky.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-notifications.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-permalinks.php';
+require_once __DIR__ . '/inc/class-toocheke-companion-import-tapas.php';
 
 class Toocheke_Companion_Comic_Features
 {
@@ -79,6 +80,7 @@ class Toocheke_Companion_Comic_Features
     use Toocheke_Companion_Bluesky;
     use Toocheke_Companion_Notifications;
     use Toocheke_Companion_Permalinks;
+    use Toocheke_Companion_Import_Tapas;
 
     public function __construct()
     {
@@ -432,6 +434,12 @@ class Toocheke_Companion_Comic_Features
         // -- every hook this feature needs lives in
         // inc/class-toocheke-companion-permalinks.php; see that file's header.
         $this->toocheke_permalinks_register_hooks();
+
+        // Import From Tapas.io (Toocheke > Import: Tapas) — every hook
+        // this feature needs lives in
+        // inc/class-toocheke-companion-import-tapas.php; see that file's
+        // header.
+        $this->toocheke_tapas_register_hooks();
     }
 
     /* Set default options */

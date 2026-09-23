@@ -1,0 +1,110 @@
+/**
+ * Toocheke Companion — Tapas.io import admin UI.
+ * Enqueued only on Toocheke > Import: Tapas (see
+ * toocheke_tapas_enqueue_admin_assets() in
+ * class-toocheke-companion-import-tapas.php).
+ */
+
+.toocheke-tapas-url-rows {
+    margin-top: 8px;
+    max-width: 700px;
+}
+
+.toocheke-tapas-url-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.toocheke-tapas-url-row .toocheke-tapas-url-input {
+    flex: 1;
+}
+
+.toocheke-tapas-remove-row {
+    line-height: 1;
+    padding: 0 8px;
+}
+
+.toocheke-tapas-progress {
+    margin-top: 24px;
+    max-width: 700px;
+}
+
+.toocheke-tapas-overall {
+    margin-bottom: 16px;
+}
+
+.toocheke-tapas-overall-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.toocheke-tapas-series-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.toocheke-tapas-series-title {
+    margin: 0 0 10px;
+}
+
+.toocheke-tapas-progressbar {
+    height: 10px;
+    border-radius: 5px;
+    background: #f0f0f1;
+    border: 1px solid #dcdcde;
+    overflow: hidden;
+}
+
+.toocheke-tapas-progressbar-fill {
+    height: 100%;
+    width: 0%;
+    background: #2271b1;
+    transition: width 0.3s ease;
+}
+
+.toocheke-tapas-series-status {
+    margin: 10px 0 0;
+    color: #50575e;
+}
+
+.toocheke-tapas-resume-row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f1;
+}
+
+.toocheke-tapas-resume-row label {
+    color: #50575e;
+    font-size: 13px;
+}
+
+.toocheke-tapas-resume-row input {
+    margin: 6px 0;
+}
+
+.toocheke-tapas-log {
+    background: #1e1e1e;
+    color: #c3c4c7;
+    border-radius: 4px;
+    padding: 10px 14px;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.toocheke-tapas-log-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.toocheke-tapas-log-line::before {
+    content: "› ";
+    color: #6c7781;
+}

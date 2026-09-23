@@ -7,47 +7,6 @@
  * recurring schedule so nothing repeats until the whole archive has been
  * cycled through once.
  *
- * DESIGN NOTES (read this before extending):
- *
- * - The publish-time trigger is deliberately split across two hooks:
- *   transition_post_status decides WHETHER a post should go to Bluesky,
- *   the generic save_post hook (at priority 999) actually POSTS it. This
- *   is not incidental — see toocheke_bluesky_maybe_post_on_publish()'s
- *   docblock. transition_post_status fires before any metabox has saved
- *   its fields to the database, so building the Bluesky message that
- *   early would silently use stale (often empty) data for anything the
- *   author just typed in on the same Publish click. The posting hook
- *   specifically targets the *generic* save_post, not save_post_{type} —
- *   WordPress fires save_post_{type} BEFORE the generic save_post, and
- *   this plugin's own field-save handlers (transcript, hovertext, blog
- *   post editor, etc.) are all hooked to the generic one, so posting from
- *   save_post_{type} would still run too early.
- *
- * - All raw Bluesky/AT-Protocol HTTP calls are isolated to exactly three
- *   functions: toocheke_bluesky_authenticate(), toocheke_bluesky_upload_image(),
- *   and toocheke_bluesky_create_record(). If Bluesky ever changes its API,
- *   those are the only three places that should need touching — everything
- *   else in this file only deals with WordPress data and hands a finished
- *   "record" array to toocheke_bluesky_create_record().
- *
- * - There is exactly ONE post meta flag, `toocheke_bluesky_posted`, shared by
- *   both the "post on publish" feature and the "random archive repost"
- *   feature. Once a comic/chapter has been sent to Bluesky once (successfully
- *   or not — see below), it is never sent again until the whole archive pool
- *   for its post type is deliberately reset (see toocheke_bluesky_reset_posted_flags()).
- *
- * - A failed post attempt is logged (see toocheke_bluesky_log_error()) but is
- *   NOT retried automatically — it is still marked as "posted" so it can
- *   never silently repost later. This is deliberate: it keeps the feature
- *   simple and avoids ever double-posting the same thing.
- *
- * - There is no dashboard, activity log, or per-post attempt counter by
- *   design. The only persistent "log" is a single capped array of error
- *   strings (toocheke-bluesky-errors) shown as one cumulative, dismissible,
- *   site-wide admin notice.
- *
- * Used by {@see Toocheke_Companion_Comic_Features} in toocheke-companion.php,
- * which `use`s this trait alongside the others in /inc.
  */
 
 if (! defined('ABSPATH')) { exit; }

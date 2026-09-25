@@ -1,14 +1,8 @@
 /**
  * Toocheke Companion — Tapas.io import admin UI.
  *
- * The server side (class-toocheke-companion-import-tapas.php) does exactly
- * ONE unit of work per AJAX call and returns. This script is the loop: it
- * keeps calling "step" until the job reports finished/throttled, updating
- * the progress UI from each response. That's what makes bulk imports of
- * arbitrarily large series possible without ever hitting a PHP execution
- * time limit, and what makes "close the tab, come back later, resume"
- * work — the job state lives entirely server-side in one option; this
- * script is just a dumb, restartable loop over it.
+ * The PHP side does one unit of work per AJAX call; this script is the
+ * loop, polling "step" until the job finishes or throttles.
  */
 jQuery(document).ready(function ($) {
     var cfg = window.toochekeTapasImport || {};
@@ -49,9 +43,7 @@ jQuery(document).ready(function ($) {
     function fmt(template) {
         var args = Array.prototype.slice.call(arguments, 1);
         var i = 0;
-        // Handles both WP-style numbered placeholders (%1$s, %2$d — used
-        // whenever a string has more than one placeholder, per WP i18n
-        // conventions) and plain %s/%d for single-placeholder strings.
+        // Handles both numbered (%1$s) and plain (%s) placeholders.
         return template.replace(/%(\d+)\$[sd]|%[sd]/g, function (match, num) {
             return num ? args[parseInt(num, 10) - 1] : args[i++];
         });
@@ -88,11 +80,8 @@ jQuery(document).ready(function ($) {
 
         $seriesTitle.text(active.slug);
 
-        // "Processed" (imported + deliberately skipped) is what actually
-        // reflects progress through the episode list — using
-        // episodes_done alone would make the bar look stuck partway
-        // through any series with locked/paid content, even once every
-        // episode has genuinely been walked.
+        // Imported + skipped, so the bar doesn't look stuck on series
+        // with a lot of locked/paid content.
         var processed = active.episodes_done + (active.episodes_skipped || 0);
 
         var pct = 0;
@@ -126,9 +115,8 @@ jQuery(document).ready(function ($) {
         $seriesStatus.text(statusText);
 
         var needsAttention = active.status === 'failed' || !!active.warning;
-        // Retry only makes sense if it could plausibly change the
-        // outcome — see the matching comment server-side in
-        // toocheke_tapas_ajax_retry_series().
+        // Retry only if it could actually change the outcome — same
+        // check server-side in toocheke_tapas_ajax_retry_series().
         var canRetry = active.status === 'failed' || (!!active.warning && !active.episodes_skipped);
         if (needsAttention) {
             $copyRow.show();
@@ -380,9 +368,7 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // On load: if a job is already in progress (survived a page reload /
-    // reopened tab), show its current state immediately without starting
-    // the loop — the creator explicitly clicks Resume to continue.
+    // Show any in-progress job on load, but don't auto-resume it.
     ajax('toocheke_tapas_import_status', {}).done(function (res) {
         if (res && res.success && res.data.job && res.data.job.series && res.data.job.series.length) {
             renderJob(res.data.job);

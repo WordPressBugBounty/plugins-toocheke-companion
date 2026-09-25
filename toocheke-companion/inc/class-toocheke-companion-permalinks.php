@@ -8,32 +8,16 @@
  * Manga Genre, Manga Publisher) from Toocheke > Options > Navigation >
  * Permalinks.
  *
- * Designed defensively, since a bad rewrite slug can genuinely break a
- * site (silent 404s, colliding URLs) rather than just look wrong:
- * - Every submitted value is sanitized (sanitize_title()) before it's ever
- *   used in a rewrite rule.
- * - An empty value is rejected and reset to that field's default.
- * - A value that duplicates another one of these same 11 fields (on the
- *   very same save) is rejected outright.
- * - A value matching a common WordPress-reserved term (page, feed,
- *   category, etc.) is rejected.
- * - A value matching another currently-registered post type or taxonomy
- *   key, site-wide, is rejected -- a reasonable best-effort check for
- *   colliding with another plugin or WordPress core, though it can't catch
- *   every possible conflict (e.g. a manually-added add_rewrite_rule() with
- *   no registered post type/taxonomy behind it).
+ * Each submitted value is sanitized, and rejected (falling back to
+ * whatever was previously saved, or the default) if it's empty,
+ * duplicates another one of these 11 fields, matches a WordPress-
+ * reserved term, or collides with another registered post type/
+ * taxonomy — a bad slug should never take the site offline.
  *
- * Any rejected value keeps whatever was previously saved (or the default,
- * on a first save) instead of silently applying something broken --
- * changing one of these slugs can therefore never take the site offline
- * on its own, even with a careless or conflicting entry.
- *
- * Actual slug resolution for CPT/taxonomy registration happens via
- * toocheke_permalinks_get_slug(), called from
- * class-toocheke-companion-cpt-taxonomy.php in place of each previously
- * hardcoded slug string -- every one of those calls passes that exact
- * former hardcoded value back in as its $default, so a site that never
- * touches this new Permalinks tab sees zero change in behavior.
+ * Actual slug resolution happens via toocheke_permalinks_get_slug(),
+ * called from class-toocheke-companion-cpt-taxonomy.php with each
+ * former hardcoded slug as its default, so a site that never visits
+ * this tab sees no change in behavior.
  */
 
 if (! defined('ABSPATH')) {
@@ -42,30 +26,19 @@ if (! defined('ABSPATH')) {
 
 trait Toocheke_Companion_Permalinks
 {
-    /**
-     * Computed once per request by toocheke_permalinks_compute_conflicts()
-     * and reused across all 11 fields' sanitize callbacks, since they all
-     * need to evaluate the exact same cross-field picture.
-     */
+    // Computed once per request and reused across all 11 fields'
+    // sanitize callbacks, since they all need the same cross-field view.
     private $toocheke_permalinks_conflict_cache = null;
 
     public function toocheke_permalinks_register_hooks()
     {
-        // Deferred, one-time flush -- see the docblock on
-        // toocheke_permalinks_maybe_flush_rewrite_rules() for why this
-        // can't just call flush_rewrite_rules() directly inside the
-        // sanitize callback itself.
+        // Deferred, one-time flush — see toocheke_permalinks_maybe_flush_rewrite_rules().
         add_action('admin_init', [$this, 'toocheke_permalinks_maybe_flush_rewrite_rules']);
     }
 
-    /* =========================================================================
-       FIELD DEFINITIONS
-       Single source of truth for all 11 customizable slugs -- their
-       label, and their default value, which is exactly what each one's
-       hardcoded slug string used to be in class-toocheke-companion-cpt-taxonomy.php
-       before this feature existed.
-    ========================================================================= */
-
+    // Single source of truth for all 11 customizable slugs — label and
+    // default (each default matches the former hardcoded slug in
+    // class-toocheke-companion-cpt-taxonomy.php).
     private function toocheke_permalinks_get_field_definitions()
     {
         return [
@@ -83,25 +56,14 @@ trait Toocheke_Companion_Permalinks
         ];
     }
 
-    /**
-     * The one place any CPT/taxonomy registration should ever get one of
-     * these 11 slugs from -- never a bare get_option() call, so the
-     * "always fall back to something valid" guarantee holds even if the
-     * stored option somehow ended up empty or otherwise invalid.
-     */
+    // The one place any CPT/taxonomy registration should get one of
+    // these slugs from — never a bare get_option() — so it always
+    // falls back to something valid even if the option is empty.
     public function toocheke_permalinks_get_slug($key, $default)
     {
         $value = sanitize_title(get_option("toocheke-permalink-{$key}", $default));
         return ('' !== $value) ? $value : $default;
     }
-
-    /* =========================================================================
-       SETTINGS REGISTRATION
-       Called from the 'navigation_options' case's 'permalinks' subsection
-       gate in class-toocheke-companion-settings-page.php, matching how
-       Bluesky/Notifications keep their own settings registration
-       self-contained in their own file.
-    ========================================================================= */
 
     public function toocheke_permalinks_register_settings_fields()
     {
@@ -165,26 +127,16 @@ trait Toocheke_Companion_Permalinks
         <?php
     }
 
-    /* =========================================================================
-       SANITIZE + CROSS-FIELD VALIDATION
-    ========================================================================= */
-
-    /**
-     * The shared sanitize_callback for all 11 fields. Which field is
-     * currently being processed is determined via current_filter() --
-     * register_setting()'s sanitize_callback is invoked as the callback
-     * attached to WordPress's own 'sanitize_option_{$option_name}'
-     * filter, so current_filter() reliably returns e.g.
-     * 'sanitize_option_toocheke-permalink-comic' here, letting one shared
-     * method serve all 11 fields without 11 near-identical copies of it.
-     */
+    // Shared sanitize_callback for all 11 fields — current_filter()
+    // returns e.g. 'sanitize_option_toocheke-permalink-comic', so one
+    // method can serve all 11 without near-identical copies.
     public function toocheke_permalinks_sanitize_slug($value)
     {
         $key         = $this->toocheke_permalinks_key_from_current_filter();
         $definitions = $this->toocheke_permalinks_get_field_definitions();
 
         if (! $key || ! isset($definitions[$key])) {
-            // Shouldn't happen in practice -- defensive fallback only.
+            // Shouldn't happen — defensive fallback only.
             return sanitize_title($value);
         }
 
@@ -195,16 +147,10 @@ trait Toocheke_Companion_Permalinks
         $conflicts = $this->toocheke_permalinks_compute_conflicts();
 
         if (isset($conflicts[$key])) {
-            // A field can end up "in conflict" two different ways: either
-            // the user genuinely just tried to change it to a value that
-            // collides with something, or -- just as validly -- its own
-            // value was never touched at all, and it's only implicated
-            // because some OTHER field's new value happens to collide
-            // with this one's existing, already-saved value. Either way
-            // the safe outcome is identical (this field simply keeps its
-            // current value), but only the first case is something the
-            // user actually did and needs to be told about; showing an
-            // error about a field they never touched is just confusing.
+            // A field can be "in conflict" either because it was just
+            // changed to a colliding value, or because it was never
+            // touched and another field's new value collides with its
+            // existing one — only the first case is worth an error.
             if (sanitize_title($value) !== $current) {
                 add_settings_error(
                     'toocheke-settings',
@@ -280,11 +226,8 @@ trait Toocheke_Companion_Permalinks
         return '';
     }
 
-    /**
-     * Common WordPress-reserved top-level terms -- not exhaustive, but
-     * covers the well-known ones that would genuinely break routing or
-     * collide with core behavior if used as a rewrite slug.
-     */
+    // Common WordPress-reserved top-level terms — not exhaustive, but
+    // covers the well-known ones that would break routing as a slug.
     private function toocheke_permalinks_get_reserved_slugs()
     {
         return [
@@ -295,20 +238,11 @@ trait Toocheke_Companion_Permalinks
         ];
     }
 
-    /**
-     * Computes, once per request, which of the 11 proposed values (if
-     * any) can't be saved as-is -- either because two of our own fields
-     * collided with each other on this same save, because a value matches
-     * a WordPress-reserved term, or because it matches another currently
-     * registered post type/taxonomy key elsewhere on the site.
-     *
-     * Reading directly from $_POST (rather than the $value each
-     * individual sanitize call receives) is what makes the cross-field
-     * duplicate check possible at all -- register_setting()'s
-     * sanitize_callback for one option is never given visibility into
-     * what the other 10 fields on the same form were submitted as, but
-     * they're all still part of the same $_POST for this one request.
-     */
+    // Computes, once per request, which of the 11 proposed values can't
+    // be saved — colliding with each other, a reserved term, or another
+    // registered post type/taxonomy. Reads directly from $_POST rather
+    // than the single $value each sanitize call gets, since that's the
+    // only way to see what all 11 fields were submitted as at once.
     private function toocheke_permalinks_compute_conflicts()
     {
         if (null !== $this->toocheke_permalinks_conflict_cache) {
@@ -370,24 +304,12 @@ trait Toocheke_Companion_Permalinks
         return $conflicts;
     }
 
-    /* =========================================================================
-       DEFERRED REWRITE-RULES FLUSH
-    ========================================================================= */
-
-    /**
-     * Deliberately NOT called directly from toocheke_permalinks_sanitize_slug()
-     * above. By the time a save request reaches that sanitize callback,
-     * this same request's 'init' hook (where every CPT/taxonomy actually
-     * registers, at priority 0 — see toocheke-companion.php) has already
-     * run, using the OLD option values. Calling flush_rewrite_rules()
-     * right there would rebuild the rewrite rules from those still-stale
-     * registrations, not the new slug that's only about to be saved.
-     *
-     * Instead, this just sets a flag; the actual flush happens here, on
-     * admin_init, the NEXT time any admin page loads — by then, that
-     * request's own earlier 'init' has already re-registered everything
-     * using the freshly-saved slug, so the flush correctly picks it up.
-     */
+    // Not called directly from the sanitize callback — by the time a
+    // save reaches it, this request's 'init' has already registered
+    // CPTs/taxonomies using the OLD values, so flushing there would
+    // rebuild from stale registrations. Instead this just sets a flag;
+    // the actual flush happens here on the NEXT admin page load, by
+    // which point 'init' has re-registered everything with the new slug.
     public function toocheke_permalinks_maybe_flush_rewrite_rules()
     {
         if (get_option('toocheke_permalinks_flush_needed')) {

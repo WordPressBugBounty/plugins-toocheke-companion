@@ -6,28 +6,19 @@
  * they're published or, optionally, at random from the back-catalogue on a
  * recurring schedule so nothing repeats until the whole archive has been
  * cycled through once.
- *
-
  */
 
 if (! defined('ABSPATH')) { exit; }
 
-// Every Bluesky/AT-Protocol endpoint used by this file is built from this one
-// constant. If Bluesky changes its API host, this is the only line to edit.
+// Every Bluesky/AT-Protocol endpoint used by this file is built from this
+// one constant.
 if (! defined('TOOCHEKE_BLUESKY_API_BASE')) {
     define('TOOCHEKE_BLUESKY_API_BASE', 'https://bsky.social/xrpc/');
 }
 
 trait Toocheke_Companion_Bluesky
 {
-    /* =========================================================================
-       HOOK REGISTRATION
-       Everything this feature needs is wired up from this single method,
-       called once from init() in toocheke-companion.php. Keeping every hook
-       registration in one place (rather than scattered add_action calls in
-       the main plugin file) keeps this feature self-contained and easy to
-       find/extend later.
-    ========================================================================= */
+    // Called once from init() in toocheke-companion.php.
 
     public function toocheke_bluesky_register_hooks()
     {
@@ -83,26 +74,12 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /* =========================================================================
-       SETTINGS TAB
-       Registration is called from the 'bluesky_options' case inside
-       toocheke_init_option_fields() in class-toocheke-companion-settings-page.php.
-       Everything else related to this tab (field renderers, messages) lives
-       here so the feature stays self-contained.
-    ========================================================================= */
+    // Called from toocheke_init_option_fields() in
+    // class-toocheke-companion-settings-page.php.
 
-    /**
-     * $active_subsection is passed in from toocheke_init_option_fields()
-     * in class-toocheke-companion-settings-page.php, which is also what
-     * renders the actual subnav links -- both key off the exact same
-     * subsection list (see toocheke_get_tab_subsections() there) so they
-     * can't drift out of sync. Each of the four sections below maps
-     * 1:1 to one subsection; nothing about the sections/fields
-     * themselves changed here, only that each is now gated behind its
-     * matching subsection so the settings page only ever renders (and
-     * saves) whichever one the admin is actually looking at, instead of
-     * every Bluesky field on one long page.
-     */
+    // $active_subsection comes from toocheke_init_option_fields(), which
+    // also renders the subnav links off the same subsection list, so
+    // only the matching subsection's fields render/save at a time.
     public function toocheke_bluesky_register_settings_fields($active_subsection = 'connection')
     {
         if ('connection' === $active_subsection) {
@@ -161,29 +138,13 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /* =========================================================================
-       POST FILTERING
-       Lets the admin scope Automatic Posting and Random Archive Posting to
-       specific Series/Collections/Chapters (comics) or Manga Series/Manga
-       Volumes (manga chapters) — independently for each of those two
-       contexts, per the original design discussion. Matching is OR across
-       everything selected, including across the different taxonomy/post-type
-       groups within one filter (e.g. a comic in either the selected Series
-       OR the selected Collection qualifies) — confirmed deliberately, since
-       Series and Collection are naturally distinct, non-overlapping ways of
-       grouping the same comics.
+    // Lets the admin scope Automatic/Random posting to specific
+    // Series/Collections/Chapters or Manga Series/Volumes. Matching is
+    // OR across everything selected. Not applied on the manual "Post to
+    // Bluesky Now" checkbox — that's an explicit override.
 
-       Deliberately NOT applied on the manual "Post to Bluesky Now" checkbox
-       path (see toocheke_bluesky_maybe_post_on_publish()) — checking that
-       box is the author explicitly saying "yes, post this one," which
-       always overrides any filter.
-    ========================================================================= */
-
-    /**
-     * Registers the mode radio + all filter-option settings for one
-     * context ('auto' or 'random'). Shared by both Automatic Posting and
-     * Random Archive Posting so the two stay structurally identical.
-     */
+    // Registers the mode radio + filter fields for one context ('auto'
+    // or 'random') — shared so both stay structurally identical.
     private function toocheke_bluesky_register_filter_fields($context, $section_id)
     {
         $label_prefix = ('auto' === $context) ? __('auto-posted', 'toocheke-companion') : __('eligible for random re-posting', 'toocheke-companion');
@@ -245,14 +206,9 @@ trait Toocheke_Companion_Bluesky
         $this->toocheke_bluesky_render_filter_ui($args['context'], 'manga');
     }
 
-    /**
-     * Renders the "Post everything" / "Only post these:" radio choice plus
-     * one collapsible pill group per relevant taxonomy or post type. Shared
-     * by both toocheke_bluesky_comic_filter_field() and
-     * toocheke_bluesky_manga_filter_field() above — $type is 'comic' or
-     * 'manga', which only changes which groups get built, not the overall
-     * structure.
-     */
+    // "Post everything" / "Only post these:" radio plus one collapsible
+    // pill group per relevant taxonomy/post type. $type is 'comic' or
+    // 'manga' — only changes which groups get built.
     private function toocheke_bluesky_render_filter_ui($context, $type)
     {
         $mode_option = "toocheke-bluesky-{$context}-{$type}-filter-mode";
@@ -659,10 +615,6 @@ trait Toocheke_Companion_Bluesky
         <?php
     }
 
-    /* =========================================================================
-       ADMIN ASSETS (character counter, show/hide toggles, Test Connection)
-    ========================================================================= */
-
     public function toocheke_bluesky_enqueue_admin_assets()
     {
         if (empty($_GET['page']) || 'toocheke-options-page' !== $_GET['page']) {
@@ -761,10 +713,6 @@ trait Toocheke_Companion_Bluesky
         wp_send_json_error(['message' => $message]);
     }
 
-    /* =========================================================================
-       "POST TO BLUESKY" METABOX (manual-publish path only)
-    ========================================================================= */
-
     public function toocheke_bluesky_add_publish_checkbox_metabox_comic()
     {
         if (! get_option('toocheke-bluesky-enable-comics')) {
@@ -849,14 +797,9 @@ trait Toocheke_Companion_Bluesky
         <?php
     }
 
-    /**
-     * Handles a manual "Post to Bluesky (Again)" button click from the
-     * metabox above. Unlike every other posting path in this file, this one
-     * is a deliberate, explicit action with no automatic trigger of its own
-     * — it exists specifically so a post whose "posted" flag no longer
-     * matches reality (e.g. it was deleted from Bluesky directly) can be
-     * sent again without needing to unpublish/republish the WordPress post.
-     */
+    // Manual "Post to Bluesky (Again)" button — the one posting path
+    // with no automatic trigger, for when a post's "posted" flag no
+    // longer matches reality (e.g. deleted from Bluesky directly).
     public function toocheke_bluesky_handle_republish()
     {
         $post_id = isset($_GET['post_id']) ? absint($_GET['post_id']) : 0;
@@ -875,37 +818,21 @@ trait Toocheke_Companion_Bluesky
             }
         }
 
-        // Built directly rather than via get_edit_post_link(), which
-        // performs its own internal capability re-check and silently
-        // returns an empty string if that fails for any reason — sending
-        // wp_safe_redirect() an empty location falls back to admin_url(),
-        // which is what was actually landing people on the plain Posts
-        // list screen instead of back on this specific post.
+        // Built directly rather than via get_edit_post_link(), which can
+        // silently return empty on a failed capability check, sending
+        // the redirect to the plain Posts list instead of back here.
         wp_safe_redirect(admin_url('post.php?post=' . $post_id . '&action=edit'));
         exit;
     }
 
-    /**
-     * Flags a one-time, per-user, per-post success notice to show the next
-     * time this post's edit screen loads (see toocheke_bluesky_show_success_notice()).
-     * A short-lived transient rather than a query-string flag, since the
-     * redirect after a normal WordPress "Publish" click is controlled by
-     * WordPress core, not by this plugin, so there's no query arg of ours to
-     * read on that particular page load.
-     */
+    // Flags a one-time success notice for this post's next edit-screen
+    // load. A transient rather than a query arg, since WordPress core
+    // controls the redirect after a normal Publish click.
     private function toocheke_bluesky_set_success_notice($post_id)
     {
         set_transient('toocheke_bluesky_success_' . get_current_user_id() . '_' . $post_id, 1, MINUTE_IN_SECONDS);
     }
 
-    /**
-     * Shows a standard green "Successfully posted to Bluesky" admin notice
-     * once, right after either: (a) a manual publish with the "Post to
-     * Bluesky Now" checkbox checked, or (b) a manual "Post to Bluesky
-     * (Again)" button click. Scheduled/automatic posts don't set this flag
-     * (see toocheke_bluesky_maybe_post_on_publish()), since nobody is
-     * necessarily looking at the edit screen at the moment those fire.
-     */
     public function toocheke_bluesky_show_success_notice()
     {
         if (empty($_GET['post'])) {
@@ -923,14 +850,8 @@ trait Toocheke_Companion_Bluesky
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Successfully posted to Bluesky.', 'toocheke-companion') . '</p></div>';
     }
 
-    /**
-     * Companion to toocheke_bluesky_set_success_notice() for the opposite
-     * case: the "Post to Bluesky Now" checkbox was checked on a manual
-     * publish, but nothing was actually sent because this exact post had
-     * already been shared before (e.g. unpublish -> republish). Without
-     * this, an author checking the box would have no way of knowing their
-     * checkbox click was silently a no-op.
-     */
+    // Lets an author know their "Post to Bluesky Now" checkbox click was
+    // a no-op because this post was already shared before.
     private function toocheke_bluesky_set_already_posted_notice($post_id)
     {
         set_transient('toocheke_bluesky_already_posted_' . get_current_user_id() . '_' . $post_id, 1, MINUTE_IN_SECONDS);
@@ -955,52 +876,27 @@ trait Toocheke_Companion_Bluesky
             '</p></div>';
     }
 
-    /* =========================================================================
-       PUBLISH-TIME TRIGGER
-    ========================================================================= */
-
-    /**
-     * Post IDs that toocheke_bluesky_maybe_post_on_publish() has determined
-     * should be posted, along with whether that determination came from the
-     * scheduled/automatic path or the manual checkbox path. Populated on
-     * transition_post_status (which is the hook that actually tells us
-     * old/new status), consumed by toocheke_bluesky_maybe_post_after_save()
-     * on the generic save_post hook (priority 999) — see that method's docblock for why posting
-     * itself is deliberately deferred to a later hook rather than happening
-     * immediately here.
-     *
-     * @var array<int, bool> post ID => true if this was the manual/checkbox
-     *      path (false/absent = scheduled/automatic path)
-     */
+    // Post IDs that toocheke_bluesky_maybe_post_on_publish() decided
+    // should be posted, and whether that was the manual checkbox path.
+    // Populated on transition_post_status, consumed on save_post
+    // (priority 999) — see that method for why posting is deferred.
+    //
+    // @var array<int, bool> post ID => true if manual/checkbox path
     private $toocheke_bluesky_pending = [];
 
-    /**
-     * Fires on every post status transition. Only acts on comic/manga_chapter
-     * posts moving INTO "publish" for the first time (never on subsequent
-     * saves/updates of an already-published post, which prevents any
-     * possibility of a duplicate Bluesky post).
-     *
-     * This method only DECIDES whether a post should go to Bluesky — it
-     * deliberately does not post it. transition_post_status fires quite
-     * early inside wp_insert_post(), BEFORE the metabox save handlers that
-     * write fields like the transcript, hovertext, or blog post content to
-     * the database. Posting from here would mean building the Bluesky
-     * message from whatever those fields happened to contain from a PRIOR
-     * save — empty, for a field filled in for the very first time on this
-     * same Publish click — even though the author just typed real content
-     * into it. The actual posting happens on the generic save_post hook instead (see
-     * toocheke_bluesky_maybe_post_after_save()), which fires after every
-     * metabox has already saved, so the post is always built from the
-     * genuinely-current, just-saved field values.
-     */
+    // Only acts on comic/manga_chapter posts moving INTO "publish" for
+    // the first time. Only DECIDES whether to post — doesn't post here,
+    // since transition_post_status fires before metabox save handlers
+    // write fields like transcript/hovertext, so the post could be built
+    // from stale (pre-save) data. Actual posting happens on save_post
+    // instead (toocheke_bluesky_maybe_post_after_save()), once every
+    // metabox has saved.
     public function toocheke_bluesky_maybe_post_on_publish($new_status, $old_status, $post)
     {
         if (! in_array($post->post_type, ['comic', 'manga_chapter'], true)) {
             return;
         }
-        // Only the actual transition INTO publish matters, and only once —
-        // this also naturally excludes ordinary "Update" saves of a post
-        // that was already published.
+        // Only a fresh transition into publish, not a re-save.
         if ('publish' !== $new_status || 'publish' === $old_status) {
             return;
         }
@@ -1059,17 +955,11 @@ trait Toocheke_Companion_Bluesky
         $this->toocheke_bluesky_pending[$post->ID] = $is_manual;
     }
 
-    /**
-     * Fires on the generic 'save_post' hook at priority 999 — deliberately
-     * high, so it runs after every one of this plugin's own field-save
-     * handlers (transcript, hovertext, blog post editor, etc.), which are
-     * all themselves hooked to plain 'save_post' at the default priority.
-     * By the time this runs, any field the author just typed in is
-     * guaranteed to already be in the database. Fires for every post save
-     * on the site, not just comic/manga_chapter — the pending-list check
-     * below is what filters that down to only the exact posts
-     * toocheke_bluesky_maybe_post_on_publish() actually flagged.
-     */
+    // Fires on save_post at priority 999, deliberately after this
+    // plugin's own field-save handlers, so any field the author just
+    // typed is already in the database by the time this runs. Fires for
+    // every post save — the pending-list check below filters it down to
+    // only the posts flagged on publish.
     public function toocheke_bluesky_maybe_post_after_save($post_id, $post, $update)
     {
         if (! array_key_exists($post_id, $this->toocheke_bluesky_pending)) {
@@ -1104,10 +994,6 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /* =========================================================================
-       RANDOM ARCHIVE RE-POSTING (cron)
-    ========================================================================= */
-
     public function toocheke_bluesky_register_cron_interval($schedules)
     {
         $number = max(1, (int) get_option('toocheke-bluesky-random-frequency-number', 6));
@@ -1128,12 +1014,8 @@ trait Toocheke_Companion_Bluesky
         return $schedules;
     }
 
-    /**
-     * Schedules or unschedules the random-post cron based on whether either
-     * random-posting option is currently enabled. Cheap to run on every
-     * 'init' since it's just two get_option() calls and, at most, a
-     * wp_next_scheduled() check.
-     */
+    // Schedules/unschedules the random-post cron based on whether
+    // either random-posting option is enabled.
     public function toocheke_bluesky_maybe_schedule_cron()
     {
         $enabled   = get_option('toocheke-bluesky-random-comics') || get_option('toocheke-bluesky-random-manga-chapters');
@@ -1146,12 +1028,8 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /**
-     * When the frequency number/unit changes, the already-queued next cron
-     * run is still using the OLD interval (that's just how wp_schedule_event
-     * works). Re-schedule immediately so a settings change takes effect on
-     * the very next run rather than one run late.
-     */
+    // wp_schedule_event keeps the OLD interval for an already-queued run,
+    // so re-schedule immediately when frequency settings change.
     public function toocheke_bluesky_reschedule_cron_on_settings_change()
     {
         if (wp_next_scheduled('toocheke_bluesky_random_post_cron')) {
@@ -1160,22 +1038,18 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /**
-     * The cron job itself — posts exactly one random, not-yet-posted comic
-     * or manga chapter. When both types are enabled, alternates (round
-     * robin) between them across runs.
-     */
+    // Posts one random, not-yet-posted comic or manga chapter — round
+    // robin between types when both are enabled.
     public function toocheke_bluesky_run_random_post()
     {
         $comics_on = get_option('toocheke-bluesky-random-comics');
         $manga_on  = get_option('toocheke-bluesky-random-manga-chapters');
         if (! $comics_on && ! $manga_on) {
-            return; // Cron will be unscheduled separately; bail defensively.
+            return;
         }
 
         $last_type = get_option('toocheke-bluesky-last-random-type', '');
         if ($comics_on && $manga_on) {
-            // Round robin: try whichever type didn't run last time first.
             $order = ('comic' === $last_type) ? ['manga_chapter', 'comic'] : ['comic', 'manga_chapter'];
         } elseif ($comics_on) {
             $order = ['comic'];
@@ -1186,7 +1060,7 @@ trait Toocheke_Companion_Bluesky
         foreach ($order as $post_type) {
             $post_id = $this->toocheke_bluesky_get_random_eligible_id($post_type);
             if (! $post_id) {
-                continue; // Nothing postable for this type even after a reset attempt.
+                continue;
             }
 
             $uri = $this->toocheke_bluesky_post_to_bluesky($post_id, $post_type);
@@ -1196,10 +1070,7 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /**
-     * Returns a random eligible post ID for the given type, automatically
-     * resetting (and re-querying) if the pool has been fully exhausted.
-     */
+    // Random eligible post ID, resetting the pool if exhausted.
     public function toocheke_bluesky_get_random_eligible_id($post_type)
     {
         $post_id = $this->toocheke_bluesky_query_random_unposted_id($post_type);
@@ -1207,9 +1078,8 @@ trait Toocheke_Companion_Bluesky
             return $post_id;
         }
 
-        // Pool is empty — either genuinely nothing eligible exists yet (e.g.
-        // a brand-new site with no featured images), or every eligible post
-        // has already been shared once and it's time to loop the archive.
+        // Empty pool: either nothing eligible exists yet, or the archive
+        // needs to loop.
         if (! $this->toocheke_bluesky_type_has_any_eligible_post($post_type)) {
             return false;
         }
@@ -1223,14 +1093,9 @@ trait Toocheke_Companion_Bluesky
         return $this->toocheke_bluesky_query_random_unposted_id($post_type);
     }
 
-    /**
-     * Pulls just the IDs of eligible, not-yet-posted posts and picks one at
-     * random in PHP — deliberately avoiding `orderby => rand` in WP_Query,
-     * which forces a full, index-less table sort in MySQL and gets slower as
-     * an archive grows. This ID-only approach stays fast even on very large
-     * archives since cron runs are infrequent (whatever the admin sets, e.g.
-     * every few hours/days) so there's no need for extra caching here.
-     */
+    // Picks a random eligible ID in PHP rather than `orderby => rand` in
+    // WP_Query, which forces a full table sort and slows down as the
+    // archive grows.
     public function toocheke_bluesky_query_random_unposted_id($post_type)
     {
         $ids = get_posts([
@@ -1239,7 +1104,7 @@ trait Toocheke_Companion_Bluesky
             'posts_per_page' => -1,
             'fields'         => 'ids',
             'meta_query'     => [
-                ['key' => '_thumbnail_id', 'compare' => 'EXISTS'], // must have a featured image
+                ['key' => '_thumbnail_id', 'compare' => 'EXISTS'],
                 ['key' => 'toocheke_bluesky_posted', 'compare' => 'NOT EXISTS'],
             ],
         ]);
@@ -1253,18 +1118,14 @@ trait Toocheke_Companion_Bluesky
         return (int) $ids[array_rand($ids)];
     }
 
-    /**
-     * Used only to decide whether an empty result from the query above means
-     * "reset the archive" or "there's nothing to post at all" (e.g. no
-     * comics with featured images exist yet) — the latter should never
-     * trigger a reset loop.
-     */
+    // Distinguishes "reset the archive" from "nothing to post at all" —
+    // the latter should never trigger a reset loop.
     public function toocheke_bluesky_type_has_any_eligible_post($post_type)
     {
         $ids = get_posts([
             'post_type'      => $post_type,
             'post_status'    => 'publish',
-            'posts_per_page' => -1, // must check every candidate against the filter below, not just the first one found
+            'posts_per_page' => -1,
             'fields'         => 'ids',
             'meta_query'     => [['key' => '_thumbnail_id', 'compare' => 'EXISTS']],
         ]);
@@ -1274,11 +1135,7 @@ trait Toocheke_Companion_Bluesky
         return ! empty($ids);
     }
 
-    /**
-     * Shared by both toocheke_bluesky_query_random_unposted_id() and
-     * toocheke_bluesky_type_has_any_eligible_post() above -- applies the
-     * Random Archive Posting filter to a list of candidate IDs.
-     */
+    // Applies the Random Archive Posting filter to a list of candidates.
     private function toocheke_bluesky_filter_ids_for_random(array $ids, $post_type)
     {
         if (empty($ids)) {
@@ -1290,12 +1147,7 @@ trait Toocheke_Companion_Bluesky
         }));
     }
 
-    /**
-     * Bulk-clears the "posted" flags for every post of the given type in one
-     * query, so the random-archive pool starts over. Mirrors the efficient
-     * bulk-delete approach used elsewhere in the Toocheke ecosystem for
-     * exactly this kind of "reset everything" operation.
-     */
+    // Bulk-clears "posted" flags for one post type in a single query.
     public function toocheke_bluesky_reset_posted_flags($post_type)
     {
         global $wpdb;
@@ -1308,10 +1160,6 @@ trait Toocheke_Companion_Bluesky
             $post_type
         ));
     }
-
-    /* =========================================================================
-       SHARED "POSTED" STATE HELPERS
-    ========================================================================= */
 
     public function toocheke_bluesky_is_type_enabled($post_type)
     {
@@ -1337,18 +1185,10 @@ trait Toocheke_Companion_Bluesky
         }
     }
 
-    /**
-     * Permalink for a post, with a series id (?sid=) appended when the post
-     * is a comic assigned to a series. Mirrors the same handling already
-     * used for RSS permalinks — see toocheke_add_series_id_to_rss_permalink()
-     * in class-toocheke-companion-rss-feeds.php: a comic's post_parent is
-     * its series, and the front end needs that ?sid= param to render the
-     * comic in the context of that series (series-scoped navigation,
-     * background/branding, etc.) rather than as a standalone page. Manga
-     * chapters don't use this same post_parent-as-series convention, so
-     * this only applies to the 'comic' post type, exactly like the RSS
-     * version.
-     */
+    // Appends ?sid= for a comic assigned to a series (mirrors
+    // toocheke_add_series_id_to_rss_permalink() in
+    // class-toocheke-companion-rss-feeds.php) — manga chapters don't use
+    // post_parent-as-series, so this only applies to 'comic'.
     private function toocheke_bluesky_get_post_url($post_id, $post_type)
     {
         $permalink = get_permalink($post_id);
@@ -1365,12 +1205,8 @@ trait Toocheke_Companion_Bluesky
         return $permalink;
     }
 
-    /* =========================================================================
-       CORE: BUILD + SEND ONE POST
-       This is the single shared entry point used by both the publish-time
-       trigger and the random-repost cron job.
-    ========================================================================= */
-
+    // Shared entry point for both the publish-time trigger and the
+    // random-repost cron job.
     public function toocheke_bluesky_post_to_bluesky($post_id, $post_type)
     {
         $auth = $this->toocheke_bluesky_authenticate();
@@ -1405,16 +1241,8 @@ trait Toocheke_Companion_Bluesky
         return sprintf('"%s" (#%d): ', get_the_title($post_id), $post_id);
     }
 
-    /* =========================================================================
-       RECORD BUILDERS (one per post format)
-    ========================================================================= */
-
-    /**
-     * Builds an app.bsky.feed.post record using a link-card embed (title,
-     * description, and image inside one preview card), plus a short caption
-     * above the card (see toocheke_bluesky_build_card_caption_text()) so the
-     * post doesn't read as an automated, caption-less link drop.
-     */
+    // Link-card embed (title, description, image) plus a short caption
+    // above it so the post doesn't read as a caption-less link drop.
     private function toocheke_bluesky_build_card_record($post_id, $post_type, $token)
     {
         $image_url = get_the_post_thumbnail_url($post_id, 'full');
@@ -1442,26 +1270,11 @@ trait Toocheke_Companion_Bluesky
         ];
     }
 
-    /**
-     * Builds the short caption shown above a Card-format post. Unlike the
-     * Text+Image template, there's no %%URL%% placeholder — the link card
-     * itself already carries the link, so repeating it in the caption text
-     * would be redundant and would need its own separate facet handling for
-     * no real benefit. %%URL%% is deliberately excluded from the
-     * substitution map here (see toocheke_bluesky_get_template_placeholders()),
-     * and any literal "%%URL%%" left in a caption (e.g. from copy-pasting
-     * the Text+Image template by mistake) is stripped to an empty string
-     * rather than left visible as a raw, broken-looking token in a live
-     * post. Because there's no URL to protect, truncation here is a simple
-     * hard cap rather than the title-shortening logic used in
-     * toocheke_bluesky_build_message_text().
-     *
-     * Returns ['text' => ..., 'facets' => [...]] rather than a bare
-     * string, so any %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% used in the
-     * caption still render as real hashtags (see
-     * toocheke_bluesky_build_tag_facets()) — not just the URL format gets
-     * that treatment.
-     */
+    // Short caption above a Card-format post. No %%URL%% placeholder
+    // here — the link card already carries the link, so any literal
+    // "%%URL%%" left in the template is stripped rather than shown raw.
+    // Still returns facets so %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%%
+    // render as real hashtags.
     private function toocheke_bluesky_build_card_caption_text($post_id, $post_type, $title)
     {
         $template = get_option('toocheke-bluesky-card-caption');
@@ -1487,10 +1300,7 @@ trait Toocheke_Companion_Bluesky
         ];
     }
 
-    /**
-     * Builds an app.bsky.feed.post record with the featured image embedded
-     * directly and a visible, clickable link to the post in the text.
-     */
+    // Featured image embedded directly, with a visible clickable link.
     private function toocheke_bluesky_build_text_image_record($post_id, $post_type, $token)
     {
         $image_url = get_the_post_thumbnail_url($post_id, 'full');
@@ -1530,16 +1340,8 @@ trait Toocheke_Companion_Bluesky
         ];
     }
 
-    /* =========================================================================
-       TEXT / ALT-TEXT / DESCRIPTION LOGIC
-    ========================================================================= */
-
-    /**
-     * Alt text for the Text+Image format's embedded image.
-     * Comic: same fallback chain as the Card format's description, see
-     * toocheke_bluesky_get_comic_fallback_text(). Manga chapter: the
-     * "notes" meta field, if present, same as the Card description.
-     */
+    // Alt text for the Text+Image image. Comic: same fallback chain as
+    // the Card description. Manga chapter: the "notes" field.
     private function toocheke_bluesky_get_alt_text($post_id, $post_type)
     {
         if ('comic' === $post_type) {
@@ -1549,12 +1351,8 @@ trait Toocheke_Companion_Bluesky
         return trim((string) get_post_meta($post_id, 'notes', true));
     }
 
-    /**
-     * Description for the Card format.
-     * Comic: same fallback chain as the Text+Image alt text, see
-     * toocheke_bluesky_get_comic_fallback_text(). Manga chapter: the "notes"
-     * meta field only, or empty.
-     */
+    // Description for the Card format. Comic: same fallback chain as the
+    // Text+Image alt text. Manga chapter: the "notes" field, or empty.
     private function toocheke_bluesky_get_card_description($post_id, $post_type)
     {
         if ('manga_chapter' === $post_type) {
@@ -1564,22 +1362,14 @@ trait Toocheke_Companion_Bluesky
         return $this->toocheke_bluesky_get_comic_fallback_text($post_id);
     }
 
-    /**
-     * Shared comic-only fallback chain, used by both the Text+Image format's
-     * alt text and the Card format's description: comic-hovertext -> the
-     * post excerpt (only if one was actually, manually set) ->
-     * transcript meta field (truncated to 200 chars) -> the blog-post field
-     * content (truncated to 200 chars) -> empty if none of those have
-     * anything.
-     *
-     * The excerpt is read with an explicit 'raw' context — get_post_field()
-     * defaults to 'display' context, which runs the value through the
-     * `post_excerpt` filter. If any other plugin/theme hooks that filter,
-     * it can make this look non-empty even when no excerpt was ever
-     * manually typed, which would silently skip the transcript/blog-post
-     * fallbacks below every single time. 'raw' reads the literal database
-     * value with no filtering, which is what "if it has text" actually means.
-     */
+    // Comic-only fallback chain, shared by the alt text and description
+    // above: hovertext -> manually-set excerpt -> transcript (200 chars)
+    // -> blog-post content (200 chars) -> empty.
+    //
+    // Excerpt is read with 'raw' context, not the default 'display' —
+    // 'display' runs it through the post_excerpt filter, which another
+    // plugin could hook to make it look non-empty when nothing was
+    // actually typed, silently skipping the fallbacks below.
     private function toocheke_bluesky_get_comic_fallback_text($post_id)
     {
         $hovertext = trim((string) get_post_meta($post_id, 'comic-hovertext', true));
@@ -1614,25 +1404,12 @@ trait Toocheke_Companion_Bluesky
         return rtrim(mb_substr($text, 0, $max_chars)) . '…';
     }
 
-    /**
-     * Resolves every supported %%PLACEHOLDER%% for the given post into an
-     * associative array, used by both toocheke_bluesky_build_message_text()
-     * (Text+Image template) and toocheke_bluesky_build_card_caption_text()
-     * (Card Caption, which additionally excludes %%URL%% -- see that
-     * method's own docblock for why).
-     *
-     * Every value here is already plain text (HTML stripped where the
-     * source field can contain rich content, e.g. %%BLOG_POST%%) and
-     * left untruncated -- the two callers above are what enforce
-     * Bluesky's 300-character limit, once, after full substitution; this
-     * method's only job is producing correct values, not managing length.
-     *
-     * Comic-only placeholders resolve to '' on a manga_chapter post, and
-     * manga_chapter-only placeholders resolve to '' on a comic post --
-     * deliberately, so a single shared template can be used across both
-     * post types without ever leaving a raw, unresolved %%TOKEN%% visible
-     * in a published post.
-     */
+    // Resolves every %%PLACEHOLDER%% for a post into an associative
+    // array, used by both the message-text and card-caption builders.
+    // Values are plain text and left untruncated — length limits are
+    // enforced by the callers, not here. Comic-only placeholders resolve
+    // to '' on a manga_chapter post and vice versa, so a shared template
+    // never leaves a raw %%TOKEN%% visible.
     private function toocheke_bluesky_get_template_placeholders($post_id, $post_type, $title, $url)
     {
         $placeholders = [
@@ -1710,25 +1487,13 @@ trait Toocheke_Companion_Bluesky
         ];
     }
 
-    /**
-     * Builds one app.bsky.richtext.facet#tag facet per occurrence of each
-     * given hashtag name found in $text (as "#Name") -- this is what
-     * actually makes %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% render as
-     * real, clickable, searchable hashtags on Bluesky. Just posting text
-     * that happens to start with "#" does nothing on its own via the API
-     * (unlike typing directly into Bluesky's own compose box, which does
-     * its own client-side detection) -- the AT Protocol requires an
-     * explicit facet annotating the exact byte range for any client to
-     * treat a substring as a tag.
-     *
-     * Built against the FINAL, already-truncated text (not the
-     * pre-truncation template output) -- passed in by both callers only
-     * after their own truncation/shortening logic has already run, so a
-     * facet can never point past the end of what's actually being
-     * posted. If truncation happened to cut a hashtag in half, that
-     * leftover partial "#Wo" text is simply left as plain text rather
-     * than producing an invalid or misleading facet for it.
-     */
+    // Builds one app.bsky.richtext.facet#tag per hashtag occurrence in
+    // $text — the AT Protocol requires an explicit facet for any client
+    // to treat a substring as a clickable tag; posting text starting
+    // with "#" alone does nothing via the API. Built against the FINAL,
+    // already-truncated text so a facet never points past what's
+    // actually posted; a hashtag cut in half by truncation is left as
+    // plain text rather than an invalid facet.
     private function toocheke_bluesky_build_tag_facets($text, array $hashtag_names)
     {
         $facets = [];
@@ -1775,23 +1540,13 @@ trait Toocheke_Companion_Bluesky
         return implode($separator, wp_list_pluck($terms, 'name'));
     }
 
-    /**
-     * Term names as Bluesky-safe hashtags for %%CHARACTERS%%,
-     * %%LOCATIONS%%, and %%TAGS%% -- same convention Jetpack Social uses
-     * for its own {tags} placeholder. Hashtags can't contain spaces or
-     * punctuation, so each term name is stripped down to letters/numbers/
-     * underscore only (Unicode-aware, so non-English character names
-     * aren't mangled) before being prefixed with #.
-     *
-     * Every clean tag name (without the # prefix) is also appended to
-     * $collected_tags by reference -- toocheke_bluesky_get_template_placeholders()
-     * gathers these across all three hashtag placeholders so
-     * toocheke_bluesky_build_tag_facets() knows exactly which substrings
-     * in the final assembled text need a real app.bsky.richtext.facet#tag
-     * facet, rather than just being plain "#Word" text with no facet at
-     * all (which is what a hashtag with no facet actually is to Bluesky
-     * -- inert, unclickable, unsearchable text).
-     */
+    // Term names as Bluesky-safe hashtags for %%CHARACTERS%%,
+    // %%LOCATIONS%%, %%TAGS%% — each stripped to letters/numbers/
+    // underscore (Unicode-aware) before the # prefix, since hashtags
+    // can't contain spaces or punctuation. Each clean tag name is also
+    // appended to $collected_tags by reference, so
+    // toocheke_bluesky_build_tag_facets() knows which substrings need a
+    // real facet — without one, a "#Word" is just inert, unclickable text.
     private function toocheke_bluesky_terms_as_hashtags($post_id, $taxonomy, array &$collected_tags)
     {
         $terms = get_the_terms($post_id, $taxonomy);
@@ -1811,29 +1566,12 @@ trait Toocheke_Companion_Bluesky
         return implode(' ', $hashtags);
     }
 
-    /**
-     * Assembles the Text+Image format's post text from the admin-configured
-     * template, substituting every placeholder resolved by
-     * toocheke_bluesky_get_template_placeholders().
-     *
-     * Bluesky's 300-character (grapheme) limit applies to the full text
-     * including the URL — Bluesky does not shorten links or exempt them from
-     * the count (confirmed directly against the AT Protocol post lexicon).
-     * If a real post's combined placeholders push the assembled text over
-     * that limit, only %%TITLE%% is shortened to make room — it was the
-     * single elastic placeholder before this template grew to support many
-     * more fields, and remains the one deliberately shortened now; every
-     * other placeholder (excerpt, blog post content, hashtags, etc.) keeps
-     * its full value. If TITLE alone can't free up enough room, the whole
-     * assembled string is hard-truncated as a last resort so the API call
-     * never fails outright.
-     *
-     * Returns ['text' => ..., 'facets' => [...]] rather than a bare
-     * string — the URL link facet (previously built separately by the
-     * caller) and any %%CHARACTERS%%/%%LOCATIONS%%/%%TAGS%% hashtag
-     * facets are both built here, once, against the final text, so the
-     * caller doesn't need its own facet-building logic at all.
-     */
+    // Assembles the Text+Image post text from the admin template.
+    // Bluesky's 300-character limit includes the URL (no auto-shortening),
+    // so if the assembled text runs over, %%TITLE%% is shortened first —
+    // every other placeholder keeps its full value — and the whole string
+    // is hard-truncated as a last resort. Returns facets (link + hashtag)
+    // built against the final text, so the caller doesn't need its own.
     private function toocheke_bluesky_build_message_text($post_id, $post_type, $title, $url)
     {
         $template = get_option('toocheke-bluesky-message-template');
@@ -1883,13 +1621,7 @@ trait Toocheke_Companion_Bluesky
         ];
     }
 
-    /* =========================================================================
-       BLUESKY / AT-PROTOCOL API LAYER
-       These three functions are the only places that talk to Bluesky
-       directly. See the file header note about keeping this isolated for
-       easy upgrades if the API ever changes.
-    ========================================================================= */
-
+    // The only three functions that talk to Bluesky directly.
     private function toocheke_bluesky_authenticate()
     {
         $handle   = get_option('toocheke-bluesky-handle');
@@ -1923,16 +1655,10 @@ trait Toocheke_Companion_Bluesky
         return ['token' => $body['accessJwt'], 'did' => $body['did']];
     }
 
-    /**
-     * Bluesky's blob size limit (2MB as of their April 2026 update). We stay
-     * a little under it for safety since this is an undocumented margin,
-     * not a hard protocol constant.
-     *
-     * NOTE: this is a method, not a class constant, because this file is a
-     * trait (see `trait Toocheke_Companion_Bluesky` above) and traits
-     * cannot have constants until PHP 8.2 — a class constant here fatals
-     * with "Traits cannot have constants" on any older PHP version.
-     */
+    // Bluesky's blob size limit (2MB as of April 2026), with a small
+    // safety margin since that's not a documented hard constant. A
+    // method rather than a class constant because traits can't have
+    // constants until PHP 8.2.
     private function toocheke_bluesky_max_image_bytes()
     {
         return 1950 * 1024;
@@ -2181,12 +1907,7 @@ trait Toocheke_Companion_Bluesky
         return $body['uri'];
     }
 
-    /* =========================================================================
-       CUMULATIVE, SITE-WIDE ERROR NOTICE
-       Deliberately just one capped array option — no per-post log, no
-       dashboard. See file header for the reasoning.
-    ========================================================================= */
-
+    // One capped array option for site-wide errors — no per-post log.
     public function toocheke_bluesky_log_error($message)
     {
         $errors = get_option('toocheke-bluesky-errors', []);

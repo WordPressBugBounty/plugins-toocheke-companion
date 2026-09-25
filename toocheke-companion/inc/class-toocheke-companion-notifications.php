@@ -8,10 +8,8 @@
 
 if (! defined('ABSPATH')) { exit; }
 
-// The schema version for this feature's two custom tables. Bump this
-// (and add a new branch in toocheke_notifications_maybe_upgrade_db())
-// any time the table structure changes in a later pass. This is
-// intentionally separate from TOOCHEKE_COMPANION_VERSION.
+// Schema version for this feature's two custom tables — bump when the
+// table structure changes. Separate from TOOCHEKE_COMPANION_VERSION.
 if (! defined('TOOCHEKE_NOTIFICATIONS_DB_VERSION')) {
     define('TOOCHEKE_NOTIFICATIONS_DB_VERSION', '1.1');
 }
@@ -24,44 +22,28 @@ if (! defined('TOOCHEKE_TURNSTILE_VERIFY_URL')) {
     define('TOOCHEKE_TURNSTILE_VERIFY_URL', 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
 }
 
-// The guaranteed minimum time a queued notification sits before it's
-// eligible to send -- see the docblock on
-// toocheke_notifications_process_queue_batch() for why this exists
-// alongside (not instead of) the 15-minute cron interval.
+// Guaranteed minimum time a queued notification sits before it's
+// eligible to send — see toocheke_notifications_process_queue_batch().
 if (! defined('TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES')) {
     define('TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES', 10);
 }
 
 trait Toocheke_Companion_Notifications
 {
-    /**
-     * Set by toocheke_notifications_signup_shortcode() /
-     * toocheke_notifications_manage_shortcode() at the moment each
-     * actually renders its form. Widgets (sidebars, footers, etc.)
-     * render outside $post->post_content, so there's no reliable way to
-     * know ahead of time whether either shortcode is present on a given
-     * page — instead, toocheke_notifications_enqueue_frontend_assets()
-     * checks these flags from wp_footer, which fires after every widget
-     * area and the main content have already rendered.
-     */
+    // Set when the signup/manage shortcode actually renders — widgets
+    // render outside $post->post_content, so there's no way to know
+    // ahead of time; enqueue_frontend_assets() checks these from
+    // wp_footer, after every widget area has rendered.
     private $toocheke_notify_render_flags = [
         'signup_rendered'    => false,
         'manage_rendered'    => false,
         'turnstile_rendered' => false,
     ];
 
-    /* =========================================================================
-       HOOK REGISTRATION
-       Everything this feature needs is wired up from this single method,
-       called once from init() in toocheke-companion.php — same pattern as
-       toocheke_bluesky_register_hooks().
-    ========================================================================= */
-
+    // Called once from init() in toocheke-companion.php.
     public function toocheke_notifications_register_hooks()
     {
-        // Keep the two custom tables current on every admin page load
-        // (cheap: one get_option() check unless a real upgrade is due —
-        // see the docblock on toocheke_notifications_maybe_upgrade_db()).
+        // Keep the two custom tables current on every admin page load.
         add_action('admin_init', [$this, 'toocheke_notifications_maybe_upgrade_db']);
 
         if (is_admin()) {
@@ -152,23 +134,10 @@ trait Toocheke_Companion_Notifications
         add_action('init', [$this, 'toocheke_notifications_maybe_schedule_cron']);
     }
 
-    /* =========================================================================
-       DATABASE TABLES
-    ========================================================================= */
-
-    /**
-     * Creates (or updates, via dbDelta's own diffing) the two tables this
-     * feature needs. Safe to call repeatedly — dbDelta only ever adds/
-     * modifies what's different from the schema passed in, it never drops
-     * or truncates existing data.
-     *
-     * Called from two places, both intentional:
-     * - register_activation_hook in toocheke-companion.php, for sites
-     *   installing/activating the plugin fresh.
-     * - toocheke_notifications_maybe_upgrade_db(), for sites that already
-     *   have the plugin active and simply update the plugin files (the
-     *   normal WP auto-update path), which never fires an activation hook.
-     */
+    // Called from register_activation_hook (fresh installs) and
+    // toocheke_notifications_maybe_upgrade_db() (plugin updates, which
+    // don't fire an activation hook). Safe to call repeatedly — dbDelta
+    // only adds/modifies, never drops data.
     public function toocheke_notifications_create_tables()
     {
         global $wpdb;
@@ -180,12 +149,9 @@ trait Toocheke_Companion_Notifications
         $subscribers_table = $wpdb->prefix . 'toocheke_notify_subscribers';
         $queue_table       = $wpdb->prefix . 'toocheke_notify_queue';
 
-        // Subscribers: one row per email address per site. `token` is
-        // reused for both the confirmation link and the manage/unsubscribe
-        // link — it's regenerated whenever a new one needs to be issued,
-        // so a stale token in an old email simply stops matching.
-        // `series_prefs` holds a JSON-encoded array of series/manga_series
-        // post IDs the subscriber wants; NULL/empty means "everything".
+        // Subscribers: one row per email. `token` covers both the
+        // confirmation and manage/unsubscribe links, reissued as needed.
+        // `series_prefs` is JSON-encoded post IDs; empty means "everything".
         $sql_subscribers = "CREATE TABLE {$subscribers_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             email VARCHAR(255) NOT NULL,
@@ -201,17 +167,11 @@ trait Toocheke_Companion_Notifications
             KEY status (status)
         ) {$charset_collate};";
 
-        // Send queue: one row per (subscriber, post) notification to be
-        // sent. Populated by the publish-time hook (later pass) and
-        // drained in batches by WP-Cron (later pass), mirroring the
-        // two-phase AJAX pattern already used elsewhere in this plugin
-        // for the CSV importer. The UNIQUE KEY exists so
-        // toocheke_notifications_queue_for_subscribers() can safely use
-        // INSERT IGNORE — WordPress/Gutenberg is known to fire
-        // transition_post_status more than once for a single publish
-        // action in some cases, and this guarantees that never results
-        // in the same subscriber getting queued (and thus emailed)
-        // twice for the same post.
+        // Send queue: one row per subscriber/post notification, drained
+        // in batches by WP-Cron. The UNIQUE KEY lets the queueing insert
+        // use INSERT IGNORE, since transition_post_status can fire more
+        // than once for a single publish — this keeps a subscriber from
+        // being emailed twice for the same post.
         $sql_queue = "CREATE TABLE {$queue_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             subscriber_id BIGINT UNSIGNED NOT NULL,
@@ -233,16 +193,10 @@ trait Toocheke_Companion_Notifications
         update_option('toocheke_notifications_db_version', TOOCHEKE_NOTIFICATIONS_DB_VERSION);
     }
 
-    /**
-     * Version-gated dbDelta runner — see the docblock on
-     * toocheke_notifications_create_tables() for why this exists
-     * alongside the activation hook rather than instead of it.
-     *
-     * Mirrors the existing toocheke_companion_upgrade_check() pattern in
-     * class-toocheke-companion-settings-page.php (version_compare against
-     * a stored option), just scoped to this feature's own table schema
-     * instead of the whole plugin.
-     */
+    // Version-gated dbDelta runner, mirroring
+    // toocheke_companion_upgrade_check() in
+    // class-toocheke-companion-settings-page.php, scoped to this
+    // feature's own table schema.
     public function toocheke_notifications_maybe_upgrade_db()
     {
         $installed_db_version = get_option('toocheke_notifications_db_version', '0');
@@ -252,29 +206,12 @@ trait Toocheke_Companion_Notifications
         }
     }
 
-    /* =========================================================================
-       SETTINGS TAB
-       Registration is called from the 'notification_options' case inside
-       toocheke_init_option_fields() in class-toocheke-companion-settings-page.php,
-       inside the same premium-theme check already wrapping 'buy_options'
-       and 'sponsor_options'. Everything else related to this tab lives
-       here so the feature stays self-contained, same as Bluesky.
-    ========================================================================= */
-
-    /**
-     * Single source of truth for each post type's default
-     * enabled/disabled state, used both when registering the settings
-     * fields below and when actually checking whether to queue a
-     * notification at publish time (see
-     * toocheke_notifications_is_post_type_enabled()). Keeping this in
-     * one place matters: get_option()'s own registered default only
-     * applies during a request where register_setting() has already run
-     * earlier in that same request (i.e. while actively viewing this
-     * settings tab) — a normal front-end publish or a WP-Cron run never
-     * triggers that, so relying on it there would silently treat every
-     * post type as disabled on any site where this tab had never once
-     * been saved.
-     */
+    // Single source of truth for each post type's default enabled state.
+    // get_option()'s own registered default only applies once
+    // register_setting() has run this request (i.e. viewing this
+    // settings tab) — a front-end publish or WP-Cron run never
+    // triggers that, so relying on it there would treat every post type
+    // as disabled on a site where this tab was never saved.
     private function toocheke_notifications_get_post_type_defaults()
     {
         return [
@@ -287,12 +224,8 @@ trait Toocheke_Companion_Notifications
         ];
     }
 
-    /**
-     * The correct, always-safe way to check whether a post type should
-     * trigger notifications — used at publish time. Do not call
-     * get_option('toocheke-notify-enable-' . $post_type) directly
-     * without this fallback; see the docblock above.
-     */
+    // The safe way to check whether a post type should notify — don't
+    // call get_option() directly, see the defaults method above.
     private function toocheke_notifications_is_post_type_enabled($post_type)
     {
         $defaults = $this->toocheke_notifications_get_post_type_defaults();
@@ -539,20 +472,12 @@ trait Toocheke_Companion_Notifications
         <?php
     }
 
-    /**
-     * Renders the live Turnstile widget + "Test Connection" button.
-     * The widget itself is mounted client-side by
-     * js/notifications-admin.js using Turnstile's explicit-render API
-     * (rather than the auto-render script tag) so it can be re-rendered
-     * if the admin pastes in a different Site Key without reloading the
-     * page. Solving the widget produces a token, which is sent — along
-     * with whatever Site/Secret Key are currently in the two fields
-     * above, NOT necessarily the saved options — to
-     * toocheke_notifications_ajax_test_turnstile() for server-side
-     * verification against Cloudflare's siteverify endpoint. This lets
-     * the admin test unsaved keys, same as the Bluesky tab's Test
-     * Connection button does for an unsaved handle/app password.
-     */
+    // Widget mounted client-side (js/notifications-admin.js) using
+    // Turnstile's explicit-render API so it can re-render if the admin
+    // pastes a different Site Key without reloading. Solving it sends
+    // the token plus whatever's currently in the two fields above (not
+    // necessarily saved) to the AJAX test handler — lets the admin test
+    // unsaved keys, same as Bluesky's Test Connection button.
     public function toocheke_notifications_turnstile_test_area_field()
     {
         ?>
@@ -573,14 +498,9 @@ trait Toocheke_Companion_Notifications
         echo '<p>' . esc_html__('Customize how the notification email itself looks — the logo shown above the message, and the signature shown at the bottom.', 'toocheke-companion') . '</p>';
     }
 
-    /**
-     * Reuses the plugin's existing generic media-uploader button (see
-     * .upload-custom-button in js/media.js, already enqueued site-wide
-     * in wp-admin via toocheke_admin_styles_and_scripts()) rather than
-     * adding a new uploader script — the button just needs matching
-     * data-hidden/data-image attributes pointing at this field's hidden
-     * input and preview image.
-     */
+    // Reuses the plugin's generic media-uploader button rather than a
+    // new uploader script — just needs matching data-hidden/data-image
+    // attributes pointing at this field's hidden input and preview image.
     public function toocheke_notifications_email_logo_field()
     {
         $logo_url = get_option('toocheke-notify-email-logo', '');
@@ -612,10 +532,6 @@ trait Toocheke_Companion_Notifications
         return $value ? 1 : 0;
     }
 
-    /* =========================================================================
-       ADMIN ASSETS
-    ========================================================================= */
-
     public function toocheke_notifications_enqueue_admin_assets()
     {
         if (empty($_GET['page']) || 'toocheke-options-page' !== $_GET['page']) {
@@ -625,14 +541,9 @@ trait Toocheke_Companion_Notifications
             return;
         }
 
-        // Cloudflare's own widget script — only ever loaded on this one
-        // admin tab, so it can't affect anything else on the site.
         // phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent -- Cloudflare Turnstile is a live anti-bot challenge service; it cannot be self-hosted without breaking verification.
         wp_enqueue_script('toocheke-turnstile-api', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
 
-        // filemtime() rather than the static plugin version — see the
-        // matching comment on toocheke_enqueue_options_nav_assets() in
-        // class-toocheke-companion-settings-page.php for why.
         $js_path = TOOCHEKE_COMPANION_PLUGIN_DIR . 'js/notifications-admin.js';
 
         wp_enqueue_script(
@@ -647,10 +558,6 @@ trait Toocheke_Companion_Notifications
             'nonce'   => wp_create_nonce('toocheke_notifications_test_turnstile'),
         ]);
     }
-
-    /* =========================================================================
-       AJAX: TEST TURNSTILE CONNECTION
-    ========================================================================= */
 
     public function toocheke_notifications_ajax_test_turnstile()
     {
@@ -697,10 +604,6 @@ trait Toocheke_Companion_Notifications
         )]);
     }
 
-    /* =========================================================================
-       PAGES & SHORTCODES SETTINGS FIELDS
-    ========================================================================= */
-
     public function toocheke_notifications_pages_section_message()
     {
         ?>
@@ -726,11 +629,8 @@ trait Toocheke_Companion_Notifications
             </tbody>
         </table>
         <?php
-        // Nudge, don't block: the feature still technically works without
-        // these selected (links fall back to the homepage — see
-        // toocheke_notifications_send_confirmation_email()), but a
-        // subscriber clicking a homepage link instead of a real
-        // confirmation page would be confusing, so flag it early.
+        // Nudge, don't block — the feature still works without these
+        // set (links fall back to the homepage), but flag it early.
         $missing = [];
         foreach ([
             'toocheke-notify-confirm-page'     => __('Confirmation', 'toocheke-companion'),
@@ -761,27 +661,15 @@ trait Toocheke_Companion_Notifications
         ]);
     }
 
-    /* =========================================================================
-       PREMIUM GATE
-       The settings TAB is hidden for non-Premium themes (see the
-       'notification_options' case in class-toocheke-companion-settings-page.php),
-       but that alone doesn't stop the public-facing shortcodes/AJAX from
-       working if a shortcode is left in page content after switching away
-       from Premium (or on a Companion-only site that never had the tab).
-       Every shortcode callback and the signup AJAX handler check this
-       directly so the feature is actually gated end-to-end, not just
-       hidden in wp-admin.
-    ========================================================================= */
-
+    // The settings tab is hidden for non-Premium themes, but that alone
+    // doesn't stop a leftover shortcode from working after switching
+    // away from Premium — every shortcode/AJAX handler checks this
+    // directly so the feature is gated end-to-end, not just in wp-admin.
     private function toocheke_notifications_is_premium_active()
     {
         $theme = wp_get_theme();
         return ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme);
     }
-
-    /* =========================================================================
-       SHORTCODES
-    ========================================================================= */
 
     public function toocheke_notifications_register_shortcodes()
     {
@@ -953,14 +841,8 @@ trait Toocheke_Companion_Notifications
         return $identity_line . $this->toocheke_notifications_message_box('success', __('You\'ve been unsubscribed. Sorry to see you go!', 'toocheke-companion'));
     }
 
-    /**
-     * [toocheke_notify_manage] — lets an existing subscriber switch
-     * between "notify me about everything" and a specific list of
-     * series/manga series, or unsubscribe entirely. Reads ?token= off
-     * the URL to identify the subscriber; the preference update itself
-     * goes through AJAX (toocheke_notifications_ajax_update_prefs) so
-     * the page doesn't reload.
-     */
+    // Lets a subscriber switch between "everything" and a specific
+    // series list, or unsubscribe — preference updates go through AJAX.
     public function toocheke_notifications_manage_shortcode($atts)
     {
         if (! $this->toocheke_notifications_is_premium_active()) {
@@ -1066,17 +948,10 @@ trait Toocheke_Companion_Notifications
         return ob_get_clean();
     }
 
-    /**
-     * Small shared renderer for the success/warning/error states used by
-     * the confirm/unsubscribe/manage shortcodes above. Uses inline
-     * styles (not just a CSS class) so the message stays legible
-     * regardless of the theme's page or widget background — a plain
-     * class was found during testing to be unreadable against dark
-     * sidebar backgrounds. A theme can still target
-     * .toocheke-notify-message-{success,warning,error} directly if it
-     * wants to restyle these; the inline styles just guarantee a sane
-     * default everywhere.
-     */
+    // Uses inline styles (not just a CSS class) so the message stays
+    // legible regardless of the theme's background — a plain class was
+    // unreadable against dark sidebars in testing. A theme can still
+    // target .toocheke-notify-message-{success,warning,error} directly.
     private function toocheke_notifications_message_box($type, $message)
     {
         $palette = [
@@ -1096,17 +971,10 @@ trait Toocheke_Companion_Notifications
         );
     }
 
-    /**
-     * Masks an email address for display on unsubscribe/manage pages,
-     * e.g. "ian@unfedartist.com" -> "i***@unfedartist.com". Shown so a
-     * subscriber (or someone a newsletter was forwarded to) can confirm
-     * *which* address a token-based link belongs to, without exposing
-     * the full address on a page that requires no login to view.
-     *
-     * Local parts of 1 character are masked as a single asterisk
-     * rather than left bare, since a bare single character plus domain
-     * is often enough to fully identify common short addresses.
-     */
+    // Masks an email for display on unsubscribe/manage pages, e.g.
+    // "ian@unfedartist.com" -> "i***@unfedartist.com", so a subscriber
+    // can confirm which address a token link belongs to without
+    // exposing the full address on a page that needs no login.
     private function toocheke_notifications_mask_email($email)
     {
         $at_pos = strrpos($email, '@');
@@ -1141,19 +1009,10 @@ trait Toocheke_Companion_Notifications
         );
     }
 
-    /* =========================================================================
-       FRONT-END ASSETS
-    ========================================================================= */
-
-    /**
-     * Only enqueues the (small) public JS file — and Cloudflare's
-     * Turnstile script, if it was actually used — on pages where the
-     * signup or manage shortcode actually rendered. Hooked to wp_footer
-     * (priority 1); see the docblock on $toocheke_notify_render_flags
-     * for why this can't be decided any earlier, e.g. from
-     * wp_enqueue_scripts against $post->post_content, which misses
-     * shortcodes placed in a sidebar/footer widget entirely.
-     */
+    // Enqueues the public JS (and Turnstile, if used) only on pages
+    // where the signup/manage shortcode actually rendered — hooked to
+    // wp_footer since a widget-placed shortcode wouldn't be caught by
+    // checking $post->post_content earlier, on wp_enqueue_scripts.
     public function toocheke_notifications_enqueue_frontend_assets()
     {
         if (! $this->toocheke_notifications_is_premium_active()) {
@@ -1187,10 +1046,6 @@ trait Toocheke_Companion_Notifications
             'turnstileEnabled' => (bool) get_option('toocheke-notify-turnstile-enable', 0),
         ]);
     }
-
-    /* =========================================================================
-       AJAX: PUBLIC SIGNUP + PREFERENCE UPDATES
-    ========================================================================= */
 
     public function toocheke_notifications_ajax_signup()
     {
@@ -1270,14 +1125,9 @@ trait Toocheke_Companion_Notifications
         return __('Almost done! Check your inbox for a confirmation email.', 'toocheke-companion');
     }
 
-    /* =========================================================================
-       TURNSTILE VERIFICATION (public path)
-       Separate from toocheke_notifications_ajax_test_turnstile() above,
-       which is the admin-only test panel and accepts an unsaved
-       secret/site key straight from the settings form. This one always
-       verifies against the SAVED secret key, for real public signups.
-    ========================================================================= */
-
+    // Verifies against the SAVED secret key for real public signups —
+    // separate from the admin test panel above, which uses an unsaved
+    // key straight from the settings form.
     private function toocheke_notifications_verify_turnstile_token($secret_key, $token)
     {
         $response = wp_remote_post(TOOCHEKE_TURNSTILE_VERIFY_URL, [
@@ -1296,10 +1146,6 @@ trait Toocheke_Companion_Notifications
         $body = json_decode(wp_remote_retrieve_body($response), true);
         return ! empty($body['success']);
     }
-
-    /* =========================================================================
-       SUBSCRIBER DATA HELPERS
-    ========================================================================= */
 
     private function toocheke_notifications_generate_token()
     {
@@ -1323,19 +1169,12 @@ trait Toocheke_Companion_Notifications
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE token = %s", $token));
     }
 
-    /**
-     * Inserts a brand-new subscriber, or handles a repeat signup for an
-     * email address already on file:
-     * - pending      -> resend the same confirmation link (no new token
-     *                   needed; the old email's link still works).
-     * - unsubscribed -> treat as re-subscribing: issue a fresh token
-     *                   (deliberately not reusing the old one, in case
-     *                   it's sitting in an old, possibly-forwarded email)
-     *                   and send a new confirmation.
-     * - confirmed    -> already subscribed; do nothing. The AJAX handler
-     *                   still reports generic success either way, so
-     *                   this never reveals subscription status.
-     */
+    // New subscriber, or repeat signup for an existing email:
+    // pending -> resend the same confirmation link. unsubscribed ->
+    // re-subscribe with a fresh token (not reusing the old one, in case
+    // it's in an old forwarded email). confirmed -> no-op. Either way
+    // the AJAX handler reports generic success, so this never reveals
+    // subscription status.
     private function toocheke_notifications_create_or_resend_subscriber($email, $series_id = 0)
     {
         global $wpdb;
@@ -1362,10 +1201,8 @@ trait Toocheke_Companion_Notifications
         }
 
         if ('pending' === $existing->status) {
-            // They might submit the signup form twice, for two different
-            // series, before ever confirming — broaden (never narrow)
-            // their pending prefs the same way a confirmed subscriber's
-            // would be.
+            // May submit the form twice for two different series before
+            // ever confirming — broaden, never narrow, their prefs.
             $new_prefs = $this->toocheke_notifications_broaden_series_prefs($existing->series_prefs, $series_id);
             if ($new_prefs !== $existing->series_prefs) {
                 $wpdb->update($table, ['series_prefs' => $new_prefs, 'updated_at' => $now], ['id' => $existing->id]);
@@ -1375,11 +1212,8 @@ trait Toocheke_Companion_Notifications
         }
 
         if ('unsubscribed' === $existing->status) {
-            // Re-subscribing after having unsubscribed starts fresh from
-            // exactly what this signup requests, rather than reviving
-            // whatever scope they had before unsubscribing — a
-            // deliberate, visible resubscribe rather than a silent scope
-            // change.
+            // Starts fresh from this signup's exact scope rather than
+            // reviving the old one — a deliberate resubscribe.
             $token        = $this->toocheke_notifications_generate_token();
             $series_prefs = $series_id ? wp_json_encode([$series_id]) : null;
 
@@ -1394,14 +1228,9 @@ trait Toocheke_Companion_Notifications
         }
 
         if ('confirmed' === $existing->status) {
-            // Signing up again can only ever broaden an already-confirmed
-            // subscription, never narrow it — narrowing is a deliberate
-            // action available only on the Manage page, where the
-            // subscriber can see exactly what they're opting in/out of.
-            // No email needed either way; this stays a silent scope
-            // update, consistent with the AJAX handler's generic
-            // "check your inbox" response, so this never reveals whether
-            // the email address was already subscribed.
+            // Can only broaden an already-confirmed subscription, never
+            // narrow it — narrowing only happens on the Manage page. No
+            // email needed, keeping this a silent scope update.
             $new_prefs = $this->toocheke_notifications_broaden_series_prefs($existing->series_prefs, $series_id);
             if ($new_prefs !== $existing->series_prefs) {
                 $wpdb->update($table, ['series_prefs' => $new_prefs, 'updated_at' => $now], ['id' => $existing->id]);
@@ -1409,22 +1238,10 @@ trait Toocheke_Companion_Notifications
         }
     }
 
-    /**
-     * Returns the series_prefs value (a JSON-encoded array of post IDs,
-     * or null meaning "everything") that results from broadening
-     * $current_prefs_json to also include $new_series_id — this never
-     * narrows an existing subscription:
-     * - Already unrestricted (null) stays unrestricted, regardless of
-     *   what this signup requests.
-     * - An unscoped signup ($new_series_id === 0 — no series/manga_series
-     *   attribute on the shortcode) is a request for "everything," which
-     *   is broader than any specific list, so it always wins and clears
-     *   any existing filter.
-     * - Otherwise, the new series/manga series ID is added to whatever
-     *   list already existed (a plain union — WordPress post IDs are
-     *   unique across post types, so Series and Manga Series IDs can
-     *   never collide in this list).
-     */
+    // Broadens (never narrows) series_prefs to also include
+    // $new_series_id: already-unrestricted (null) stays that way; an
+    // unscoped signup (0, meaning "everything") always wins and clears
+    // any filter; otherwise the ID is added to the existing list.
     private function toocheke_notifications_broaden_series_prefs($current_prefs_json, $new_series_id)
     {
         if (empty($current_prefs_json)) {
@@ -1445,14 +1262,9 @@ trait Toocheke_Companion_Notifications
         return wp_json_encode(array_values($current_ids));
     }
 
-    /**
-     * Now uses the same branded HTML template as the actual notification
-     * email (toocheke_notifications_render_email_html()), per later
-     * feedback — this and every other email this feature sends all go
-     * through the one shared toocheke_notifications_send_email()
-     * wrapper below, so they can never drift out of sync in styling or
-     * error handling again.
-     */
+    // Now uses the shared toocheke_notifications_send_email() wrapper
+    // like every other email this feature sends, so styling and error
+    // handling can't drift out of sync between them.
     private function toocheke_notifications_send_confirmation_email($email, $token)
     {
         $confirm_page_id = (int) get_option('toocheke-notify-confirm-page');
@@ -1470,25 +1282,17 @@ trait Toocheke_Companion_Notifications
         $body_html = '<p>' . esc_html__('Please confirm your subscription by clicking the button below.', 'toocheke-companion') . '</p>'
             . '<p>' . esc_html__("If you didn't request this, you can safely ignore this email.", 'toocheke-companion') . '</p>';
 
-        // No manage-subscription link here — there's nothing to manage
-        // yet until they've actually confirmed.
+        // No manage-subscription link — there's nothing to manage until
+        // they've confirmed.
         return $this->toocheke_notifications_send_email($email, $subject, $body_html, $link, __('Confirm Now', 'toocheke-companion'), $unsubscribe_link, '');
     }
 
-    /* =========================================================================
-       PASS 3: PUBLISH-TIME QUEUEING
-       Fires on the same transition_post_status event Bluesky already
-       hooks (see class-toocheke-companion-bluesky.php) -- comic and
-       manga_chapter auto-posting and email queueing are two independent
-       features reacting to the same underlying "this just got published"
-       moment, not related to each other.
-    ========================================================================= */
-
-    /**
-     * Post types this feature can ever notify on.
-     */
+    // Post types this feature can ever notify on.
     private $toocheke_notify_supported_post_types = ['post', 'comic', 'manga_chapter', 'series', 'manga_series', 'manga_volume'];
 
+    // Fires on the same transition_post_status event Bluesky hooks —
+    // two independent features reacting to the same "just published"
+    // moment, unrelated to each other.
     public function toocheke_notifications_maybe_queue_on_publish($new_status, $old_status, $post)
     {
         if ('publish' !== $new_status || 'publish' === $old_status) {
@@ -1516,21 +1320,13 @@ trait Toocheke_Companion_Notifications
         }
     }
 
-    /**
-     * Resolves the series/manga_series post ID a given post is scoped
-     * to, for matching against subscribers' series_prefs. Mirrors the
-     * exact relationships toocheke_bluesky_get_post_url() already relies
-     * on in class-toocheke-companion-bluesky.php, rather than the
-     * separate legacy 'series_id' meta field that also exists on comic
-     * posts:
-     * - comic: native WordPress post_parent (NOT the 'series_id' meta).
-     * - manga_chapter / manga_volume: the 'series_id' meta field, which
-     *   for these two post types does point to the parent Manga Series
-     *   (manga content doesn't use the post_parent convention).
-     * - series / manga_series: publishing one of these IS that series,
-     *   so its own post ID is the scope.
-     * - post: not series-scoped at all.
-     */
+    // Resolves the series/manga_series a post is scoped to, for
+    // matching against subscribers' series_prefs — mirrors
+    // toocheke_bluesky_get_post_url()'s relationships, not the separate
+    // legacy 'series_id' meta some comics also carry:
+    // comic: post_parent. manga_chapter/manga_volume: 'series_id' meta
+    // (their actual parent-series link). series/manga_series: its own
+    // ID. post: not series-scoped.
     private function toocheke_notifications_get_scope_id($post_id, $post_type)
     {
         switch ($post_type) {
@@ -1550,15 +1346,9 @@ trait Toocheke_Companion_Notifications
         }
     }
 
-    /**
-     * Returns the IDs of every confirmed subscriber who should be
-     * notified for a post with the given post type and scope ID.
-     * - 'post' isn't series-scoped at all, so every confirmed subscriber
-     *   qualifies regardless of their series_prefs.
-     * - Otherwise, a subscriber qualifies if their series_prefs is
-     *   NULL/empty ("notify me about everything") or if $scope_id
-     *   appears in their series_prefs list.
-     */
+    // IDs of confirmed subscribers to notify: 'post' isn't series-scoped
+    // so every subscriber qualifies; otherwise a subscriber qualifies if
+    // series_prefs is empty ("everything") or contains $scope_id.
     private function toocheke_notifications_get_matching_subscriber_ids($post_type, $scope_id)
     {
         global $wpdb;
@@ -1608,10 +1398,6 @@ trait Toocheke_Companion_Notifications
         }
     }
 
-    /* =========================================================================
-       PASS 3: WP-CRON BATCH SENDER
-    ========================================================================= */
-
     public function toocheke_notifications_register_cron_schedule($schedules)
     {
         if (! isset($schedules['toocheke_notify_fifteen_minutes'])) {
@@ -1657,23 +1443,15 @@ trait Toocheke_Companion_Notifications
         wp_clear_scheduled_hook('toocheke_notifications_send_queue');
     }
 
-    /**
-     * Drains up to $batch_size pending queue rows per cron tick. Kept
-     * deliberately small (20 per run, every 15 minutes) so a popular
-     * post with many subscribers doesn't create one big send spike.
-     *
-     * Also enforces TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES as a
-     * genuine, guaranteed minimum age before a row is even eligible to
-     * send -- widening the cron interval to 15 minutes alone only
-     * changes how *often* this runs, not how long any individual row
-     * has actually been sitting when it's picked up: a post published
-     * right before a scheduled tick could otherwise still go out within
-     * seconds. This minimum-age check is what actually guarantees the
-     * "Publish by mistake instead of Schedule, then unpublish in time"
-     * safety window described in the Notifications tab notice,
-     * regardless of exactly when within the cron cycle a post happened
-     * to be queued.
-     */
+    // Drains up to 20 pending rows per cron tick (every 15 minutes) so
+    // a popular post doesn't create one big send spike.
+    //
+    // Also enforces MIN_SEND_DELAY_MINUTES as a guaranteed minimum age
+    // before a row is eligible — the 15-minute cron interval alone
+    // doesn't guarantee this, since a post published right before a
+    // tick could otherwise go out within seconds. This is what actually
+    // gives the "publish by mistake, unpublish in time" safety window
+    // described in the Notifications tab notice.
     public function toocheke_notifications_process_queue_batch()
     {
         global $wpdb;
@@ -1681,11 +1459,8 @@ trait Toocheke_Companion_Notifications
         $subscribers_table = $wpdb->prefix . 'toocheke_notify_subscribers';
         $batch_size        = 20;
 
-        // Computed the same way current_time('mysql') itself is built
-        // internally (gmdate() over an already site-offset-adjusted
-        // timestamp), so this cutoff compares apples-to-apples against
-        // created_at values regardless of the server's own PHP
-        // timezone setting.
+        // Built the same way current_time('mysql') is internally, so
+        // this compares apples-to-apples regardless of server timezone.
         $cutoff = gmdate('Y-m-d H:i:s', current_time('timestamp') - (TOOCHEKE_NOTIFICATIONS_MIN_SEND_DELAY_MINUTES * MINUTE_IN_SECONDS));
 
         $rows = $wpdb->get_results($wpdb->prepare(
@@ -1729,14 +1504,10 @@ trait Toocheke_Companion_Notifications
         }
     }
 
-    /**
-     * Builds the notification email's heading/content/links, then hands
-     * off to the shared toocheke_notifications_send_email() wrapper —
-     * every email this feature sends (this one and the confirmation
-     * email above) goes through that one method now, so template
-     * rendering, HTML content-type, and error logging/capture all stay
-     * in exactly one place.
-     */
+    // Builds the notification email's heading/content/links, then hands
+    // off to the shared send_email() wrapper along with the
+    // confirmation email above, so template rendering and error
+    // handling stay in one place.
     private function toocheke_notifications_send_notification_email($email, $token, $post)
     {
         $post_type  = $post->post_type;
@@ -1773,25 +1544,13 @@ trait Toocheke_Companion_Notifications
         return $this->toocheke_notifications_send_email($email, $heading, $body_content, $link, __('Read it here', 'toocheke-companion'), $unsubscribe_link, $manage_link);
     }
 
-    /* =========================================================================
-       PATREON GATING (Toocheke Premium integration)
-       Toocheke Premium's own Patreon integration can lock a post behind a
-       paywall via the 'patreon-level' post meta (set > 0). Notification
-       emails must never include the actual gated content -- readers
-       without access shouldn't see it there any more than on the site
-       itself. This applies uniformly across every post type this feature
-       already supports (Post, Comic, Manga Chapter, Series, Manga Series,
-       Manga Volume), since the theme's own gating meta isn't restricted to
-       any specific post type either.
-    ========================================================================= */
+    // Notification emails must never include content gated behind
+    // Toocheke Premium's Patreon integration ('patreon-level' post
+    // meta) — applies across every post type this feature supports,
+    // same as the theme's own gating.
 
-    /**
-     * Mirrors the exact check Toocheke Premium's own code uses (see
-     * is_plugin_active('patreon-connect/patreon.php') in
-     * inc/toocheke-functions.php) -- is_plugin_active() lives in
-     * wp-admin/includes/plugin.php, which isn't autoloaded outside
-     * wp-admin (e.g. during a WP-Cron run), hence the explicit require.
-     */
+    // is_plugin_active() isn't autoloaded outside wp-admin (e.g. during
+    // a WP-Cron run), hence the explicit require.
     private function toocheke_notifications_is_patreon_active()
     {
         if (! function_exists('is_plugin_active')) {
@@ -1809,31 +1568,18 @@ trait Toocheke_Companion_Notifications
         return '' !== $level && (float) $level > 0;
     }
 
-    /**
-     * Mirrors the exact link Toocheke Premium's own "Login with Patreon"
-     * button builds (see the $flow_link construction in
-     * inc/toocheke-functions.php) -- home_url()/patreon-flow/ with a
-     * final_redirect back to the gated post itself, so after logging in
-     * the reader lands right back where the content actually is, the same
-     * as clicking that button on the site.
-     */
+    // Mirrors Toocheke Premium's own "Login with Patreon" link, with a
+    // final_redirect back to the gated post so the reader lands right
+    // back where the content is after logging in.
     private function toocheke_notifications_get_patreon_login_url($post_id)
     {
         return home_url('/patreon-flow/') . '?patreon-login=yes&patreon-final-redirect=' . urlencode(get_permalink($post_id));
     }
 
-    /**
-     * The locked-content layout: padlock icon, a short explanation, and a
-     * Patreon login button -- in place of the post's actual content. No
-     * title here deliberately -- the outer email template
-     * (toocheke_notifications_render_email_html()) already renders the
-     * post title as part of its own heading (e.g. "New Comic: Locked
-     * Comic"), so repeating it here would just duplicate it. Bluesky's
-     * own SVG-based icons aren't used here since SVG support in email
-     * clients is inconsistent; both images are plain PNGs bundled with
-     * the plugin (img/patreon-padlock.png and img/patreon-login-button.png)
-     * specifically for this.
-     */
+    // Padlock icon, explanation, and Patreon login button in place of
+    // the post content. No title — the outer email template already
+    // renders it in the heading. Plain PNGs rather than Bluesky's SVG
+    // icons, since SVG support in email clients is inconsistent.
     private function toocheke_notifications_build_patreon_locked_body($post)
     {
         $login_url   = $this->toocheke_notifications_get_patreon_login_url($post->ID);
@@ -1857,17 +1603,10 @@ trait Toocheke_Companion_Notifications
         return ob_get_clean();
     }
 
-    /**
-     * The one place every email this feature sends actually goes through
-     * — wraps the given content in the branded HTML template, sends it
-     * as HTML (scoped tightly to just this one wp_mail() call via
-     * add_filter/remove_filter, so it never affects any other plugin's
-     * or WP core's own mail), and captures the underlying WP_Error
-     * message on failure (via the same tightly-scoped
-     * add_action/remove_action technique on wp_mail_failed) so the
-     * admin-facing error log below has an actual reason, not just
-     * "failed."
-     */
+    // The one place every email this feature sends goes through — wraps
+    // the content in the branded template, sends as HTML (scoped
+    // tightly to this one wp_mail() call), and captures the real
+    // WP_Error message on failure so the error log has an actual reason.
     private function toocheke_notifications_send_email($to, $subject, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url = '', $hide_cta = false)
     {
         $html = $this->toocheke_notifications_render_email_html($subject, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url, $hide_cta);
@@ -1912,20 +1651,11 @@ trait Toocheke_Companion_Notifications
         return 'text/html';
     }
 
-    /**
-     * Wraps the per-post-type body content (see
-     * toocheke_notifications_build_email_content()) in the actual
-     * branded email layout: grey background, a centered logo above a
-     * 600px white rounded-corner card, the content itself, a styled CTA
-     * button, an optional signature, and a styled unsubscribe
-     * button/link. Table-based layout with all-inline styles
-     * deliberately — email clients (particularly Outlook desktop) don't
-     * reliably support external/embedded stylesheets or flexbox/grid,
-     * so tables + inline styles remain the only broadly compatible
-     * approach. border-radius degrades gracefully to square corners in
-     * the handful of clients that don't support it (mainly older
-     * Outlook), which is standard, accepted practice for HTML email.
-     */
+    // Wraps the body content in the branded email layout: grey
+    // background, centered logo, 600px white card, CTA button,
+    // optional signature, unsubscribe link. Table-based layout with
+    // inline styles, since Outlook desktop doesn't reliably support
+    // stylesheets or flexbox/grid — the standard approach for HTML email.
     private function toocheke_notifications_render_email_html($heading, $body_html, $cta_url, $cta_label, $unsubscribe_url, $manage_url, $hide_cta = false)
     {
         $logo_url  = get_option('toocheke-notify-email-logo', '');
@@ -2014,23 +1744,11 @@ trait Toocheke_Companion_Notifications
         return ob_get_clean();
     }
 
-    /**
-     * Content per post type:
-     * - manga_chapter: the featured image as a real embedded <img>
-     *   (Pass 3 only linked to the image URL as plain text, since a
-     *   plain-text email has no way to embed one) + the 'notes' meta
-     *   field (the same field Bluesky's auto-posting already uses as
-     *   its description — see toocheke_bluesky_get_alt_text() in
-     *   class-toocheke-companion-bluesky.php).
-     * - everything else (post, comic, series, manga_series,
-     *   manga_volume): the full post content, run through the_content
-     *   filter so shortcodes/embeds expand the same way they would on
-     *   the live page, then passed through wp_kses_post() — this keeps
-     *   images and formatting intact (Pass 3 stripped all tags,
-     *   including any <img>, since that pass was plain text) while still
-     *   stripping anything genuinely unsafe or email-incompatible
-     *   (scripts, iframes, etc).
-     */
+    // manga_chapter: featured image as a real embedded <img> + the
+    // 'notes' meta field (same field Bluesky uses as its description).
+    // Everything else: full post content run through the_content (so
+    // shortcodes/embeds expand as on the live page) then wp_kses_post()
+    // to strip anything unsafe while keeping images/formatting intact.
     private function toocheke_notifications_build_email_content($post, $post_type)
     {
         if ('manga_chapter' === $post_type) {
@@ -2099,14 +1817,8 @@ trait Toocheke_Companion_Notifications
         return isset($labels[$post_type]) ? $labels[$post_type] : ucfirst(str_replace('_', ' ', $post_type));
     }
 
-    /* =========================================================================
-       CUMULATIVE, SITE-WIDE ERROR NOTICE
-       Deliberately mirrors the exact pattern already used for Bluesky
-       posting errors -- see toocheke_bluesky_log_error() and friends in
-       class-toocheke-companion-bluesky.php -- just under this feature's
-       own option name so dismissing one never clears the other.
-    ========================================================================= */
-
+    // Mirrors the same pattern as Bluesky's own error logging, under
+    // this feature's own option name.
     private function toocheke_notifications_log_error($message)
     {
         $errors = get_option('toocheke-notifications-errors', []);
@@ -2178,23 +1890,10 @@ trait Toocheke_Companion_Notifications
         exit;
     }
 
-    /* =========================================================================
-       EMAIL SUBSCRIPTIONS ADMIN PAGE
-       A separate page from the Notifications settings tab: lets the
-       site admin see who's subscribed, delete an individual subscriber
-       outright (not just mark them unsubscribed), and export the whole
-       list as CSV. Registered under the existing Toocheke top-level menu
-       (parent slug 'toocheke-menu', defined in
-       class-toocheke-companion-settings-page.php) from its own
-       admin_menu callback here, so this feature stays self-contained
-       rather than requiring an edit to that file.
-
-       Deliberately gated on 'manage_options' rather than the 'edit_posts'
-       capability the rest of that menu uses -- this page can export a
-       list of real people's email addresses, which warrants a tighter
-       bar than the rest of the Toocheke admin menu.
-    ========================================================================= */
-
+    // Separate admin page from the settings tab: lets the admin see
+    // subscribers, delete one outright, and export the list as CSV.
+    // Gated on 'manage_options' rather than 'edit_posts' — exporting
+    // real people's email addresses warrants a tighter bar.
     public function toocheke_notifications_register_admin_menu()
     {
         if (! $this->toocheke_notifications_is_premium_active()) {
@@ -2372,14 +2071,9 @@ trait Toocheke_Companion_Notifications
         exit;
     }
 
-    /**
-     * Streams every subscriber as a CSV download. CSV rather than a
-     * native .xlsx: it opens directly in Excel with no extra library
-     * needed, and it's the universally-accepted import format for every
-     * other email platform (Mailchimp, ConvertKit, Brevo, etc.), so one
-     * export covers both "open in Excel" and "import elsewhere" without
-     * a second file format to maintain.
-     */
+    // CSV rather than .xlsx — opens directly in Excel with no extra
+    // library, and is the universal import format for other email
+    // platforms too, so one export covers both.
     public function toocheke_notifications_handle_export_subscribers()
     {
         if (! current_user_can('manage_options')) {

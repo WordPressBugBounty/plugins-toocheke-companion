@@ -2,8 +2,7 @@
 /**
  * Toocheke Companion — Import from Tapas.io.
  *
- * Lets a comic creator migrate one or more series off Tapas.io 
- *
+ * Lets a comic creator migrate one or more series off Tapas.io.
  */
 
 if (! defined('ABSPATH')) {
@@ -14,24 +13,15 @@ if (! defined('TOOCHEKE_TAPAS_IMPORT_OPTION')) {
     define('TOOCHEKE_TAPAS_IMPORT_OPTION', 'toocheke_tapas_import_job');
 }
 
-// Hosts this importer is ever allowed to request. Tapas serves its pages
-// from tapas.io and its comic-panel/thumbnail images from a per-region
-// CDN subdomain (seen in the wild as us-a.tapas.io); allow the whole
-// *.tapas.io family for images while keeping page fetches on the bare
-// apex domain.
+// Hosts this importer is allowed to request — pages from tapas.io,
+// images from its CDN subdomains (e.g. us-a.tapas.io).
 if (! defined('TOOCHEKE_TAPAS_ALLOWED_HOST_SUFFIX')) {
     define('TOOCHEKE_TAPAS_ALLOWED_HOST_SUFFIX', 'tapas.io');
 }
 
 trait Toocheke_Companion_Import_Tapas
 {
-    /* =========================================================================
-       HOOK REGISTRATION
-       Called once from init() in toocheke-companion.php, matching the
-       pattern used by the Bluesky/Notifications features — see those
-       files' toocheke_*_register_hooks() for precedent.
-    ========================================================================= */
-
+    // Called once from init() in toocheke-companion.php.
     public function toocheke_tapas_register_hooks()
     {
         if (! is_admin()) {
@@ -50,18 +40,10 @@ trait Toocheke_Companion_Import_Tapas
         add_action('wp_ajax_toocheke_tapas_dismiss_error',  [$this, 'toocheke_tapas_ajax_dismiss_error']);
     }
 
-    /* =========================================================================
-       ADMIN ASSETS
-    ========================================================================= */
-
     public function toocheke_tapas_enqueue_admin_assets($hook)
     {
-        // Note: this page is a submenu of our own custom top-level menu
-        // ('toocheke-menu'), so its $hook suffix is
-        // 'toocheke-menu_page_toocheke-import-tapas', NOT 'admin.php' —
-        // checking $_GET['page'] alone (matching how every other
-        // conditionally-enqueued asset in this plugin does it, e.g.
-        // toocheke_bluesky_enqueue_admin_assets()) is what actually works.
+        // This page hangs off our own top-level menu, so $hook won't be
+        // 'admin.php' — just check the page slug instead.
         if (empty($_GET['page']) || 'toocheke-import-tapas' !== $_GET['page']) {
             return;
         }
@@ -109,10 +91,6 @@ trait Toocheke_Companion_Import_Tapas
             ],
         ]);
     }
-
-    /* =========================================================================
-       ADMIN PAGE
-    ========================================================================= */
 
     public function toocheke_tapas_render_import_page()
     {
@@ -197,10 +175,8 @@ trait Toocheke_Companion_Import_Tapas
         <?php
     }
 
-    /* =========================================================================
-       JOB STATE (single, not-autoloaded option — see class docblock)
-    ========================================================================= */
-
+    // Job state is stored in a single, not-autoloaded option so a large
+    // import survives a closed tab, a PHP timeout, or a page reload.
     protected function toocheke_tapas_default_job()
     {
         return [
@@ -231,27 +207,15 @@ trait Toocheke_Companion_Import_Tapas
         delete_option(TOOCHEKE_TAPAS_IMPORT_OPTION);
     }
 
-    /**
-     * Escalating backoff for a URL that keeps coming back throttled
-     * (genuine 429/503 rate-limiting, or a 403 that looks like a
-     * transient anti-bot block rather than the content itself being
-     * gated — see toocheke_tapas_http_get()). Each consecutive strike on
-     * the SAME series entry doubles the wait, capped at 10 minutes, so a
-     * stubborn block gets progressively more patience rather than either
-     * giving up too fast or hammering Tapas at a fixed interval forever.
-     * Resets to zero the moment a fetch succeeds — see
-     * toocheke_tapas_reset_backoff_strikes().
-     */
+    // Doubles the wait on each consecutive strike (capped at 10 minutes)
+    // so a stubborn 429/503 or anti-bot block gets more patience over
+    // time instead of hammering Tapas on a fixed interval.
     protected function toocheke_tapas_apply_backoff_strike(array &$entry, array $fetch)
     {
         $entry['throttle_strikes'] = isset($entry['throttle_strikes']) ? $entry['throttle_strikes'] + 1 : 1;
 
         if ($entry['throttle_strikes'] > 8) {
-            // Persistent enough, across enough automatic and manual
-            // retries, that it's very unlikely to be a passing block —
-            // stop asking Tapas and hand control back to the creator
-            // (Retry This Series, or Resume From This Episode) instead
-            // of retrying forever.
+            // Give up and let the creator retry manually.
             return ['throttled' => false, 'gave_up' => true];
         }
 
@@ -277,10 +241,7 @@ trait Toocheke_Companion_Import_Tapas
         $entry['throttle_strikes'] = 0;
     }
 
-    /**
-     * Appends a short status line to a series' rolling log, capped so the
-     * option never grows unbounded across a multi-thousand-episode run.
-     */
+    // Rolling log for one series, capped so it doesn't grow forever.
     protected function toocheke_tapas_log(array &$series_entry, $message)
     {
         if (empty($series_entry['log']) || ! is_array($series_entry['log'])) {
@@ -292,12 +253,8 @@ trait Toocheke_Companion_Import_Tapas
         }
     }
 
-    /**
-     * Every episode/series-page problem that stops a series (a hard fetch
-     * failure, or a suspiciously short finish) gets appended here, so a
-     * run with more than one distinct problem shows all of them together
-     * rather than only the most recent one silently replacing the last.
-     */
+    // Tracks every episode with a problem this run, so the summary can
+    // list all of them instead of just the most recent one.
     protected function toocheke_tapas_flag_episode(array &$entry, $tapas_episode_id, $message)
     {
         if (empty($entry['flagged_episodes']) || ! is_array($entry['flagged_episodes'])) {
@@ -308,23 +265,13 @@ trait Toocheke_Companion_Import_Tapas
             'message'    => $message,
             'time'       => current_time('mysql'),
         ];
-        // Bounded for the same reason as the rolling log — a pathological
-        // run shouldn't grow the option without limit.
         if (count($entry['flagged_episodes']) > 25) {
             $entry['flagged_episodes'] = array_slice($entry['flagged_episodes'], -25);
         }
     }
 
-    /**
-     * Captures everything needed for a webcomic creator to hand this off
-     * to a developer for troubleshooting: what failed, on which series/
-     * episode, and what environment it happened in. Stored as its own
-     * option (separate from the job state) so it survives a Discard, and
-     * surfaced two ways — an admin notice on every wp-admin page (so it
-     * can't be missed even if the creator has navigated away from the
-     * import page) and a "Copy Diagnostic Report" button on the import
-     * page itself while it's still open.
-     */
+    // Stored separately from the job state so it survives a Discard.
+    // Shows up as an admin notice plus a "Copy Diagnostic Report" button.
     protected function toocheke_tapas_record_failure(array &$entry, $tapas_episode_id = null)
     {
         $this->toocheke_tapas_flag_episode($entry, $tapas_episode_id, $entry['error']);
@@ -343,26 +290,16 @@ trait Toocheke_Companion_Import_Tapas
         ], false);
     }
 
-    /**
-     * Same mechanism as toocheke_tapas_record_failure(), for the "finished,
-     * but suspiciously short of Tapas' own episode count" case — worth the
-     * creator's attention, but not phrased as a hard failure since the
-     * import itself didn't error out.
-     */
+    // Same as above, but for a "finished, just short of Tapas' own
+    // episode count" case rather than a hard failure.
     protected function toocheke_tapas_record_incomplete_notice(array &$entry, $actual_count)
     {
         $this->toocheke_tapas_flag_episode($entry, $entry['last_episode_id'], $entry['warning']);
         $this->toocheke_tapas_write_error_option($entry, 'incomplete');
     }
 
-    /**
-     * Used when one or more episodes were already individually flagged
-     * (see toocheke_tapas_flag_episode() calls in
-     * toocheke_tapas_import_episode_data()) and all that's needed is to
-     * surface the existing list — avoids tacking on a redundant summary
-     * entry the way calling toocheke_tapas_record_incomplete_notice()
-     * here would (it always adds one more flag of its own).
-     */
+    // Same option write, but skips adding another flag entry when the
+    // episodes were already flagged individually.
     protected function toocheke_tapas_record_existing_flags(array &$entry)
     {
         $this->toocheke_tapas_write_error_option($entry, 'incomplete');
@@ -384,13 +321,8 @@ trait Toocheke_Companion_Import_Tapas
         ], false);
     }
 
-    /**
-     * Site-wide admin notice for the last recorded import failure (see
-     * toocheke_tapas_record_failure()). Deliberately not scoped to the
-     * Tapas import page — the whole point is that a creator running a
-     * multi-hour import in a background tab still sees it show up
-     * wherever they're working in wp-admin.
-     */
+    // Shows on every wp-admin page, not just the import page, so it's
+    // seen even if the creator has navigated away while it's running.
     public function toocheke_tapas_admin_error_notice()
     {
         if (! current_user_can('edit_posts')) {
@@ -511,10 +443,6 @@ trait Toocheke_Companion_Import_Tapas
         wp_send_json_success();
     }
 
-    /* =========================================================================
-       AJAX: start / step / status / discard
-    ========================================================================= */
-
     public function toocheke_tapas_ajax_start()
     {
         $this->toocheke_tapas_ajax_guard();
@@ -588,17 +516,8 @@ trait Toocheke_Companion_Import_Tapas
         wp_send_json_success(['job' => $this->toocheke_tapas_job_for_js($this->toocheke_tapas_default_job())]);
     }
 
-    /**
-     * Retries a single failed series in place, picking up from exactly
-     * where it stopped rather than re-fetching everything from episode
-     * #1 (that would also work, thanks to the idempotent dedup checks —
-     * but this is faster and doesn't re-request pages that already
-     * succeeded). If the series never got far enough to create a Series
-     * post, this puts it back to 'pending' so it resolves from scratch;
-     * otherwise it goes back to 'importing' with its existing cursor
-     * (next_id) intact, so the very next step retries the episode that
-     * failed.
-     */
+    // Resumes a failed series from where it left off instead of
+    // re-fetching from episode #1.
     public function toocheke_tapas_ajax_retry_series()
     {
         $this->toocheke_tapas_ajax_guard();
@@ -609,10 +528,9 @@ trait Toocheke_Companion_Import_Tapas
         $found_index = null;
         foreach ($job['series'] as $index => $entry) {
             $is_failed         = 'failed' === $entry['status'];
-            // Retrying only makes sense when it could plausibly change
-            // the outcome — a plain skip-summary (locked/mature content
-            // that will still be locked/mature next time) doesn't
-            // qualify, only an unexplained shortfall does.
+            // Only offer a retry when it could actually change something —
+            // a plain locked/mature skip summary won't be any different
+            // next time, so exclude that.
             $is_short_finish   = 'done' === $entry['status'] && ! empty($entry['warning']) && empty($entry['episodes_skipped']);
             if ($entry['slug'] === $slug && ($is_failed || $is_short_finish)) {
                 $found_index = $index;
@@ -627,17 +545,13 @@ trait Toocheke_Companion_Import_Tapas
         $entry = &$job['series'][$found_index];
 
         if ('failed' === $entry['status']) {
-            // A genuine fetch/insert failure: resume from exactly the
-            // cursor it stopped on.
+            // Resume from exactly the cursor it stopped on.
             $entry['status'] = $entry['series_post_id'] ? 'importing' : 'pending';
         } else {
-            // "Done, but short of Tapas' own count": the cursor is -1
-            // (Tapas said "no next"), so there's nothing to resume from —
-            // the only way to find out if more episodes actually exist is
-            // to walk the chain again from episode #1. Every episode
-            // already on the site is recognized and skipped (see
-            // toocheke_tapas_find_existing_comic_post()), so this is slower
-            // than a true resume but never re-imports anything.
+            // The cursor is -1 (Tapas said "no next"), so the only way to
+            // check for more episodes is to walk the chain again from #1.
+            // Already-imported episodes get skipped, so this is slower
+            // but never re-imports anything.
             $entry['status']         = 'pending';
             $entry['next_id']        = null;
             $entry['episodes_done']  = 0;
@@ -655,16 +569,9 @@ trait Toocheke_Companion_Import_Tapas
         wp_send_json_success(['job' => $this->toocheke_tapas_job_for_js($job)]);
     }
 
-    /**
-     * Manual escape hatch for when an episode simply can't be fetched by
-     * the importer no matter how many times it retries (most commonly:
-     * mature/NSFW-gated content that requires being signed in — see the
-     * 403 handling in toocheke_tapas_http_get()). There's no way to
-     * automatically discover what comes after an unreadable page, so
-     * this lets the creator check Tapas themselves, find the next
-     * episode that IS reachable, and point the importer at it directly —
-     * skipping the gated one rather than losing the rest of the series.
-     */
+    // Manual escape hatch for an episode the importer can't fetch at all
+    // (usually mature-gated). Lets the creator find the next reachable
+    // episode on Tapas themselves and point the importer at it.
     public function toocheke_tapas_ajax_resume_from()
     {
         $this->toocheke_tapas_ajax_guard();
@@ -730,23 +637,15 @@ trait Toocheke_Companion_Import_Tapas
         return 0;
     }
 
-    /**
-     * Processes exactly ONE unit of work (resolving a series, or importing
-     * one episode of the currently-active series) and returns. The JS side
-     * is what loops — see js/toocheke-tapas-import.js — so this never has
-     * to worry about PHP execution time limits piling up across a large
-     * series. It CAN still take a while within a single step, though, for
-     * an episode with many panel images (each is its own download +
-     * Media Library attach) — hence raising the time limit below rather
-     * than relying on whatever a given host's default happens to be.
-     */
+    // Processes one unit of work (resolve a series, or import one
+    // episode) and returns — the JS side loops this, so a large series
+    // never hits a PHP time limit. A single step can still take a while
+    // for a many-panel episode, hence raising it below.
     public function toocheke_tapas_ajax_step()
     {
         $this->toocheke_tapas_ajax_guard();
 
-        // Suppressed: some hosts disable this function entirely (it's a
-        // no-op there, not an error), and this is a "best effort, not
-        // load-bearing" raise — see the docblock above.
+        // Some hosts disable this function entirely — harmless no-op.
         @set_time_limit(120); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_time_limit
 
         $job = $this->toocheke_tapas_get_job();
@@ -802,11 +701,7 @@ trait Toocheke_Companion_Import_Tapas
         check_ajax_referer('toocheke_tapas_import', 'nonce');
     }
 
-    /**
-     * Strips the job down to what the browser actually needs (no internal
-     * cursor bookkeeping) and computes the small derived fields the
-     * progress UI displays.
-     */
+    // Strips the job down to what the browser needs for the progress UI.
     protected function toocheke_tapas_job_for_js(array $job)
     {
         $series_out = [];
@@ -834,10 +729,6 @@ trait Toocheke_Companion_Import_Tapas
         ];
     }
 
-    /* =========================================================================
-       CORE STATE MACHINE — one series entry, one call = one unit of work
-    ========================================================================= */
-
     protected function toocheke_tapas_process_one_unit(array &$entry)
     {
         if ('pending' === $entry['status']) {
@@ -847,12 +738,9 @@ trait Toocheke_Companion_Import_Tapas
         return $this->toocheke_tapas_import_next_episode($entry);
     }
 
-    /**
-     * First unit of work for a series: fetch the series URL (which is
-     * simultaneously that series' first episode page), create the Series
-     * post, and import episode #1 from the same page fetch — no extra
-     * request needed for it.
-     */
+    // First unit of work for a series: the series URL is also its first
+    // episode's page, so this creates the Series post and imports
+    // episode #1 from the same fetch — no extra request needed.
     protected function toocheke_tapas_resolve_series(array &$entry)
     {
         $entry['status'] = 'resolving';
@@ -939,11 +827,8 @@ trait Toocheke_Companion_Import_Tapas
         return $this->toocheke_tapas_import_episode_data($entry, $data);
     }
 
-    /**
-     * Every subsequent unit of work for an 'importing' series: fetch the
-     * next episode (by the cursor left behind by the previous step) and
-     * import it.
-     */
+    // Fetches the next episode using the cursor left by the previous
+    // step, and imports it.
     protected function toocheke_tapas_import_next_episode(array &$entry)
     {
         if (null === $entry['next_id'] || -1 === (int) $entry['next_id']) {
@@ -970,15 +855,9 @@ trait Toocheke_Companion_Import_Tapas
         $this->toocheke_tapas_reset_backoff_strikes($entry);
 
         if (empty($fetch['body'])) {
-            // A single unreachable episode shouldn't sink the whole
-            // series — but toocheke_tapas_http_get() already retried a
-            // couple of times internally, so if we're here it genuinely
-            // didn't recover; log the real technical reason (not just a
-            // generic message) so it can actually be diagnosed. Tapas'
-            // own "-1 = no next" convention means we can't discover
-            // further episodes past a broken link this way, though, so
-            // this stops the series here rather than silently skipping
-            // ahead and losing the rest of the chain.
+            // Already retried internally by toocheke_tapas_http_get(), so
+            // this genuinely didn't recover — stop here rather than
+            // guessing at what comes after a broken link.
             $entry['error'] = sprintf(
                 /* translators: 1: Tapas episode id, 2: underlying technical error */
                 __('Could not load episode #%1$d after retrying — stopping here so later episodes aren\'t skipped. Technical detail: %2$s', 'toocheke-companion'),
@@ -1004,13 +883,9 @@ trait Toocheke_Companion_Import_Tapas
         return $this->toocheke_tapas_import_episode_data($entry, $data);
     }
 
-    /**
-     * Turns one parsed episode payload into a Comic post — or, if it was
-     * already imported in a prior run, just advances the cursor past it —
-     * or, if the page genuinely has nothing to import (most commonly a
-     * paid/rental "Wait Until Free" episode, or mature-gated content),
-     * skips it without creating a placeholder post at all.
-     */
+    // Turns one parsed episode into a Comic post — or skips it (no
+    // placeholder post) if there's nothing to import, usually a
+    // paid/rental or mature-gated episode.
     protected function toocheke_tapas_import_episode_data(array &$entry, array $data)
     {
         $entry['next_id']         = $data['next_id'];
@@ -1025,12 +900,8 @@ trait Toocheke_Companion_Import_Tapas
                 $data['episode_title']
             ));
         } elseif (! $comic_post_id && empty($data['content_image_urls'])) {
-            // Nothing to import and no post started for it yet — don't
-            // create an empty placeholder a reader could stumble onto.
-            // The reason is worth being specific about where possible,
-            // since "mature" and "paid/rental" call for different
-            // action from the creator (one truly can't be imported
-            // anonymously; the other might just need re-checking).
+            // Nothing to import yet — don't create an empty placeholder
+            // post. Be specific about why where possible.
             if (! empty($data['is_mature'])) {
                 $reason_key   = 'mature';
                 $reason_label = __('mature/NSFW-gated content — not viewable without being signed in.', 'toocheke-companion');
@@ -1055,13 +926,8 @@ trait Toocheke_Companion_Import_Tapas
             $this->toocheke_tapas_flag_episode($entry, $data['episode_id'], $warning);
         } else {
             if ($comic_post_id) {
-                // A post exists for this episode but never got marked
-                // complete — most likely a prior step that timed out
-                // partway through downloading a many-panel episode's
-                // images (see toocheke_tapas_ajax_step()'s time-limit
-                // raise), from before the skip-before-create check
-                // above existed. Finish it in place rather than
-                // creating a second post for the same episode.
+                // Exists but never got marked complete — likely a timed-
+                // out step on a many-panel episode. Finish it in place.
                 $this->toocheke_tapas_log($entry, sprintf(
                     /* translators: %s: episode title */
                     __('Finishing an incomplete import of “%s” from an earlier interrupted run…', 'toocheke-companion'),
@@ -1093,14 +959,12 @@ trait Toocheke_Companion_Import_Tapas
                     $entry['error'] = $comic_post_id->get_error_message();
                     $this->toocheke_tapas_log($entry, $entry['error']);
                     $comic_post_id = 0;
-                    // Cursor has already moved on above, so a single bad
-                    // insert doesn't wedge the whole series — it just skips
-                    // that one episode and keeps going.
+                    // A bad insert just skips this one episode, not the
+                    // whole series — the cursor already moved on above.
                 } else {
-                    // Tagged with the episode id immediately (so a
-                    // timeout doesn't cause a *duplicate* post next
-                    // time — see the lookup above), but NOT marked
-                    // complete until every image has actually landed.
+                    // Tag it now so a timeout doesn't create a duplicate
+                    // post — but don't mark it complete until the images
+                    // are actually in.
                     update_post_meta($comic_post_id, '_toocheke_tapas_episode_id', $data['episode_id']);
                     update_post_meta($comic_post_id, '_toocheke_tapas_series_id', $entry['tapas_series_id']);
                 }
@@ -1119,21 +983,16 @@ trait Toocheke_Companion_Import_Tapas
                     wp_update_post(['ID' => $comic_post_id, 'post_content' => $content]);
                 }
 
-                // Everything for this episode landed — now, and only
-                // now, is it safe to treat as done on any future run.
+                // Only mark complete once every image has landed.
                 update_post_meta($comic_post_id, '_toocheke_tapas_import_complete', 1);
 
                 $entry['episodes_done']++;
                 $entry['last_episode_title'] = $data['episode_title'];
 
                 if ('' === $content) {
-                    // Only reachable now via the legacy-partial-post
-                    // path above (a post from before this skip logic
-                    // existed, whose images turn out to be
-                    // unavailable after all) — same safety-net
-                    // reasoning as the skip branch, just for a post
-                    // that already exists rather than one about to be
-                    // created.
+                    // Only hit via the legacy partial-post path above —
+                    // same idea as the skip branch, for a post that
+                    // already existed.
                     $reason = ! empty($data['is_mature'])
                         ? __('this looks like mature/NSFW-gated content.', 'toocheke-companion')
                         : (! empty($data['is_locked'])
@@ -1164,17 +1023,10 @@ trait Toocheke_Companion_Import_Tapas
         return ['throttled' => false];
     }
 
-    /**
-     * Reached the end of the "next episode" chain (Tapas' own signal that
-     * there is no more content). Whether that's actually true is worth
-     * double-checking: it can also happen if some episode along the way
-     * had a page structure the parser didn't recognize (mature-gated,
-     * unlisted, a non-standard post type) and silently read as "no next"
-     * when Tapas' own site would have kept going. Comparing what actually
-     * landed on the site against the episode count Tapas itself reported
-     * on the series page is a cheap, reliable way to catch that — a
-     * clean finish and a broken one both look identical otherwise.
-     */
+    // Tapas said "no next episode" — but that can also happen if some
+    // page along the way had a layout the parser didn't recognize, so
+    // double-check by comparing the actual post count against Tapas'
+    // own reported episode count.
     protected function toocheke_tapas_finish_series(array &$entry)
     {
         $entry['status'] = 'done';
@@ -1194,12 +1046,8 @@ trait Toocheke_Companion_Import_Tapas
         $unexplained_gap = ! empty($entry['episodes_total']) ? (int) $entry['episodes_total'] - $expected_count : 0;
 
         if ($entry['episodes_skipped'] > 0) {
-            // The clear, common case: we know exactly why some episodes
-            // didn't become posts (locked/rental, mature-gated, or an
-            // unrecognized page) — see toocheke_tapas_import_episode_data().
-            // A matching post count no longer means a clean 1:1 import
-            // once skipping-on-purpose is in the picture, so this always
-            // gets a summary rather than reading as a plain success.
+            // We know exactly why episodes were skipped, so always show
+            // a breakdown rather than reading as a plain success.
             $reason_parts = [];
             $reason_labels = [
                 'locked'  => __('locked/paid (“Wait Until Free”)', 'toocheke-companion'),
@@ -1249,13 +1097,8 @@ trait Toocheke_Companion_Import_Tapas
             $this->toocheke_tapas_log($entry, $warning);
             $this->toocheke_tapas_record_incomplete_notice($entry, $actual_count);
         } elseif (! empty($entry['flagged_episodes'])) {
-            // Every episode is accounted for (the count matches), but
-            // one or more still came back with no images — see where
-            // 'flagged_episodes' is populated in
-            // toocheke_tapas_import_episode_data(). A matching post
-            // count alone doesn't mean a clean import, so this still
-            // needs to be surfaced rather than reading as a plain
-            // success.
+            // Post count matches, but one or more still came back with
+            // no images — still worth surfacing.
             $count = count($entry['flagged_episodes']);
             $warning = sprintf(
                 /* translators: %d: number of episodes with no images */
@@ -1287,14 +1130,8 @@ trait Toocheke_Companion_Import_Tapas
         return count($found);
     }
 
-    /**
-     * Downloads every comic-panel image for one episode (in reading
-     * order) into the Media Library and returns the <img> markup to use
-     * as the Comic post's content — this is deliberately plain, unwrapped
-     * <img> tags (matching how Tapas itself stacks panels) rather than a
-     * gallery shortcode, so it renders correctly regardless of what other
-     * block/shortcode support a given theme build has.
-     */
+    // Downloads every panel image for one episode and returns plain
+    // <img> markup for the post content, in reading order.
     protected function toocheke_tapas_build_comic_content(array $image_urls, $post_id, $desc)
     {
         $html = '';
@@ -1303,17 +1140,9 @@ trait Toocheke_Companion_Import_Tapas
             if (! $attachment_id) {
                 continue;
             }
-            // Every <img> here is meant to butt directly against the
-            // next one, like Tapas' own stacked-panel layout — but
-            // <img> is an inline element, so joining them with even a
-            // newline in the HTML source (as this used to do) renders
-            // as a visible gap between panels in most themes. Forcing
-            // block display + zero margin here makes that immune to
-            // both this file's own formatting AND whatever a theme's
-            // default image CSS happens to do — not something to rely
-            // on "no whitespace in the source" alone to prevent, since
-            // a future edit in the block/classic editor could easily
-            // reintroduce it.
+            // Force block display so panels stack tight with no gap —
+            // <img> is inline by default, which leaves a visible sliver
+            // between them in most themes.
             $html .= wp_get_attachment_image($attachment_id, 'full', false, [
                 'class'   => 'toocheke-tapas-panel',
                 'loading' => 'lazy',
@@ -1322,10 +1151,6 @@ trait Toocheke_Companion_Import_Tapas
         }
         return $html;
     }
-
-    /* =========================================================================
-       LOOKUPS (idempotency — see class docblock)
-    ========================================================================= */
 
     protected function toocheke_tapas_find_existing_series_post($tapas_series_id)
     {
@@ -1353,14 +1178,8 @@ trait Toocheke_Companion_Import_Tapas
         return ! empty($found) ? (int) $found[0] : 0;
     }
 
-    /* =========================================================================
-       HTML PARSING
-       DOMDocument/XPath for anything structural (attributes, stable class
-       hooks); one small, tightly-scoped regex for the inline JS state
-       object Tapas embeds on every page (there is no attribute hook for
-       "episode count" or "series id" otherwise).
-    ========================================================================= */
-
+    // Uses DOMDocument/XPath for structural bits, plus one small regex
+    // for the inline JS state object Tapas embeds on every page.
     protected function toocheke_tapas_parse_episode_html($html)
     {
         $out = [
@@ -1394,9 +1213,7 @@ trait Toocheke_Companion_Import_Tapas
         if (preg_match('/seriesTitle\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/', $html, $m)) {
             $out['series_title'] = $this->toocheke_tapas_unescape_js_string($m[1]);
         }
-        // Two independent signals Tapas uses for paid/rental episodes —
-        // either is enough to flag it; see the note on 'is_locked' where
-        // it's used, for why this is a hint rather than the sole trigger.
+        // Paid/rental episode signals — either one is enough to flag it.
         if (preg_match('/data-is-rental="true"/i', $html)
             || preg_match('/episode\s*:\s*\{[^}]*?\bfree\s*:\s*false/s', $html)) {
             $out['is_locked'] = true;
@@ -1412,7 +1229,7 @@ trait Toocheke_Companion_Import_Tapas
         libxml_clear_errors();
         $xpath = new DOMXPath($dom);
 
-        // --- Episode wrapper: carries the "next episode" chain cursor. ---
+        // Episode wrapper carries the "next episode" chain cursor.
         $episode_wrap = $xpath->query('//*[starts-with(@id,"episode-")][@data-next-id]');
         if ($episode_wrap->length) {
             $node = $episode_wrap->item(0);
@@ -1426,7 +1243,7 @@ trait Toocheke_Companion_Import_Tapas
             }
         }
 
-        // --- Episode title & date. ---
+        // Episode title & date.
         $title_node = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " viewer__header ")]//*[contains(concat(" ", normalize-space(@class), " "), " title ")]');
         if ($title_node->length) {
             $out['episode_title'] = trim($title_node->item(0)->textContent);
@@ -1436,13 +1253,13 @@ trait Toocheke_Companion_Import_Tapas
             $out['episode_date_str'] = trim($date_node->item(0)->textContent);
         }
 
-        // --- Episode thumbnail (toolbar), distinct from the comic panels. ---
+        // Episode thumbnail (toolbar) — distinct from the comic panels.
         $thumb_node = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " row-item--info ")]//img');
         if ($thumb_node->length) {
             $out['episode_thumb_url'] = $thumb_node->item(0)->getAttribute('src');
         }
 
-        // --- Comic panel images, in reading order. ---
+        // Comic panel images, in reading order.
         $panel_nodes = $xpath->query('//article[contains(concat(" ", normalize-space(@class), " "), " viewer__body ")]//img[contains(concat(" ", normalize-space(@class), " "), " content__img ")]');
         foreach ($panel_nodes as $panel) {
             $src = $panel->getAttribute('data-src');
@@ -1459,14 +1276,14 @@ trait Toocheke_Companion_Import_Tapas
             ];
         }
 
-        // --- Episode "story" teaser (short creator note, when present). ---
+        // Episode "story" teaser (short creator note, when present).
         $story_node = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " js-episode-story ")]');
         if ($story_node->length) {
             $out['story_excerpt'] = trim($story_node->item(0)->textContent);
         }
 
-        // --- Series-level info (only present when this fetch is the
-        //     series/first-episode page; harmless no-op otherwise). ---
+        // Series-level info — only present when this fetch is the
+        // series/first-episode page.
         $series_title_node = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " title-wrapper ")]//*[contains(concat(" ", normalize-space(@class), " "), " title ")]');
         if ($series_title_node->length) {
             $text = trim($series_title_node->item(0)->textContent);
@@ -1497,21 +1314,16 @@ trait Toocheke_Companion_Import_Tapas
         return $out;
     }
 
-    /**
-     * Very small helper for the one inline-JS string value we read
-     * (seriesTitle) — undoes basic JS string escaping without pulling in
-     * a JSON parser for a single field.
-     */
+    // Undoes basic JS string escaping for the one inline value we read
+    // (seriesTitle) without pulling in a JSON parser for a single field.
     protected function toocheke_tapas_unescape_js_string($raw)
     {
         return html_entity_decode(stripslashes($raw), ENT_QUOTES, 'UTF-8');
     }
 
-    /**
-     * Tapas shows dates like "Dec 02, 2020" with no time-of-day. Anchoring
-     * to noon (rather than midnight) avoids a GMT conversion nudging the
-     * stored date to the previous calendar day for sites west of UTC.
-     */
+    // Tapas shows dates like "Dec 02, 2020" with no time — anchoring to
+    // noon avoids a GMT conversion nudging it to the previous day for
+    // sites west of UTC.
     protected function toocheke_tapas_parse_episode_date($date_str)
     {
         $date_str = trim((string) $date_str);
@@ -1525,10 +1337,6 @@ trait Toocheke_Companion_Import_Tapas
         return gmdate('Y-m-d H:i:s', $timestamp);
     }
 
-    /* =========================================================================
-       HTTP
-    ========================================================================= */
-
     protected function toocheke_tapas_is_allowed_host($url)
     {
         $host = wp_parse_url($url, PHP_URL_HOST);
@@ -1540,26 +1348,10 @@ trait Toocheke_Companion_Import_Tapas
             || '.' . TOOCHEKE_TAPAS_ALLOWED_HOST_SUFFIX === substr($host, -1 - strlen(TOOCHEKE_TAPAS_ALLOWED_HOST_SUFFIX));
     }
 
-    /**
-     * Fetches a page URL. Never throws/dies — always returns an array
-     * with either 'body' set, or 'throttled' => true with a suggested
-     * 'retry_after' (seconds), or 'error' with a human message.
-     */
-    /**
-     * Fetches a page URL. Never throws/dies — always returns an array
-     * with either 'body' set, or 'throttled' => true with a suggested
-     * 'retry_after' (seconds), or 'error' with a human-readable message
-     * that still includes the underlying technical reason (HTTP status /
-     * connection error) so a failure can actually be diagnosed rather
-     * than just reported as "didn't work".
-     *
-     * A single hard failure (a dropped connection, a one-off 403/500) is
-     * common enough across a run of hundreds/thousands of requests that
-     * treating it as instantly fatal to the whole series would be overly
-     * brittle, so this retries a couple of times with a short pause
-     * first — separately from, and in addition to, the JS-side
-     * throttle backoff for genuine 429/503 rate-limiting.
-     */
+    // Fetches a page. Never throws — returns 'body', or 'throttled' with
+    // a suggested wait, or 'error' with the underlying reason. Retries a
+    // couple of times on a hard failure before giving up, separate from
+    // the JS-side backoff for genuine rate-limiting.
     protected function toocheke_tapas_http_get($url, $attempt = 1)
     {
         if (! $this->toocheke_tapas_is_allowed_host($url)) {
@@ -1585,18 +1377,10 @@ trait Toocheke_Companion_Import_Tapas
         $code = wp_remote_retrieve_response_code($response);
 
         if (429 === $code || 503 === $code || 403 === $code) {
-            // 429/503 are Tapas explicitly saying "slow down". A 403 is
-            // less clear-cut — it can mean genuinely-forbidden content,
-            // but in practice a 403 that hits one specific page while its
-            // neighbours fetch fine (rather than every request failing)
-            // has consistently turned out to be a transient anti-bot
-            // block rather than the content itself being restricted.
-            // Treating it the same as a rate limit — back off and retry
-            // the SAME page later rather than giving up after a few quick
-            // attempts — is what actually clears it; see
-            // toocheke_tapas_apply_backoff_strike(), which is what
-            // escalates the wait on repeated strikes and is where this
-            // eventually surfaces to the creator if it truly never clears.
+            // 403 is treated the same as a rate limit — in practice a
+            // 403 on one page while its neighbours fetch fine turns out
+            // to be a transient anti-bot block, not genuinely forbidden
+            // content, and backing off clears it.
             $retry_after = (int) wp_remote_retrieve_header($response, 'retry-after');
             if ($retry_after <= 0) {
                 $retry_after = $this->toocheke_tapas_backoff_seconds();
@@ -1625,30 +1409,16 @@ trait Toocheke_Companion_Import_Tapas
         return ['body' => $body, 'throttled' => false, 'error' => '' === trim($body) ? __('Tapas returned an empty page.', 'toocheke-companion') : ''];
     }
 
-    /**
-     * Exponential-ish backoff used only when Tapas doesn't tell us how
-     * long to wait via a Retry-After header. Kept intentionally simple —
-     * a fixed, generous pause — since the JS side already caps automatic
-     * retries and hands control back to the creator rather than hammering
-     * a rate limit indefinitely.
-     */
+    // Fallback wait when Tapas doesn't send a Retry-After header.
     protected function toocheke_tapas_backoff_seconds()
     {
         return 45;
     }
 
-    /* =========================================================================
-       IMAGES
-    ========================================================================= */
-
-    /**
-     * Tapas' CDN serves resized variants as `{hash}_{sizecode}.{ext}`
-     * alongside the original at `{hash}.{ext}`. When the requested URL
-     * matches that pattern, tries the (larger) unsuffixed original first
-     * and falls back to the given URL if that 404s — see class docblock
-     * for why this is only done for thumbnails, not the (often numerous)
-     * comic-panel images.
-     */
+    // Tapas' CDN serves resized variants as `{hash}_{sizecode}.{ext}`
+    // alongside the original — try the larger unsuffixed version first,
+    // fall back to the given URL if that 404s. Only used for thumbnails,
+    // not the (often numerous) comic-panel images.
     protected function toocheke_tapas_sideload_largest($url, $post_id, $desc)
     {
         $stripped = $this->toocheke_tapas_strip_size_suffix($url);
@@ -1671,14 +1441,9 @@ trait Toocheke_Companion_Import_Tapas
         return $url;
     }
 
-    /**
-     * Thin, defensive wrapper around media_sideload_image(): confines
-     * requests to the allowed host, loads the admin includes it needs
-     * (not guaranteed to already be loaded in an admin-ajax context),
-     * and always returns an attachment ID or 0 rather than a WP_Error/
-     * HTML string (media_sideload_image()'s return type varies by WP
-     * version depending on the 4th argument, so this pins it down once).
-     */
+    // Wraps media_sideload_image(): confines requests to the allowed
+    // host, loads the admin includes it needs, and always returns an
+    // attachment ID or 0 (its return type otherwise varies by WP version).
     protected function toocheke_tapas_sideload_image($url, $post_id, $desc)
     {
         if (empty($url) || ! $this->toocheke_tapas_is_allowed_host($url)) {
@@ -1705,15 +1470,8 @@ trait Toocheke_Companion_Import_Tapas
         return (int) $result;
     }
 
-    /* =========================================================================
-       INPUT VALIDATION
-    ========================================================================= */
-
-    /**
-     * Accepts only https://tapas.io/series/{name}[/...] and returns the
-     * sanitized series slug, or false. Deliberately strict — this feeds
-     * directly into an outbound HTTP request.
-     */
+    // Accepts only https://tapas.io/series/{name}[/...], strict since
+    // this feeds directly into an outbound request.
     protected function toocheke_tapas_validate_series_url($url)
     {
         $url = esc_url_raw($url);

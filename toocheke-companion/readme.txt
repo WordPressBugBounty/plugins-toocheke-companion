@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.24
+Stable tag: 2.25
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -17,7 +17,7 @@ Transform your WordPress theme into a platform for publishing your webcomics.
 
 **Toocheke Companion Website:** [Toocheke Companion](https://leetoo.net/toocheke-companion/ "Toocheke Companion - Plugin for publishing your webcomic")
 
-Looking to publish your comics or manga on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic and manga posts. While it works best with the **Toocheke WordPress theme**, it is compatible with most modern WordPress themes.
+Looking to publish your comics or manga on your WordPress website? **Toocheke Companion** extends your WordPress theme with the ability to create, manage, and display comic and manga posts. While it works best with the **[Toocheke WordPress theme](https://www.toocheke.com/)**, it is compatible with most modern WordPress themes.
 
 Comics published with Toocheke Companion can also be discovered through **[ComicScout](https://www.thecomicscout.com/)** — a curated discovery platform built specifically for independent comic websites designed to help readers discover new comics and drive traffic back to creators' sites.
 
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.25 =
+* UPDATE: Refactoring and code cleanup.
 
 = 2.24 =
 * NEW: The Tapas import now requires confirming you have the legal right to import the comics before it will start.

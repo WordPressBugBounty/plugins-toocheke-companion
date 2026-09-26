@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.25
+Stable tag: 2.26
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.26 =
+* FIX: Fixed a bug where importing a large Tapas episode could sometimes create duplicate images if the import was interrupted partway through and had to retry.
+* NEW: Added a "Start a series over" option to the Tapas import page. If an import for a series ever goes wrong, this lets you delete that series (and all its images) with one click, so you can cleanly re-import it from scratch.
 
 = 2.25 =
 * UPDATE: Refactoring and code cleanup.

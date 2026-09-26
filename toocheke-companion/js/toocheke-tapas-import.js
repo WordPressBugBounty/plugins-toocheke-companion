@@ -207,8 +207,20 @@ jQuery(document).ready(function ($) {
             renderJob(data.job);
 
             if (data.throttled) {
-                consecutiveThrottles++;
                 var wait = data.retry_after || 45;
+
+                // A cleanup-in-progress pause is never a reason to give
+                // up automatically — it always finishes on its own, so
+                // this doesn't count toward the Tapas-throttle retry cap
+                // and shows the real reason instead of the generic
+                // rate-limit message.
+                if (data.pause_reason) {
+                    appendLog(data.pause_reason);
+                    setTimeout(loop, wait * 1000);
+                    return;
+                }
+
+                consecutiveThrottles++;
 
                 if (consecutiveThrottles > MAX_AUTO_RETRIES) {
                     appendLog(cfg.i18n.throttledManual);
@@ -368,6 +380,80 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // "Start a series over" — permanent delete + re-import.
+    var $cleanupSelect  = $('#toocheke-tapas-cleanup-select');
+    var $cleanupConfirm = $('#toocheke-tapas-cleanup-confirm-text');
+    var $cleanupStart   = $('#toocheke-tapas-cleanup-start');
+    var $cleanupProgress = $('#toocheke-tapas-cleanup-progress');
+    var $cleanupFill    = $('.toocheke-tapas-progressbar--cleanup .toocheke-tapas-progressbar-fill');
+    var $cleanupStatus  = $('.toocheke-tapas-cleanup-status');
+    var cleanupRunning  = false;
+
+    function updateCleanupButtonState() {
+        var selectedTitle = $cleanupSelect.find(':selected').data('title') || '';
+        var matches = selectedTitle !== '' && $cleanupConfirm.val() === selectedTitle;
+        $cleanupStart.prop('disabled', !matches || cleanupRunning);
+    }
+    $cleanupSelect.on('change', updateCleanupButtonState);
+    $cleanupConfirm.on('input', updateCleanupButtonState);
+
+    function cleanupStep() {
+        ajax('toocheke_tapas_cleanup_step', {}).done(function (res) {
+            if (!res || !res.success) {
+                $cleanupStatus.text((res && res.data && res.data.message) || 'Something went wrong.');
+                cleanupRunning = false;
+                return;
+            }
+            var job = res.data.job;
+            var pct = job.comics_total ? Math.min(100, Math.round((job.comics_done / job.comics_total) * 100)) : (res.data.done ? 100 : 0);
+            $cleanupFill.css('width', pct + '%');
+            $cleanupStatus.text('Deleted ' + job.comics_done + ' / ' + job.comics_total + ' comics (' + job.attachments_deleted + ' files removed so far)…');
+
+            if (res.data.done) {
+                $cleanupStatus.text('Done — “' + job.series_title + '” and everything under it has been permanently removed. You can now re-run the import for it from scratch.');
+                cleanupRunning = false;
+                $cleanupSelect.html('<option value="">' + $cleanupSelect.find('option:first').text() + '</option>');
+                $cleanupConfirm.val('');
+                updateCleanupButtonState();
+                return;
+            }
+            setTimeout(cleanupStep, STEP_DELAY_MS);
+        }).fail(function () {
+            $cleanupStatus.text('Lost connection — will keep retrying…');
+            setTimeout(cleanupStep, 15000);
+        });
+    }
+
+    $cleanupStart.on('click', function () {
+        var seriesPostId = $cleanupSelect.val();
+        var selectedTitle = $cleanupSelect.find(':selected').data('title') || '';
+        if (!seriesPostId || $cleanupConfirm.val() !== selectedTitle) {
+            return;
+        }
+        if (!window.confirm('This permanently deletes "' + selectedTitle + '", every comic under it, and every attached image file. This cannot be undone. Continue?')) {
+            return;
+        }
+
+        cleanupRunning = true;
+        $cleanupStart.prop('disabled', true);
+        $cleanupSelect.prop('disabled', true);
+        $cleanupConfirm.prop('disabled', true);
+        $cleanupProgress.show();
+        $cleanupStatus.text('Starting…');
+
+        ajax('toocheke_tapas_cleanup_start', { series_post_id: seriesPostId }).done(function (res) {
+            if (!res || !res.success) {
+                $cleanupStatus.text((res && res.data && res.data.message) || 'Could not start.');
+                cleanupRunning = false;
+                $cleanupSelect.prop('disabled', false);
+                $cleanupConfirm.prop('disabled', false);
+                updateCleanupButtonState();
+                return;
+            }
+            cleanupStep();
+        });
+    });
+
     // Show any in-progress job on load, but don't auto-resume it.
     ajax('toocheke_tapas_import_status', {}).done(function (res) {
         if (res && res.success && res.data.job && res.data.job.series && res.data.job.series.length) {
@@ -378,4 +464,21 @@ jQuery(document).ready(function ($) {
             }
         }
     });
+
+    // Unlike the import itself, a cleanup that was interrupted (tab
+    // closed, page reloaded) is always safe to just continue — deleting
+    // is idempotent, so this resumes it automatically rather than
+    // making the person notice and click something again.
+    if ($cleanupProgress.length) {
+        ajax('toocheke_tapas_cleanup_status', {}).done(function (res) {
+            if (res && res.success && res.data.job) {
+                cleanupRunning = true;
+                $cleanupSelect.prop('disabled', true);
+                $cleanupConfirm.prop('disabled', true);
+                $cleanupProgress.show();
+                $cleanupStatus.text('Resuming an interrupted cleanup…');
+                cleanupStep();
+            }
+        });
+    }
 });

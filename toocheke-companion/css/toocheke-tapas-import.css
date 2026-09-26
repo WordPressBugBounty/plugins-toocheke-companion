@@ -117,3 +117,26 @@
     content: "› ";
     color: #6c7781;
 }
+
+.toocheke-tapas-danger-zone {
+    max-width: 700px;
+    margin-top: 32px;
+    padding: 16px;
+    background: #fdecea;
+    border: 1px solid #c00;
+    border-radius: 4px;
+}
+
+.toocheke-tapas-danger-zone h3 {
+    margin-top: 0;
+    color: #c00;
+}
+
+.toocheke-tapas-progressbar--cleanup {
+    margin-top: 8px;
+}
+
+.toocheke-tapas-cleanup-status {
+    margin: 10px 0 0;
+    color: #50575e;
+}

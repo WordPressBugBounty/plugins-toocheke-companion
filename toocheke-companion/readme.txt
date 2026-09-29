@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.26
+Stable tag: 2.27
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,11 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.27 =
+* FIX: Fixed an edge-case duplicate-image bug that could still happen on a slow connection.
+* FIX: A single image that failed to download no longer gets silently left out of an episode — it's retried automatically.
+* NEW: If an image still can't be downloaded, that episode is now flagged with a "Repair" button on the import page to update with any missing images.
 
 = 2.26 =
 * FIX: Fixed a bug where importing a large Tapas episode could sometimes create duplicate images if the import was interrupted partway through and had to retry.

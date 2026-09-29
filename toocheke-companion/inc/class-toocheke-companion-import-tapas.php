@@ -21,6 +21,11 @@ if (! defined('TOOCHEKE_TAPAS_ALLOWED_HOST_SUFFIX')) {
 
 trait Toocheke_Companion_Import_Tapas
 {
+    protected function toocheke_tapas_max_image_attempts()
+    {
+        return 3;
+    }
+
     // Called once from init() in toocheke-companion.php.
     public function toocheke_tapas_register_hooks()
     {
@@ -42,6 +47,10 @@ trait Toocheke_Companion_Import_Tapas
         add_action('wp_ajax_toocheke_tapas_cleanup_start', [$this, 'toocheke_tapas_ajax_cleanup_start']);
         add_action('wp_ajax_toocheke_tapas_cleanup_step',  [$this, 'toocheke_tapas_ajax_cleanup_step']);
         add_action('wp_ajax_toocheke_tapas_cleanup_status', [$this, 'toocheke_tapas_ajax_cleanup_status']);
+
+        add_action('wp_ajax_toocheke_tapas_repair_start',  [$this, 'toocheke_tapas_ajax_repair_start']);
+        add_action('wp_ajax_toocheke_tapas_repair_step',   [$this, 'toocheke_tapas_ajax_repair_step']);
+        add_action('wp_ajax_toocheke_tapas_repair_status', [$this, 'toocheke_tapas_ajax_repair_status']);
     }
 
     public function toocheke_tapas_enqueue_admin_assets($hook)
@@ -92,6 +101,12 @@ trait Toocheke_Companion_Import_Tapas
                 'genericError'   => __('Something went wrong: %s', 'toocheke-companion'),
                 'confirmDiscard' => __('Discard the current import and start over? Anything already imported will stay on your site.', 'toocheke-companion'),
                 'confirmStart'   => __('This will start importing the series listed above. Continue?', 'toocheke-companion'),
+                /* translators: 1: episodes repaired so far, 2: total episodes being repaired */
+                'repairing'      => __('Repaired %1$d of %2$d episodes…', 'toocheke-companion'),
+                /* translators: %d: number of episodes repaired */
+                'repairDone'     => __('Repair finished — %d episode(s) fixed.', 'toocheke-companion'),
+                /* translators: %s: comma-separated episode titles */
+                'repairStill'    => __('Still missing panels after 3 tries: %s. Tapas may be refusing those images — try again later.', 'toocheke-companion'),
             ],
         ]);
     }
@@ -175,6 +190,55 @@ trait Toocheke_Companion_Import_Tapas
             <div id="toocheke-tapas-existing-job" style="<?php echo $has_existing_job ? '' : 'display:none;'; ?>">
                 <p><em><?php esc_html_e('You have an import in progress. Click “Resume Import” above to continue it, or “Discard & Start Over” to abandon it (anything already imported stays on your site either way).', 'toocheke-companion'); ?></em></p>
             </div>
+
+            <?php $flagged_episodes = $this->toocheke_tapas_get_flagged_episodes(); ?>
+            <?php if ($flagged_episodes || is_array(get_option('toocheke_tapas_repair_job'))) : ?>
+            <div class="toocheke-tapas-attention" id="toocheke-tapas-attention">
+                <h3><?php esc_html_e('Episodes needing attention', 'toocheke-companion'); ?></h3>
+                <p>
+                    <?php esc_html_e('These episodes imported, but some panels wouldn\'t download. Repair checks each one on Tapas again and downloads only the panels that are missing.', 'toocheke-companion'); ?>
+                </p>
+                <?php if ($flagged_episodes) : ?>
+                <table class="widefat striped toocheke-tapas-attention-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e('Episode', 'toocheke-companion'); ?></th>
+                            <th><?php esc_html_e('Series', 'toocheke-companion'); ?></th>
+                            <th><?php esc_html_e('Missing', 'toocheke-companion'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($flagged_episodes as $episode) : ?>
+                        <tr>
+                            <td><a href="<?php echo esc_url(get_edit_post_link($episode['post_id'])); ?>"><?php echo esc_html($episode['title']); ?></a></td>
+                            <td><?php echo esc_html($episode['series']); ?></td>
+                            <td><?php echo esc_html(sprintf(
+                                /* translators: %d: number of missing panels */
+                                _n('%d panel', '%d panels', $episode['missing'], 'toocheke-companion'),
+                                $episode['missing']
+                            )); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php endif; ?>
+                <p>
+                    <button type="button" id="toocheke-tapas-repair-start" class="button button-primary">
+                        <?php echo esc_html(sprintf(
+                            /* translators: %d: number of flagged episodes */
+                            _n('Repair %d episode', 'Repair %d episodes', count($flagged_episodes), 'toocheke-companion'),
+                            count($flagged_episodes)
+                        )); ?>
+                    </button>
+                </p>
+                <div id="toocheke-tapas-repair-progress" style="display:none;">
+                    <div class="toocheke-tapas-progressbar toocheke-tapas-progressbar--repair">
+                        <div class="toocheke-tapas-progressbar-fill"></div>
+                    </div>
+                    <p class="toocheke-tapas-repair-status"></p>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <?php $cleanup_candidates = $this->toocheke_tapas_get_cleanup_candidates(); ?>
             <?php if ($cleanup_candidates) : ?>
@@ -658,6 +722,160 @@ trait Toocheke_Companion_Import_Tapas
         wp_send_json_success(['job' => is_array($job) ? $job : null]);
     }
 
+    // Comic posts that finished importing with panels that wouldn't download.
+    protected function toocheke_tapas_get_flagged_episodes()
+    {
+        $posts = get_posts([
+            'post_type'      => 'comic',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'meta_key'       => '_toocheke_tapas_missing_panels',
+            'meta_value'     => 0,
+            'meta_compare'   => '>',
+            'meta_type'      => 'NUMERIC',
+            'orderby'        => 'date',
+            'order'          => 'ASC',
+        ]);
+
+        $out = [];
+        foreach ($posts as $p) {
+            $out[] = [
+                'post_id' => $p->ID,
+                'title'   => get_the_title($p),
+                'series'  => $p->post_parent ? get_the_title($p->post_parent) : '',
+                'missing' => (int) get_post_meta($p->ID, '_toocheke_tapas_missing_panels', true),
+            ];
+        }
+        return $out;
+    }
+
+    public function toocheke_tapas_ajax_repair_start()
+    {
+        $this->toocheke_tapas_ajax_guard();
+
+        if (is_array(get_option('toocheke_tapas_cleanup_job'))) {
+            wp_send_json_error(['message' => __('A “Start a series over” delete is still running — wait for it to finish first.', 'toocheke-companion')]);
+        }
+
+        $queue = [];
+        foreach ($this->toocheke_tapas_get_flagged_episodes() as $episode) {
+            $queue[] = ['id' => (int) $episode['post_id'], 'tries' => 0];
+        }
+        if (! $queue) {
+            wp_send_json_error(['message' => __('No episodes need repair.', 'toocheke-companion')]);
+        }
+
+        $job = [
+            'queue'         => $queue,
+            'total'         => count($queue),
+            'fixed'         => 0,
+            'still_missing' => [],
+            'status'        => 'running',
+        ];
+        update_option('toocheke_tapas_repair_job', $job, false);
+
+        wp_send_json_success(['job' => $job]);
+    }
+
+    // One episode per call, sharing the import's step lock so the two
+    // can never run a step at the same moment.
+    public function toocheke_tapas_ajax_repair_step()
+    {
+        $this->toocheke_tapas_ajax_guard();
+
+        $job = get_option('toocheke_tapas_repair_job');
+        if (! is_array($job)) {
+            wp_send_json_error(['message' => __('No repair in progress.', 'toocheke-companion')]);
+        }
+
+        if (get_transient('toocheke_tapas_step_lock')) {
+            wp_send_json_success(['job' => $job, 'done' => false, 'throttled' => true, 'retry_after' => 10]);
+        }
+        set_transient('toocheke_tapas_step_lock', 1, 150);
+        @set_time_limit(120); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_time_limit
+
+        $result = $this->toocheke_tapas_repair_one($job);
+
+        if (! empty($result['done'])) {
+            delete_option('toocheke_tapas_repair_job');
+        } else {
+            update_option('toocheke_tapas_repair_job', $job, false);
+        }
+        delete_transient('toocheke_tapas_step_lock');
+
+        wp_send_json_success(['job' => $job, 'done' => ! empty($result['done']), 'throttled' => ! empty($result['throttled']), 'retry_after' => isset($result['retry_after']) ? $result['retry_after'] : 0]);
+    }
+
+    public function toocheke_tapas_ajax_repair_status()
+    {
+        $this->toocheke_tapas_ajax_guard();
+        $job = get_option('toocheke_tapas_repair_job');
+        wp_send_json_success(['job' => is_array($job) ? $job : null]);
+    }
+
+    // Re-fetches one flagged episode and downloads only the panels the
+    // saved progress map doesn't already have.
+    protected function toocheke_tapas_repair_one(array &$job)
+    {
+        if (empty($job['queue'])) {
+            $job['status'] = 'done';
+            return ['done' => true];
+        }
+
+        $item    = array_shift($job['queue']);
+        $post_id = (int) $item['id'];
+
+        if ($post_id && get_post($post_id)) {
+            $episode_id = (int) get_post_meta($post_id, '_toocheke_tapas_episode_id', true);
+            $title      = get_the_title($post_id);
+            $missing    = (int) get_post_meta($post_id, '_toocheke_tapas_missing_panels', true);
+            $fetch      = $episode_id ? $this->toocheke_tapas_http_get('https://tapas.io/episode/' . $episode_id) : ['body' => ''];
+
+            if (! empty($fetch['throttled'])) {
+                array_unshift($job['queue'], $item);
+                return [
+                    'throttled'    => true,
+                    'retry_after'  => $fetch['retry_after'],
+                    'pause_reason' => __('Tapas is rate-limiting requests — waiting before repairing the next episode.', 'toocheke-companion'),
+                ];
+            }
+
+            $data = ! empty($fetch['body']) ? $this->toocheke_tapas_parse_episode_html($fetch['body']) : [];
+
+            if (! empty($data['content_image_urls'])) {
+                $missing = 0;
+                $content = $this->toocheke_tapas_build_comic_content($data['content_image_urls'], $post_id, $title, $missing);
+                if ('' !== $content) {
+                    wp_update_post(['ID' => $post_id, 'post_content' => $content]);
+                }
+                if (0 === $missing) {
+                    delete_post_meta($post_id, '_toocheke_tapas_missing_panels');
+                    delete_post_meta($post_id, '_toocheke_tapas_import_attempts');
+                    $this->toocheke_tapas_prune_unused_attachments($post_id);
+                    $this->toocheke_tapas_clear_image_progress($post_id);
+                    $job['fixed']++;
+                } else {
+                    update_post_meta($post_id, '_toocheke_tapas_missing_panels', $missing);
+                }
+            }
+
+            if ($missing > 0) {
+                $item['tries'] = (int) $item['tries'] + 1;
+                if ($item['tries'] < $this->toocheke_tapas_max_image_attempts()) {
+                    $job['queue'][] = $item;
+                } else {
+                    $job['still_missing'][] = ['id' => $post_id, 'title' => $title, 'missing' => $missing];
+                }
+            }
+        }
+
+        if (empty($job['queue'])) {
+            $job['status'] = 'done';
+            return ['done' => true];
+        }
+        return ['done' => false];
+    }
+
     public function toocheke_tapas_ajax_start()
     {
         $this->toocheke_tapas_ajax_guard();
@@ -863,9 +1081,26 @@ trait Toocheke_Companion_Import_Tapas
         // Some hosts disable this function entirely — harmless no-op.
         @set_time_limit(120); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_time_limit
 
+        // A slow step can still be running server-side when the client
+        // gives up and retries, starting a second process on the same
+        // episode — this makes the second request wait instead.
+        if (get_transient('toocheke_tapas_step_lock')) {
+            wp_send_json_success([
+                'job'          => $this->toocheke_tapas_job_for_js($this->toocheke_tapas_get_job()),
+                'finished'     => false,
+                'throttled'    => true,
+                'retry_after'  => 10,
+                'pause_reason' => __('Still finishing the previous step — waiting for it before continuing.', 'toocheke-companion'),
+            ]);
+        }
+        // Auto-releases on its own well before this — just a backstop in
+        // case a crash skips the delete_transient() calls below.
+        set_transient('toocheke_tapas_step_lock', 1, 150);
+
         $job = $this->toocheke_tapas_get_job();
 
         if (empty($job['series'])) {
+            delete_transient('toocheke_tapas_step_lock');
             wp_send_json_success(['job' => $this->toocheke_tapas_job_for_js($job), 'finished' => true]);
         }
 
@@ -878,6 +1113,7 @@ trait Toocheke_Companion_Import_Tapas
         if ($job['current_index'] >= count($job['series'])) {
             $job['status'] = 'completed';
             $this->toocheke_tapas_save_job($job);
+            delete_transient('toocheke_tapas_step_lock');
             wp_send_json_success(['job' => $this->toocheke_tapas_job_for_js($job), 'finished' => true]);
         }
 
@@ -891,6 +1127,7 @@ trait Toocheke_Companion_Import_Tapas
         if (! empty($result['throttled'])) {
             $job['status'] = 'throttled';
             $this->toocheke_tapas_save_job($job);
+            delete_transient('toocheke_tapas_step_lock');
             wp_send_json_success([
                 'job'            => $this->toocheke_tapas_job_for_js($job),
                 'finished'       => false,
@@ -903,6 +1140,7 @@ trait Toocheke_Companion_Import_Tapas
         $job['status'] = 'running';
         $this->toocheke_tapas_save_job($job);
 
+        delete_transient('toocheke_tapas_step_lock');
         wp_send_json_success([
             'job'      => $this->toocheke_tapas_job_for_js($job),
             'finished' => false,
@@ -1215,14 +1453,39 @@ trait Toocheke_Companion_Import_Tapas
                     }
                 }
 
-                $content = $this->toocheke_tapas_build_comic_content($data['content_image_urls'], $comic_post_id, $data['episode_title']);
+                $missing = 0;
+                $content = $this->toocheke_tapas_build_comic_content($data['content_image_urls'], $comic_post_id, $data['episode_title'], $missing);
                 if ('' !== $content) {
                     wp_update_post(['ID' => $comic_post_id, 'post_content' => $content]);
                 }
 
-                // Only mark complete once every image has landed.
+                if ($missing > 0) {
+                    $attempts = (int) get_post_meta($comic_post_id, '_toocheke_tapas_import_attempts', true) + 1;
+                    update_post_meta($comic_post_id, '_toocheke_tapas_import_attempts', $attempts);
+
+                    if ($attempts < $this->toocheke_tapas_max_image_attempts()) {
+                        // Cursor stays on this episode so the next step re-fetches it.
+                        $entry['next_id'] = $data['episode_id'];
+                        $message = sprintf(
+                            /* translators: 1: number of images, 2: episode title */
+                            _n('%1$d image in “%2$s” didn\'t download — retrying it…', '%1$d images in “%2$s” didn\'t download — retrying them…', $missing, 'toocheke-companion'),
+                            $missing,
+                            $data['episode_title']
+                        );
+                        return ['throttled' => true, 'retry_after' => 5, 'pause_reason' => $message];
+                    }
+                    update_post_meta($comic_post_id, '_toocheke_tapas_missing_panels', $missing);
+                } else {
+                    delete_post_meta($comic_post_id, '_toocheke_tapas_missing_panels');
+                    delete_post_meta($comic_post_id, '_toocheke_tapas_import_attempts');
+                }
+
                 update_post_meta($comic_post_id, '_toocheke_tapas_import_complete', 1);
-                $this->toocheke_tapas_clear_image_progress($comic_post_id);
+                $this->toocheke_tapas_prune_unused_attachments($comic_post_id);
+                // Kept for flagged episodes so Repair knows which panels already exist.
+                if (0 === $missing) {
+                    $this->toocheke_tapas_clear_image_progress($comic_post_id);
+                }
 
                 $entry['episodes_done']++;
                 $entry['last_episode_title'] = $data['episode_title'];
@@ -1241,6 +1504,15 @@ trait Toocheke_Companion_Import_Tapas
                         __('“%1$s” was created but has NO images — %2$s', 'toocheke-companion'),
                         $data['episode_title'],
                         $reason
+                    );
+                    $this->toocheke_tapas_log($entry, $warning);
+                    $this->toocheke_tapas_flag_episode($entry, $data['episode_id'], $warning);
+                } elseif ($missing > 0) {
+                    $warning = sprintf(
+                        /* translators: 1: episode title, 2: number of images */
+                        _n('“%1$s” is missing %2$d image that wouldn\'t download. Use “Repair” below to try again.', '“%1$s” is missing %2$d images that wouldn\'t download. Use “Repair” below to try again.', $missing, 'toocheke-companion'),
+                        $data['episode_title'],
+                        $missing
                     );
                     $this->toocheke_tapas_log($entry, $warning);
                     $this->toocheke_tapas_flag_episode($entry, $data['episode_id'], $warning);
@@ -1339,10 +1611,10 @@ trait Toocheke_Companion_Import_Tapas
             // no images — still worth surfacing.
             $count = count($entry['flagged_episodes']);
             $warning = sprintf(
-                /* translators: %d: number of episodes with no images */
+                /* translators: %d: number of flagged episodes */
                 _n(
-                    'Heads up: %d episode imported with no images — see the log below for which one and why.',
-                    'Heads up: %d episodes imported with no images — see the log below for which ones and why.',
+                    'Heads up: %d episode needs attention — see the log below for which one and why.',
+                    'Heads up: %d episodes need attention — see the log below for which ones and why.',
                     $count,
                     'toocheke-companion'
                 ),
@@ -1379,9 +1651,10 @@ trait Toocheke_Companion_Import_Tapas
     // every single page fetch, so the same image gets a different full
     // URL on every retry; keying on the full URL would never actually
     // recognize a previously-uploaded image.
-    protected function toocheke_tapas_build_comic_content(array $image_urls, $post_id, $desc)
+    protected function toocheke_tapas_build_comic_content(array $image_urls, $post_id, $desc, &$missing = null)
     {
         $progress = $this->toocheke_tapas_get_image_progress($post_id);
+        $missing  = 0;
 
         foreach ($image_urls as $image) {
             $url = $image['url'];
@@ -1409,6 +1682,7 @@ trait Toocheke_Companion_Import_Tapas
         foreach ($image_urls as $image) {
             $key = $this->toocheke_tapas_stable_url_key($image['url']);
             if (empty($progress[$key])) {
+                $missing++;
                 continue;
             }
             // Force block display so panels stack tight with no gap —
@@ -1449,6 +1723,36 @@ trait Toocheke_Companion_Import_Tapas
     protected function toocheke_tapas_clear_image_progress($post_id)
     {
         delete_post_meta($post_id, '_toocheke_tapas_image_progress');
+    }
+
+    // Deletes any attachment still parented to this comic post that
+    // isn't one of the ones actually used in its finished content —
+    // safe because it's scoped to this one post and checked against
+    // its own just-built, authoritative list, not a guess by title or
+    // filename. Catches the extras a concurrent-request race can leave
+    // behind. The featured thumbnail is tracked separately from the
+    // panel list, so it's explicitly protected here.
+    protected function toocheke_tapas_prune_unused_attachments($post_id)
+    {
+        $progress = $this->toocheke_tapas_get_image_progress($post_id);
+        $used     = array_map('intval', array_values($progress));
+        $keep     = (int) get_post_thumbnail_id($post_id);
+
+        $attached = get_posts([
+            'post_type'      => 'attachment',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'post_parent'    => $post_id,
+            'fields'         => 'ids',
+        ]);
+
+        foreach ($attached as $attachment_id) {
+            $attachment_id = (int) $attachment_id;
+            if ($attachment_id === $keep || in_array($attachment_id, $used, true)) {
+                continue;
+            }
+            wp_delete_attachment($attachment_id, true);
+        }
     }
 
     protected function toocheke_tapas_find_existing_series_post($tapas_series_id, $series_title = '')

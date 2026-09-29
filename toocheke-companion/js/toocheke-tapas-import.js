@@ -454,6 +454,66 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // "Episodes needing attention" — re-download missing panels.
+    var $repairStart    = $('#toocheke-tapas-repair-start');
+    var $repairProgress = $('#toocheke-tapas-repair-progress');
+    var $repairFill     = $('.toocheke-tapas-progressbar--repair .toocheke-tapas-progressbar-fill');
+    var $repairStatus   = $('.toocheke-tapas-repair-status');
+
+    function repairStep() {
+        ajax('toocheke_tapas_repair_step', {}).done(function (res) {
+            if (!res || !res.success) {
+                $repairStatus.text((res && res.data && res.data.message) || 'Something went wrong.');
+                $repairStart.prop('disabled', false);
+                return;
+            }
+            var job = res.data.job;
+            var pct = job.total ? Math.min(100, Math.round(((job.total - job.queue.length) / job.total) * 100)) : 100;
+            $repairFill.css('width', (res.data.done ? 100 : pct) + '%');
+
+            if (res.data.done) {
+                var msg = fmt(cfg.i18n.repairDone, job.fixed);
+                if (job.still_missing && job.still_missing.length) {
+                    msg += ' ' + fmt(cfg.i18n.repairStill, $.map(job.still_missing, function (m) { return m.title; }).join(', '));
+                }
+                $repairStatus.text(msg);
+                setTimeout(function () { window.location.reload(); }, 4000);
+                return;
+            }
+
+            $repairStatus.text(fmt(cfg.i18n.repairing, job.total - job.queue.length, job.total));
+            setTimeout(repairStep, res.data.throttled ? (res.data.retry_after || 10) * 1000 : STEP_DELAY_MS);
+        }).fail(function () {
+            $repairStatus.text('Lost connection — will keep retrying…');
+            setTimeout(repairStep, 15000);
+        });
+    }
+
+    $repairStart.on('click', function () {
+        $repairStart.prop('disabled', true);
+        $repairProgress.show();
+        $repairStatus.text('Starting…');
+        ajax('toocheke_tapas_repair_start', {}).done(function (res) {
+            if (!res || !res.success) {
+                $repairStatus.text((res && res.data && res.data.message) || 'Could not start.');
+                $repairStart.prop('disabled', false);
+                return;
+            }
+            repairStep();
+        });
+    });
+
+    if ($repairProgress.length) {
+        ajax('toocheke_tapas_repair_status', {}).done(function (res) {
+            if (res && res.success && res.data.job) {
+                $repairStart.prop('disabled', true);
+                $repairProgress.show();
+                $repairStatus.text('Resuming an interrupted repair…');
+                repairStep();
+            }
+        });
+    }
+
     // Show any in-progress job on load, but don't auto-resume it.
     ajax('toocheke_tapas_import_status', {}).done(function (res) {
         if (res && res.success && res.data.job && res.data.job.series && res.data.job.series.length) {

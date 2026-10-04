@@ -1,0 +1,149 @@
+/**
+ * Toocheke Companion — Webtoons import admin UI.
+ * Enqueued only on Toocheke > Import: Webtoons (see
+ * toocheke_webtoons_enqueue_admin_assets() in
+ * class-toocheke-companion-import-webtoons.php).
+ */
+
+.toocheke-webtoons-agreement {
+    margin: 16px 0;
+}
+
+.toocheke-webtoons-agreement .description {
+    display: block;
+    margin-top: 4px;
+}
+
+.toocheke-webtoons-url-rows {
+    margin-top: 8px;
+    max-width: 700px;
+}
+
+.toocheke-webtoons-url-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.toocheke-webtoons-url-row .toocheke-webtoons-url-input {
+    flex: 1;
+}
+
+.toocheke-webtoons-remove-row {
+    line-height: 1;
+    padding: 0 8px;
+}
+
+.toocheke-webtoons-progress {
+    margin-top: 24px;
+    max-width: 700px;
+}
+
+.toocheke-webtoons-overall {
+    margin-bottom: 16px;
+}
+
+.toocheke-webtoons-overall-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.toocheke-webtoons-series-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.toocheke-webtoons-series-title {
+    margin: 0 0 10px;
+}
+
+.toocheke-webtoons-progressbar {
+    height: 10px;
+    border-radius: 5px;
+    background: #f0f0f1;
+    border: 1px solid #dcdcde;
+    overflow: hidden;
+}
+
+.toocheke-webtoons-progressbar-fill {
+    height: 100%;
+    width: 0%;
+    background: #2271b1;
+    transition: width 0.3s ease;
+}
+
+.toocheke-webtoons-series-status {
+    margin: 10px 0 0;
+    color: #50575e;
+}
+
+.toocheke-webtoons-log {
+    background: #1e1e1e;
+    color: #c3c4c7;
+    border-radius: 4px;
+    padding: 10px 14px;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.toocheke-webtoons-log-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.toocheke-webtoons-log-line::before {
+    content: "› ";
+    color: #6c7781;
+}
+
+.toocheke-webtoons-danger-zone {
+    max-width: 700px;
+    margin-top: 32px;
+    padding: 16px;
+    background: #fdecea;
+    border: 1px solid #c00;
+    border-radius: 4px;
+}
+
+.toocheke-webtoons-danger-zone h3 {
+    margin-top: 0;
+    color: #c00;
+}
+
+.toocheke-webtoons-progressbar--cleanup {
+    margin-top: 8px;
+}
+
+.toocheke-webtoons-cleanup-status {
+    margin: 10px 0 0;
+    color: #50575e;
+}
+
+.toocheke-webtoons-attention {
+    max-width: 700px;
+    margin-top: 32px;
+    padding: 16px;
+    background: #fff8e5;
+    border: 1px solid #dba617;
+    border-radius: 4px;
+}
+
+.toocheke-webtoons-attention h3 {
+    margin-top: 0;
+}
+
+.toocheke-webtoons-progressbar--repair {
+    margin-top: 8px;
+}
+
+.toocheke-webtoons-repair-status {
+    margin: 10px 0 0;
+    color: #50575e;
+}

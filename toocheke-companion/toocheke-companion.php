@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.27
+ * Version:     2.28
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.27');
+    define('TOOCHEKE_COMPANION_VERSION', '2.28');
 }
 
 /**
@@ -56,6 +56,7 @@ require_once __DIR__ . '/inc/class-toocheke-companion-bluesky.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-notifications.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-permalinks.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-import-tapas.php';
+require_once __DIR__ . '/inc/class-toocheke-companion-import-webtoons.php';
 
 class Toocheke_Companion_Comic_Features
 {
@@ -81,6 +82,7 @@ class Toocheke_Companion_Comic_Features
     use Toocheke_Companion_Notifications;
     use Toocheke_Companion_Permalinks;
     use Toocheke_Companion_Import_Tapas;
+    use Toocheke_Companion_Import_Webtoons;
 
     public function __construct()
     {
@@ -440,6 +442,12 @@ class Toocheke_Companion_Comic_Features
         // inc/class-toocheke-companion-import-tapas.php; see that file's
         // header.
         $this->toocheke_tapas_register_hooks();
+
+        // Import From Webtoons (Toocheke > Import: Webtoons) -- every hook
+        // this feature needs lives in
+        // inc/class-toocheke-companion-import-webtoons.php; see that file's
+        // header.
+        $this->toocheke_webtoons_register_hooks();
     }
 
     /* Set default options */

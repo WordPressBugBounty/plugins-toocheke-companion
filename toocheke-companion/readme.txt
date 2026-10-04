@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.27
+Stable tag: 2.28
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.28 =
+* NEW: Added ability to import comic series from Webtoons. Access it under Toocheke → Import: Webtoons.
 
 = 2.27 =
 * FIX: Fixed an edge-case duplicate-image bug that could still happen on a slow connection.

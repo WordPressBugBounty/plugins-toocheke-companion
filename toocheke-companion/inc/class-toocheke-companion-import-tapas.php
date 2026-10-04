@@ -133,7 +133,7 @@ trait Toocheke_Companion_Import_Tapas
 
             <h3><?php esc_html_e('Series to import', 'toocheke-companion'); ?></h3>
             <p>
-                <?php esc_html_e('Enter one or more Tapas series URLs, e.g. https://tapas.io/series/your-series-name — each will become its own Series post here, with every episode imported underneath it as a Comic post, in order.', 'toocheke-companion'); ?>
+                <?php esc_html_e('Enter one or more Tapas series URLs, e.g. https://tapas.io/series/your-series-name — each will become its own Series post here, with every episode imported in the series as a Comic post.', 'toocheke-companion'); ?>
             </p>
 
             <p class="toocheke-tapas-agreement">

@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.28
+Stable tag: 2.29
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.29 =
+* NEW: Added an option under Toocheke → Options → Discussion to restrict comments to patrons on paywalled comic posts only (Toocheke Premium). 
+* NEW: The Series Information and Volume Information sections on manga templates now only display when there is information to show.
 
 = 2.28 =
 * NEW: Added ability to import comic series from Webtoons. Access it under Toocheke → Import: Webtoons.

@@ -266,6 +266,7 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
 <div class="manga-row row">
     <div class="col-lg-12">
 
+<?php if (! empty($volume_formatted_release_date) || ! empty($volume_isbn) || ! empty($volume_rating) || ! empty($volume_pages)): ?>
         <!--Volume Information-->
         <h2><?php esc_html_e('Volume Information', 'toocheke-companion'); ?></h2>
         <div class="manga-info-table">
@@ -292,6 +293,7 @@ while ($single_manga_volume_query->have_posts()): $single_manga_volume_query->th
         </div>
         <hr class="toocheke-hr manga-hr" />
         <!--./Volume Information-->
+<?php endif; ?>
 
         <?php if ($volume_buy_digital_url || $volume_buy_print_url): ?>
             <!--Volume Purchasing-->

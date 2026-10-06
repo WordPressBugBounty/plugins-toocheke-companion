@@ -160,6 +160,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                      <hr class="toocheke-hr manga-hr" />
                      <div class="manga-row">
                         <div class="col-lg-12">
+<?php if (! empty($manga_status) || ! empty($manga_rating) || (! empty($genres) && ! is_wp_error($genres)) || (! empty($publishers) && ! is_wp_error($publishers))): ?>
                             <!--Series Information-->
 <h2><?php esc_html_e('Series Information', 'toocheke-companion'); ?></h2>
 <div class="manga-info-table">
@@ -221,6 +222,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
         <!--./Series Information-->
  <hr class="toocheke-hr manga-hr" />
+<?php endif; ?>
 
          <!--Volumes-->
          <h2><?php esc_html_e('Volumes', 'toocheke-companion'); ?></h2>

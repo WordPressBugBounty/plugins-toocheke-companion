@@ -938,8 +938,10 @@ trait Toocheke_Companion_Settings_Page
                         if ('Toocheke Premium' == $theme->name || 'Toocheke Premium' == $theme->parent_theme) {
                             //Option for determining whether to allow discussion on comic posts on the home page
                             add_settings_section("toocheke_paywalled_discussion_section", "Paywalled Discussion", [$this, 'toocheke_render_section_message'], "toocheke-options-page", ['message' => 'This determines whether to allow commenting only for paying patrons.']);
-                            add_settings_field("toocheke-paywalled-discussion", "Do you want to allow commenting only for patrons?", [$this, 'toocheke_paywalled_discussion_checkbox'], "toocheke-options-page", "toocheke_paywalled_discussion_section");
+                            add_settings_field("toocheke-paywalled-discussion", "Restrict comments to patrons on all comic posts", [$this, 'toocheke_paywalled_discussion_checkbox'], "toocheke-options-page", "toocheke_paywalled_discussion_section");
                             register_setting("toocheke-settings", "toocheke-paywalled-discussion", ['sanitize_callback' => 'absint']);
+                            add_settings_field("toocheke-paywalled-posts", "Restrict comments to patrons on paywalled comic posts only", [$this, 'toocheke_paywalled_posts_checkbox'], "toocheke-options-page", "toocheke_paywalled_discussion_section");
+                            register_setting("toocheke-settings", "toocheke-paywalled-posts", ['sanitize_callback' => 'absint']);
                             break;
                         }
                         break;
@@ -1816,6 +1818,11 @@ trait Toocheke_Companion_Settings_Page
             public function toocheke_paywalled_discussion_checkbox()
             {
                 $this->toocheke_render_checkbox_field('toocheke-paywalled-discussion', false);
+            }
+
+            public function toocheke_paywalled_posts_checkbox()
+            {
+                $this->toocheke_render_checkbox_field('toocheke-paywalled-posts', false);
             }
 
             public function toocheke_hide_blog_checkbox()

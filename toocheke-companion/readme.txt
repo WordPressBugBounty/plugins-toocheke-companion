@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.29
+Stable tag: 2.30
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.30 =
+* NEW: The characters list can now be filtered by series using ?sid=SERIES_ID.
 
 = 2.29 =
 * NEW: Added an option under Toocheke → Options → Discussion to restrict comments to patrons on paywalled comic posts only (Toocheke Premium). 

@@ -84,27 +84,12 @@ $allowed_tags = array(
         'class' => array(),
     ),
 );
-$total_args = array(
-    'taxonomy' => 'comic_characters',
-);
-$all_active_characters_list = get_categories($total_args);
-$total_active_characters = count($all_active_characters_list);
-//start paging
+$series_id = isset($_GET['sid']) ? absint($_GET['sid']) : 0;
 $character_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-
 $characters_per_page = 60;
-$total_number_of_pages = ceil($total_active_characters / $characters_per_page);
 $paged_offset = ($character_paged - 1) * $characters_per_page;
 
-//setup paginate args
-$paginate_args = array(
-    'taxonomy' => 'comic_characters',
-    'style' => 'none',
-    'hide_empty' => false,
-    'show_count' => 0,
-    'number' => $characters_per_page,
-    'paged' => $character_paged,
-    'offset' => $paged_offset,
+$order_args = array(
     'orderby' => 'meta_value_num',
     'order' => 'ASC',
     'meta_query' => array(
@@ -120,7 +105,33 @@ $paginate_args = array(
     ),
 );
 
-$paged_characters_list = get_categories($paginate_args);
+if ($series_id) {
+    $series_comic_ids = get_posts(array(
+        'post_type' => 'comic',
+        'post_parent' => $series_id,
+        'post_status' => 'publish',
+        'fields' => 'ids',
+        'nopaging' => true,
+    ));
+    $series_characters = $series_comic_ids ? wp_get_object_terms($series_comic_ids, 'comic_characters', $order_args) : array();
+    if (is_wp_error($series_characters)) {
+        $series_characters = array();
+    }
+    $total_active_characters = count($series_characters);
+    $paged_characters_list = array_slice($series_characters, $paged_offset, $characters_per_page);
+} else {
+    $total_active_characters = count(get_categories(array('taxonomy' => 'comic_characters')));
+    $paged_characters_list = get_categories(array_merge($order_args, array(
+        'taxonomy' => 'comic_characters',
+        'style' => 'none',
+        'hide_empty' => false,
+        'show_count' => 0,
+        'number' => $characters_per_page,
+        'paged' => $character_paged,
+        'offset' => $paged_offset,
+    )));
+}
+$total_number_of_pages = ceil($total_active_characters / $characters_per_page);
 
 if ($paged_characters_list) {
     ?>

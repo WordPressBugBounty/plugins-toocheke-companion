@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.31
+Stable tag: 2.32
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,14 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.32 =
+* NEW: Added a series filter to the Chapters admin screen.
+* FIX: Scheduled comics in comic lists now link to early access comics.
+* NEW: Comics locked by Patreon now show a locked thumbnail in comic lists.
+* NEW: The [toocheke-latest-comics] shortcode now lists scheduled comics.
+* NEW: Added an email notification option to send a comic's featured image instead of its full content.
+* NEW: Webtoons import now supports all seven Webtoons languages (en, es, fr, id, de, th, zh-hant).
 
 = 2.31 =
 * NEW: Added WordPress Dashboard widgets.

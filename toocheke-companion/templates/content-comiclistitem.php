@@ -27,19 +27,44 @@ if ($series_id) {
 if ($col_id) {
     $comic_url = add_query_arg('col', $col_id, $comic_url);
 }
+$is_locked = function_exists('toocheke_is_early_access_locked') && toocheke_is_early_access_locked($post);
+if (! $is_locked && class_exists('Patreon_Wordpress') && get_option('patreon-creator-id')) {
+    $required_level = (float) get_post_meta($post->ID, 'patreon-level', true);
+    if ($required_level <= 0 && $series_id) {
+        $required_level = (float) get_post_meta($series_id, 'patreon-level', true);
+    }
+    if ($required_level > 0 && ! current_user_can('administrator')) {
+        $is_locked = true;
+        if (is_user_logged_in() && (Patreon_Wordpress::isPatron(wp_get_current_user()) || is_numeric(Patreon_Wordpress::getUserPatronage()))) {
+            $patron_level = Patreon_Wordpress::getUserPatronage() / 100;
+            $is_locked    = ($patron_level ? $patron_level : 0.01) < $required_level;
+        }
+    }
+}
+$comic_status = get_post_status($post);
+$is_linkable  = 'publish' === $comic_status || ('future' === $comic_status && function_exists('toocheke_user_has_early_access') && toocheke_user_has_early_access());
 ?>
-       <?php if ('publish' === get_post_status($id)): ?>
+       <?php if ($is_linkable): ?>
 <a href="<?php echo esc_url($comic_url); ?>">
 <?php endif?>
                                  <div class="comic-item">
                                     <div class="thmb">
 										<?php
+if ('future' === $comic_status) {
+    ?>
+                                            <div class="future-comic"><i class="future fas fa-calendar-alt"></i></div>
+                                            <?php
+}
 if ($rank) {
     ?>
                                             <span class="rank"><?php echo esc_html($rank); ?></span>
                                             <?php
 }
-if (has_post_thumbnail()) {
+if ($is_locked) {
+    ?>
+   <img src="<?php echo esc_url(plugins_url('toocheke-companion/img/lockedTn.png')); ?>" alt="" />
+   <?php
+} elseif (has_post_thumbnail()) {
     $post_thumbnail_id = get_post_thumbnail_id($post->ID);
 
 if ($post_thumbnail_id) {
@@ -116,7 +141,7 @@ if ($display_no_views) {
                                     </p>
 </div>
                                  </div>
-                                 <?php if ('publish' === get_post_status($id)): ?>
+                                 <?php if ($is_linkable): ?>
                               </a>
                               <?php endif?>
                            </li>

@@ -373,6 +373,17 @@ trait Toocheke_Companion_Notifications
             'sanitize_callback' => 'wp_kses_post',
         ]);
 
+        add_settings_field(
+            'toocheke-notify-comic-featured-image',
+            'Comic Image',
+            [$this, 'toocheke_notifications_comic_featured_image_field'],
+            'toocheke-options-page',
+            'toocheke_notifications_email_design_section'
+        );
+        register_setting('toocheke-settings', 'toocheke-notify-comic-featured-image', [
+            'sanitize_callback' => [$this, 'toocheke_notifications_sanitize_checkbox'],
+        ]);
+
         // --- Pages & Shortcodes ---
         // The confirm/unsubscribe/manage shortcodes need to live on real
         // pages so the links sent in emails (see
@@ -522,6 +533,18 @@ trait Toocheke_Companion_Notifications
         ?>
         <textarea id="toocheke-notify-email-signature" name="toocheke-notify-email-signature" rows="3" class="large-text"><?php echo esc_textarea($signature); ?></textarea>
         <p class="description"><?php esc_html_e('Shown at the bottom of the email, above the unsubscribe link. Basic formatting and links are allowed.', 'toocheke-companion'); ?></p>
+        <?php
+    }
+
+    public function toocheke_notifications_comic_featured_image_field()
+    {
+        $value = get_option('toocheke-notify-comic-featured-image', 0);
+        ?>
+        <label for="toocheke-notify-comic-featured-image">
+            <input type="checkbox" id="toocheke-notify-comic-featured-image" name="toocheke-notify-comic-featured-image" value="1" <?php checked(1, $value, true); ?> />
+            <?php esc_html_e('Use featured image for comic posts', 'toocheke-companion'); ?>
+        </label>
+        <p class="description"><?php esc_html_e('Sends the comic\'s featured image as a preview instead of the full comic and blog post. Comics without a featured image still send their normal content.', 'toocheke-companion'); ?></p>
         <?php
     }
 
@@ -1744,6 +1767,17 @@ trait Toocheke_Companion_Notifications
         return ob_get_clean();
     }
 
+    private function toocheke_notifications_featured_image_html($post, $use_title_as_alt)
+    {
+        if (! has_post_thumbnail($post)) {
+            return '';
+        }
+
+        $alt = $use_title_as_alt ? get_the_title($post) : '';
+
+        return '<p style="margin:0 0 16px;"><img src="' . esc_url(get_the_post_thumbnail_url($post, 'large')) . '" alt="' . esc_attr($alt) . '" style="max-width:100%;height:auto;display:block;border-radius:6px;border:0;" /></p>';
+    }
+
     // manga_chapter: featured image as a real embedded <img> + the
     // 'notes' meta field (same field Bluesky uses as its description).
     // Everything else: full post content run through the_content (so
@@ -1754,14 +1788,15 @@ trait Toocheke_Companion_Notifications
         if ('manga_chapter' === $post_type) {
             $notes      = trim((string) get_post_meta($post->ID, 'notes', true));
             $notes_html = $notes ? wpautop(esc_html($notes)) : '';
-            $image_html = '';
 
-            if (has_post_thumbnail($post)) {
-                $image_url  = get_the_post_thumbnail_url($post, 'large');
-                $image_html = '<p style="margin:0 0 16px;"><img src="' . esc_url($image_url) . '" alt="" style="max-width:100%;height:auto;display:block;border-radius:6px;border:0;" /></p>';
+            return $this->toocheke_notifications_featured_image_html($post, false) . $notes_html;
+        }
+
+        if ('comic' === $post_type && get_option('toocheke-notify-comic-featured-image')) {
+            $image_html = $this->toocheke_notifications_featured_image_html($post, true);
+            if ($image_html) {
+                return $image_html;
             }
-
-            return $image_html . $notes_html;
         }
 
         $content = apply_filters('the_content', $post->post_content);

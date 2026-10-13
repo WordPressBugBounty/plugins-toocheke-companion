@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.31
+ * Version:     2.32
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.31');
+    define('TOOCHEKE_COMPANION_VERSION', '2.32');
 }
 
 /**
@@ -58,6 +58,7 @@ require_once __DIR__ . '/inc/class-toocheke-companion-permalinks.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-import-tapas.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-import-webtoons.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-dashboard-widgets.php';
+require_once __DIR__ . '/inc/class-toocheke-companion-chapter-series-filter.php';
 
 class Toocheke_Companion_Comic_Features
 {
@@ -516,6 +517,9 @@ require TOOCHEKE_COMPANION_PLUGIN_DIR . 'inc/class-toocheke-future-comic-image-p
 $Toocheke_Companion_Comic_Features = new Toocheke_Companion_Comic_Features();
 $Toocheke_Companion_Comic_Features->init();
 new Toocheke_Companion_Dashboard_Widgets();
+if (is_admin()) {
+    new Toocheke_Companion_Chapter_Series_Filter();
+}
 
 // Only initialize image protection if the option is enabled
 if (get_option('toocheke-image-protection') == 1) {

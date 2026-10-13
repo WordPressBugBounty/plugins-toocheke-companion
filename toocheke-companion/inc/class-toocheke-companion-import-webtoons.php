@@ -138,7 +138,7 @@ trait Toocheke_Companion_Import_Webtoons
 
             <h3><?php esc_html_e('Series to import', 'toocheke-companion'); ?></h3>
             <p>
-                <?php esc_html_e('Enter one or more Webtoons series URLs — a Canvas series (e.g. https://www.webtoons.com/en/canvas/your-series/list?title_no=12345) or an Original (e.g. https://www.webtoons.com/en/comedy/your-series/list?title_no=123). Each will become its own Series post here, with every episode imported as a Comic post in the series.', 'toocheke-companion'); ?>
+                <?php esc_html_e('Enter one or more Webtoons series URLs in any language (en, es, fr, id, de, th, zh-hant) — a Canvas series (e.g. https://www.webtoons.com/en/canvas/your-series/list?title_no=12345) or an Original (e.g. https://www.webtoons.com/en/comedy/your-series/list?title_no=123). Each will become its own Series post here, with every episode imported as a Comic post in the series.', 'toocheke-companion'); ?>
             </p>
 
             <p class="toocheke-webtoons-agreement">
@@ -986,7 +986,7 @@ trait Toocheke_Companion_Import_Webtoons
             $parsed = $this->toocheke_webtoons_validate_series_url($raw_url);
             if (! $parsed) {
                 /* translators: %s: the URL the user entered */
-                $errors[] = sprintf(__('“%s” doesn\'t look like an English Webtoons series URL (expected https://www.webtoons.com/en/canvas/NAME/list?title_no=ID or https://www.webtoons.com/en/GENRE/NAME/list?title_no=ID).', 'toocheke-companion'), $raw_url);
+                $errors[] = sprintf(__('“%s” doesn\'t look like a supported Webtoons series URL (expected https://www.webtoons.com/LANGUAGE/canvas/NAME/list?title_no=ID or https://www.webtoons.com/LANGUAGE/GENRE/NAME/list?title_no=ID, where LANGUAGE is en, es, fr, id, de, th or zh-hant).', 'toocheke-companion'), $raw_url);
                 continue;
             }
             if (isset($seen[$parsed['title_no']])) {
@@ -2061,16 +2061,60 @@ trait Toocheke_Companion_Import_Webtoons
         return 45;
     }
 
-    // Dates on the list pages look like "Sep 25, 2026" — no time, so
-    // anchoring to noon keeps a timezone shift from moving it a day.
     protected function toocheke_webtoons_parse_list_date($raw)
     {
         $raw = trim((string) $raw);
         if ('' === $raw) {
             return '';
         }
-        $timestamp = strtotime($raw . ' 12:00:00 UTC');
-        return false === $timestamp ? '' : gmdate('Y-m-d', $timestamp);
+
+        $year = $month = $day = 0;
+        if (preg_match('/(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})/u', $raw, $m)) {
+            list(, $year, $month, $day) = $m;
+        } elseif (preg_match('/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/', $raw, $m)) {
+            list(, $day, $month, $year) = $m;
+        } elseif (preg_match('/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/', $raw, $m)) {
+            list(, $year, $month, $day) = $m;
+        } elseif (preg_match('/(\d{1,2})\s+([^\s\d,]+?)\.?,?\s+(\d{4})/u', $raw, $m)) {
+            $day   = $m[1];
+            $month = $this->toocheke_webtoons_month_number($m[2]);
+            $year  = $m[3];
+        } elseif (preg_match('/([^\s\d,]+?)\.?\s+(\d{1,2}),?\s+(\d{4})/u', $raw, $m)) {
+            $day   = $m[2];
+            $month = $this->toocheke_webtoons_month_number($m[1]);
+            $year  = $m[3];
+        }
+
+        if (! $month || ! checkdate((int) $month, (int) $day, (int) $year)) {
+            return '';
+        }
+
+        return sprintf('%04d-%02d-%02d', $year, $month, $day);
+    }
+
+    protected function toocheke_webtoons_month_number($name)
+    {
+        $name   = trim(mb_strtolower((string) $name, 'UTF-8'), ". \t");
+        $months = [
+            1  => ['jan', 'janv', 'ene', 'ม.ค'],
+            2  => ['feb', 'fév', 'févr', 'fev', 'febr', 'ก.พ'],
+            3  => ['mar', 'mär', 'mars', 'mrz', 'มี.ค'],
+            4  => ['apr', 'avr', 'abr', 'เม.ย'],
+            5  => ['may', 'mai', 'mei', 'พ.ค'],
+            6  => ['jun', 'juin', 'มิ.ย'],
+            7  => ['jul', 'juil', 'ก.ค'],
+            8  => ['aug', 'août', 'aout', 'ago', 'agu', 'agt', 'ส.ค'],
+            9  => ['sep', 'sept', 'set', 'ก.ย'],
+            10 => ['oct', 'okt', 'ต.ค'],
+            11 => ['nov', 'nop', 'พ.ย'],
+            12 => ['dec', 'déc', 'dez', 'dic', 'des', 'ธ.ค'],
+        ];
+        foreach ($months as $number => $names) {
+            if (in_array($name, $names, true)) {
+                return $number;
+            }
+        }
+        return 0;
     }
 
     protected function toocheke_webtoons_strip_query($url)
@@ -2363,7 +2407,7 @@ trait Toocheke_Companion_Import_Webtoons
             'headers'     => [
                 'Accept'          => 'text/html,application/xhtml+xml',
                 'Accept-Language' => 'en-US,en;q=0.9',
-                'Referer'         => 'https://www.webtoons.com/en/',
+                'Referer'         => 'https://www.webtoons.com/',
             ],
         ]);
 
@@ -2512,15 +2556,14 @@ trait Toocheke_Companion_Import_Webtoons
         return (int) $result;
     }
 
-    protected function toocheke_webtoons_genre_slugs()
+    protected function toocheke_webtoons_languages()
     {
-        return ['drama', 'fantasy', 'comedy', 'action', 'slice-of-life', 'romance', 'super-hero', 'sf', 'thriller', 'supernatural', 'mystery', 'sports', 'historical', 'heartwarming', 'horror', 'graphic-novel', 'tiptoon'];
+        return ['en', 'es', 'fr', 'id', 'de', 'th', 'zh-hant'];
     }
 
-    // Accepts an English series list URL (Canvas or an Original's
-    // genre path), or any episode URL of the series, and returns the
-    // pieces of its list URL. Strict since this feeds directly into an
-    // outbound request.
+    // Accepts a series list URL (Canvas or an Original's genre path) in
+    // any supported language, or any episode URL of the series. Strict
+    // since this feeds directly into an outbound request.
     protected function toocheke_webtoons_validate_series_url($url)
     {
         $url = esc_url_raw($url);
@@ -2537,22 +2580,23 @@ trait Toocheke_Companion_Import_Webtoons
         parse_str((string) wp_parse_url($url, PHP_URL_QUERY), $args);
         $title_no = isset($args['title_no']) ? absint($args['title_no']) : 0;
 
-        if (! $title_no || ! preg_match('~^/en/([A-Za-z_-]+)/([A-Za-z0-9_-]+)/(?:list|[A-Za-z0-9_%-]+/viewer)/?$~', $path, $m)) {
+        if (! $title_no || ! preg_match('~^/([A-Za-z-]+)/([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/(?:list|[^/?#]+/viewer)/?$~', $path, $m)) {
             return false;
         }
 
-        // "challenge" is the older name for Canvas.
-        $group = strtolower(str_replace('_', '-', $m[1]));
+        $language = strtolower($m[1]);
+        if (! in_array($language, $this->toocheke_webtoons_languages(), true)) {
+            return false;
+        }
+
+        $group = strtolower(str_replace('_', '-', $m[2]));
         if ('challenge' === $group) {
             $group = 'canvas';
         }
-        if ('canvas' !== $group && ! in_array($group, $this->toocheke_webtoons_genre_slugs(), true)) {
-            return false;
-        }
 
         return [
-            'url'      => 'https://www.webtoons.com/en/' . $group . '/' . $m[2] . '/list?title_no=' . $title_no,
-            'slug'     => $m[2],
+            'url'      => 'https://www.webtoons.com/' . $language . '/' . $group . '/' . $m[3] . '/list?title_no=' . $title_no,
+            'slug'     => $m[3],
             'title_no' => $title_no,
             'kind'     => 'canvas' === $group ? 'canvas' : 'original',
         ];

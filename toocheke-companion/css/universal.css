@@ -101,6 +101,23 @@ Universal theme styles
     overflow: hidden;
 }
 
+.comic-item .future-comic {
+	height: 70px;
+	width: 70px;
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 5;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.comic-item .future-comic i {
+	font-size: 30px;
+	color: #fff;
+	opacity: 0.7;
+}
+
 .comic-item .rank {
 	position: absolute;
 	top: 11px;

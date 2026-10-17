@@ -501,43 +501,41 @@ endif;
  */
 if (! function_exists('toocheke_universal_get_adjacent_comic')):
     function toocheke_universal_get_adjacent_comic($previous = true, $in_same_chapter = false, $taxonomy = 'comic')
-{
+    {
         global $post, $wpdb;
         if (empty($post)) {
             return null;
         }
-
-        $current_post_date = $post->post_date;
 
         $join = '';
 
         if ($in_same_chapter) {
             $join = " INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id INNER JOIN $wpdb->term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id";
 
-            if ($in_same_chapter) {
-                $chapt_array = wp_get_object_terms($post->ID, 'chapters', ['fields' => 'ids']);
-                if (! empty($chapt_array)) {
-                    $join .= " AND tt.taxonomy = 'chapters' AND tt.term_id IN (" . implode(',', $chapt_array) . ")";
-                }
-
+            $chapt_array = wp_get_object_terms($post->ID, 'chapters', ['fields' => 'ids']);
+            if (! empty($chapt_array) && is_array($chapt_array)) {
+                $join .= " AND tt.taxonomy = 'chapters' AND tt.term_id IN (" . implode(',', array_map('absint', $chapt_array)) . ")";
             }
         }
 
         $adjacent = $previous ? 'previous' : 'next';
-        $op       = $previous ? '<' : '>';
         $order    = $previous ? 'DESC' : 'ASC';
 
-        $where = apply_filters("get_{$adjacent}_{$taxonomy}_where", $wpdb->prepare("WHERE p.post_date %s %s AND p.post_type = %s AND p.post_status = 'publish'", $op, $current_post_date, $post->post_type), $in_same_chapter);
+        $default_where = $previous
+            ? $wpdb->prepare("WHERE p.post_date < %s AND p.post_type = %s AND p.post_status = 'publish'", $post->post_date, $post->post_type)
+            : $wpdb->prepare("WHERE p.post_date > %s AND p.post_type = %s AND p.post_status = 'publish'", $post->post_date, $post->post_type);
+
+        $where = apply_filters("get_{$adjacent}_{$taxonomy}_where", $default_where, $in_same_chapter);
         $sort  = apply_filters("get_{$adjacent}_{$taxonomy}_sort", "ORDER BY p.post_date $order LIMIT 1");
 
-        $query     = "SELECT p.* FROM $wpdb->posts AS p $join $where $sort";
-        $query_key = "adjacent_{$taxonomy}_{$post->ID}_{$previous}_{$in_same_chapter}"; // . md5($query);
+        $query_key = "adjacent_{$taxonomy}_{$post->ID}_{$previous}_{$in_same_chapter}";
         $result    = wp_cache_get($query_key, 'counts');
         if (false !== $result) {
             return $result;
         }
 
-        $result = $wpdb->get_row($wpdb->prepare("SELECT p.* FROM $wpdb->posts AS p %s %s %s", $join, $where, $sort));
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $result = $wpdb->get_row("SELECT p.* FROM $wpdb->posts AS p $join $where $sort");
         if (null === $result) {
             $result = '';
         }

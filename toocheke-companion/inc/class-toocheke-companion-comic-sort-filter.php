@@ -74,6 +74,10 @@ trait Toocheke_Companion_Comic_Sort_Filter
                 }
 
                 $comic_order = get_option('toocheke-comics-order') ? get_option('toocheke-comics-order') : 'DESC';
+                $post_status = toocheke_companion_archive_post_status();
+                if ('publish' !== $post_status) {
+                    $query->set('post_status', $post_status);
+                }
                 $query->set('orderby', 'post_date');
                 $query->set('order', $comic_order);
 

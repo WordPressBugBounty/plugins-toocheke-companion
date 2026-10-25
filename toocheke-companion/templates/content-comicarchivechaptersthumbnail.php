@@ -34,6 +34,7 @@ foreach ($chapters as $chapter) {
 
     $chapter_comics_args = array(
         'post_type' => 'comic',
+        'post_status' => toocheke_companion_archive_post_status(),
         'order' => $comic_order,
         'nopaging' => true,
         "tax_query" => array(

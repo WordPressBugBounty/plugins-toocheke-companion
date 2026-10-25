@@ -31,6 +31,7 @@ if ($series_query->have_posts()):
         $series_name = get_the_title();
         $args = array(
             'post_type' => 'comic',
+            'post_status' => toocheke_companion_archive_post_status(),
             'order' => $comic_order,
             'nopaging' => true,
             'post_parent' => $series_id,
@@ -51,25 +52,25 @@ if ($series_query->have_posts()):
                 echo '<span class="comic-thumbnail-wrapper">';
                 if (get_the_post_thumbnail($comic->ID) != '') {
 
-                    echo '<a href="';
-                    echo  esc_url($comic_url);
-                    echo '">';
+                    toocheke_companion_comic_link_open($comic_url, $comic);
                     echo get_the_post_thumbnail($comic->ID, 'thumbnail');
-                    echo '</a>';
+                    toocheke_companion_comic_link_close($comic);
 
                 } else {
 
-                    echo '<a href="';
-                    echo  esc_url($comic_url);
-                    echo '" >';
+                    toocheke_companion_comic_link_open($comic_url, $comic);
                     echo '<img src="';
                     echo esc_attr(toocheke_universal_catch_that_image_alt($comic));
                     echo '" alt="" />';
-                    echo '</a>';
+                    toocheke_companion_comic_link_close($comic);
 
                 }
                 echo '<br/>';
-                echo '<span class="posted-on">Posted on <a href="' . esc_url($comic_url) . '">' . wp_kses_data(mysql2date('F j, Y', $comic->post_date)) . '</a></span>';
+                echo '<span class="posted-on">Posted on ';
+ toocheke_companion_comic_link_open($comic_url, $comic);
+ echo wp_kses_data(mysql2date('F j, Y', $comic->post_date));
+ toocheke_companion_comic_link_close($comic);
+ echo '</span>';
                 echo '</span>';
             } // foreach($series_comics
             echo '</div>';

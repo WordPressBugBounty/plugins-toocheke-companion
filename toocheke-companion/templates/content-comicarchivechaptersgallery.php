@@ -34,6 +34,7 @@ foreach ($chapters as $chapter) {
 
     $args = array(
         'post_type' => 'comic',
+        'post_status' => toocheke_companion_archive_post_status(),
         'order' => $comic_order,
         'nopaging' => true,
         "tax_query" => array(
@@ -56,25 +57,25 @@ foreach ($chapters as $chapter) {
             echo '<span class="comic-thumbnail-wrapper">';
             if (get_the_post_thumbnail($comic->ID) != '') {
 
-                echo '<a href="';
-                echo esc_url(get_permalink($comic->ID));
-                echo '">';
+                toocheke_companion_comic_link_open(get_permalink($comic->ID), $comic);
                 echo get_the_post_thumbnail($comic->ID, 'thumbnail');
-                echo '</a>';
+                toocheke_companion_comic_link_close($comic);
 
             } else {
 
-                echo '<a href="';
-                echo esc_url(get_permalink($comic->ID));
-                echo '" >';
+                toocheke_companion_comic_link_open(get_permalink($comic->ID), $comic);
                 echo '<img src="';
                 echo esc_attr(toocheke_universal_catch_that_image_alt($comic));
                 echo '" alt="" />';
-                echo '</a>';
+                toocheke_companion_comic_link_close($comic);
 
             }
             echo '<br/>';
-            echo '<span class="posted-on">Posted on <a href="'. esc_url(get_permalink($comic->ID)) .'">' . wp_kses_data(mysql2date('F j, Y', $comic->post_date)) .'</a></span>';
+            echo '<span class="posted-on">Posted on ';
+ toocheke_companion_comic_link_open(get_permalink($comic->ID), $comic);
+ echo wp_kses_data(mysql2date('F j, Y', $comic->post_date));
+ toocheke_companion_comic_link_close($comic);
+ echo '</span>';
             echo '</span>';
         } // foreach($chapters_posts
         echo '</div>';

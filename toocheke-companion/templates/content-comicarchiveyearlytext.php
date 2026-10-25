@@ -29,7 +29,7 @@ while (have_posts()): the_post();
     ?>
 			  <div class="comic-archive-item">
 	<span class="comic-archive-date"><?php echo get_the_date(); ?></span>
-	<span class="comic-archive-title"><a href="<?php the_permalink();?>" title="<?php echo esc_attr(get_the_title()) ?>"><?php echo wp_kses_data(get_the_title()) ?></a></span>
+	<span class="comic-archive-title"><?php toocheke_companion_comic_link_open(get_permalink(), null, get_the_title()); ?><?php echo wp_kses_data(get_the_title()) ?><?php toocheke_companion_comic_link_close(); ?></span>
 	</div>
 
 	          <?php

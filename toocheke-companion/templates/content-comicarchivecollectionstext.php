@@ -34,6 +34,7 @@ foreach ($collections as $collection) {
 
     $args = array(
         'post_type' => 'comic',
+        'post_status' => toocheke_companion_archive_post_status(),
         'order' => $comic_order,
         'nopaging' => true,
         "tax_query" => array(
@@ -59,7 +60,7 @@ foreach ($collections as $collection) {
             ?>
             <div class="comic-archive-item">
   <span class="comic-archive-date"><?php echo wp_kses_data(mysql2date('F j, Y', $comic->post_date)); ?></span>
-  <span class="comic-archive-title"><a href="<?php echo esc_url($comic_url); ?>" title="<?php echo esc_attr($comic->post_title) ?>"><?php echo wp_kses_data($comic->post_title) ?></a></span>
+  <span class="comic-archive-title"><?php toocheke_companion_comic_link_open($comic_url, $comic, $comic->post_title); ?><?php echo wp_kses_data($comic->post_title) ?><?php toocheke_companion_comic_link_close($comic); ?></span>
   </div>
 
             <?php

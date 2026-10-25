@@ -24,17 +24,17 @@ if ($col_id) {
 echo '<span class="comic-thumbnail-wrapper">';
 if ( get_the_post_thumbnail(get_the_ID()) != '' ) {
 
-    echo '<a href="' . esc_url( $comic_url ) . '">';
+    toocheke_companion_comic_link_open($comic_url);
     the_post_thumbnail('full');
-    echo '</a>';
+    toocheke_companion_comic_link_close();
   
   } else {
     
-   echo '<a href="' . esc_url( $comic_url ) . '">';
+   toocheke_companion_comic_link_open($comic_url);
    echo '<img src="';
    echo esc_attr(toocheke_universal_get_first_image());
    echo '" alt="" />';
-   echo '</a>';
+   toocheke_companion_comic_link_close();
  
   
   }

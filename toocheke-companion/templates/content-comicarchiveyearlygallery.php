@@ -31,25 +31,25 @@ while (have_posts()): the_post();
 echo '<span class="comic-thumbnail-wrapper">';
 if (get_the_post_thumbnail(get_the_ID()) != '') {
 
-    echo '<a href="';
-    echo esc_url(get_permalink(get_the_ID()));
-    echo '">';
+    toocheke_companion_comic_link_open(get_permalink(get_the_ID()), null);
     echo get_the_post_thumbnail(get_the_ID(), 'thumbnail');
-    echo '</a>';
+    toocheke_companion_comic_link_close();
 
 } else {
 
-    echo '<a href="';
-    echo esc_url(get_permalink(get_the_ID()));
-    echo '" >';
+    toocheke_companion_comic_link_open(get_permalink(get_the_ID()), null);
     echo '<img src="';
     echo esc_attr(toocheke_universal_catch_that_image_alt(get_post()));
     echo '" alt="" />';
-    echo '</a>';
+    toocheke_companion_comic_link_close();
 
 }
 echo '<br/>';
-echo '<span class="posted-on">Posted on <a href="' . esc_url(get_permalink(get_the_ID())) . '">' . wp_kses_data(get_the_date('F j, Y')) . '</a></span>';
+echo '<span class="posted-on">Posted on ';
+ toocheke_companion_comic_link_open(get_permalink(get_the_ID()), null);
+ echo wp_kses_data(get_the_date('F j, Y'));
+ toocheke_companion_comic_link_close();
+ echo '</span>';
 echo '</span>';
 endwhile;
 echo '</div>';

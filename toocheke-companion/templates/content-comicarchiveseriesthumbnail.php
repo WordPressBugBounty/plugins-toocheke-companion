@@ -31,6 +31,7 @@ if ($series_query->have_posts()):
         $series_name = get_the_title();
         $series_comics_args = array(
             'post_type' => 'comic',
+            'post_status' => toocheke_companion_archive_post_status(),
             'order' => $comic_order,
             'nopaging' => true,
             'post_parent' => $series_id,

@@ -22,7 +22,7 @@ if (post_type_exists('comic')):
     $comics_args = array(
         'post_parent' => $series_id,
         'post_type' => 'comic',
-        'post_status' => function_exists('toocheke_user_has_early_access') && get_option('toocheke-early-access') ? array('publish', 'future') : 'publish',
+        'post_status' => toocheke_companion_archive_post_status(),
         'posts_per_page' => get_option('posts_per_page'),
         'paged' => $comics_paged,
         'orderby' => 'post_date',

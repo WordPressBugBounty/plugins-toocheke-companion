@@ -22,7 +22,7 @@ if (post_type_exists('comic')):
         $comics_args = array(
             'post_parent' => $series_id,
             'post_type' => 'comic',
-            'post_status' => 'publish',
+            'post_status' => toocheke_companion_archive_post_status(),
             'posts_per_page' => get_option('posts_per_page'),
             'paged' => $comics_paged,
             'orderby' => 'post_date',
@@ -40,7 +40,7 @@ if (post_type_exists('comic')):
         $comics_args = array(
             'post_parent' => $series_id,
             'post_type' => 'comic',
-            'post_status' => 'publish',
+            'post_status' => toocheke_companion_archive_post_status(),
             'posts_per_page' => get_option('posts_per_page'),
             'paged' => $comics_paged,
             'orderby' => 'post_date',
@@ -58,7 +58,7 @@ if (post_type_exists('comic')):
     ?>
 			  <div class="comic-archive-item">
 	<span class="comic-archive-date"><?php echo get_the_date(); ?></span>
-	<span class="comic-archive-title"><a href="<?php the_permalink();?>" title="<?php echo esc_attr(get_the_title()) ?>"><?php echo wp_kses_data(get_the_title()) ?></a></span>
+	<span class="comic-archive-title"><?php toocheke_companion_comic_link_open(get_permalink(), null, get_the_title()); ?><?php echo wp_kses_data(get_the_title()) ?><?php toocheke_companion_comic_link_close(); ?></span>
 	</div>
 
 	          <?php

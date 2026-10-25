@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.35
+Stable tag: 2.36
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,9 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.36 =
+* FIX: Manga chapter and volume readers now load pages as you read, preventing crashes on long chapters.
 
 = 2.35 =
 * FIX: Scheduled comics now appear in all comic archive layouts when early access is enabled.

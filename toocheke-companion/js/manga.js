@@ -132,7 +132,7 @@ jQuery(document).ready(function ($) {
     }
 
     function bindLoader() {
-        const images = swiperEl.querySelectorAll('swiper-slide img');
+        const images = Array.from(swiperEl.querySelectorAll('swiper-slide img')).filter(img => img.loading !== 'lazy');
         let loadedCount = 0;
 
         if (images.length === 0) {

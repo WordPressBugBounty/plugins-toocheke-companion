@@ -88,7 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <?php if ($img_url): ?>
                             <swiper-slide>
                                  <div class="swiper-zoom-container">
-                                <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr($img_alt); ?>" />
+                                <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr($img_alt); ?>" loading="<?php echo $page_number > 2 ? 'lazy' : 'eager'; ?>" />
                         </div>
                                 </swiper-slide>
                         <?php endif; ?>

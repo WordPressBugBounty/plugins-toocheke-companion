@@ -3057,6 +3057,7 @@ trait Toocheke_Companion_Settings_Page
                 add_submenu_page('toocheke-menu', 'Import From Webcomic',    'Import: Webcomic',    'edit_posts', 'toocheke-import-webcomic',    [$this, 'toocheke_include_import_webcomic_page']);
                 add_submenu_page('toocheke-menu', 'Import From Tapas.io',   'Import: Tapas',        'edit_posts', 'toocheke-import-tapas',       [$this, 'toocheke_tapas_render_import_page']);
                 add_submenu_page('toocheke-menu', 'Import From Webtoons',   'Import: Webtoons',     'edit_posts', 'toocheke-import-webtoons',    [$this, 'toocheke_webtoons_render_import_page']);
+                add_submenu_page('toocheke-menu', 'Bulk Upload', 'Bulk Upload', 'upload_files', 'toocheke-bulk-upload', [$this, 'toocheke_bulk_render_page']);
 
                 $submenu['toocheke-menu'][9999] = ['Promote on <b>ComicScout</b>', 'edit_posts', 'https://www.thecomicscout.com/', '', 'toocheke-comicscout-link'];
 
@@ -3160,6 +3161,12 @@ trait Toocheke_Companion_Settings_Page
                 <h2><?php esc_html_e('Options', 'toocheke-companion'); ?></h2>
                 <p><?php esc_html_e('Configure theme & plugin settings', 'toocheke-companion'); ?></p>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=toocheke-options-page')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">
+                <h2><?php esc_html_e('Bulk Upload', 'toocheke-companion'); ?></h2>
+                <p><?php esc_html_e('Schedule, backdate or draft many comics at once', 'toocheke-companion'); ?></p>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=toocheke-bulk-upload')); ?>" class="button button-primary"><?php esc_html_e('Open', 'toocheke-companion'); ?></a>
             </div>
 
             <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:20px;">

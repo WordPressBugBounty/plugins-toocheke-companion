@@ -29,7 +29,7 @@ jQuery(document).ready(function ($) {
     }
 
     const isRTL = swiperEl.dataset.rtl === '1';
-    const desktopSlides = parseInt(swiperEl.dataset.desktopSlides || '2', 10);
+    const desktopSlides = Math.max(parseInt(swiperEl.dataset.desktopSlides || '2', 10), 2);
 
     let currentMode = null;
 
@@ -129,6 +129,36 @@ jQuery(document).ready(function ($) {
         });
 
         bindLoader();
+        markPageLoading();
+        preloadAhead(swiper);
+        swiper.on('slideChange', function () {
+            preloadAhead(swiper);
+        });
+    }
+
+    function markPageLoading() {
+        swiperEl.querySelectorAll('swiper-slide img').forEach(img => {
+            const box = img.closest('.swiper-zoom-container');
+            if (!box || (img.complete && img.naturalWidth > 0)) {
+                return;
+            }
+            box.classList.add('is-loading');
+            const done = () => box.classList.remove('is-loading');
+            img.addEventListener('load', done, { once: true });
+            img.addEventListener('error', done, { once: true });
+        });
+    }
+
+    function preloadAhead(swiper) {
+        const slides = swiper.slides;
+        const start = Math.max(0, swiper.activeIndex - 1);
+        const end = Math.min(slides.length - 1, swiper.activeIndex + getCurrentSlidesPerView() + 2);
+        for (let i = start; i <= end; i++) {
+            const img = slides[i].querySelector('img');
+            if (img && img.loading === 'lazy') {
+                img.loading = 'eager';
+            }
+        }
     }
 
     function bindLoader() {

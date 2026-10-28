@@ -10,7 +10,7 @@ Description: Theme specific functions for the Toocheke WordPress theme.
  * Plugin Name: Toocheke Companion
  * Plugin URI:  https://wordpress.org/plugins/toocheke-companion/
  * Description: Enables posting of comics on your WordPress website. Specifically with the Toocheke WordPress Theme.
- * Version:     2.36
+ * Version:     2.37
  * Author:      Leetoo
  * Author URI:  https://leetoo.net
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('TOOCHEKE_COMPANION_VERSION')) {
-    define('TOOCHEKE_COMPANION_VERSION', '2.36');
+    define('TOOCHEKE_COMPANION_VERSION', '2.37');
 }
 
 /**
@@ -58,6 +58,7 @@ require_once __DIR__ . '/inc/class-toocheke-companion-notifications.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-permalinks.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-import-tapas.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-import-webtoons.php';
+require_once __DIR__ . '/inc/class-toocheke-companion-bulk-upload.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-dashboard-widgets.php';
 require_once __DIR__ . '/inc/class-toocheke-companion-chapter-series-filter.php';
 
@@ -86,6 +87,7 @@ class Toocheke_Companion_Comic_Features
     use Toocheke_Companion_Permalinks;
     use Toocheke_Companion_Import_Tapas;
     use Toocheke_Companion_Import_Webtoons;
+    use Toocheke_Companion_Bulk_Upload;
 
     public function __construct()
     {
@@ -451,6 +453,10 @@ class Toocheke_Companion_Comic_Features
         // inc/class-toocheke-companion-import-webtoons.php; see that file's
         // header.
         $this->toocheke_webtoons_register_hooks();
+
+        // Bulk Upload (Toocheke > Bulk Upload) -- see
+        // inc/class-toocheke-companion-bulk-upload.php.
+        $this->toocheke_bulk_register_hooks();
     }
 
     /* Set default options */

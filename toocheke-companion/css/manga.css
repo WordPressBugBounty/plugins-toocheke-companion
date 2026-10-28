@@ -755,6 +755,27 @@ swiper-container {
     pointer-events: none; /* Prevents interaction with the invisible overlay */
 }
 
+.swiper-zoom-container.is-loading {
+    position: relative;
+}
+.swiper-zoom-container.is-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 5px solid #f3f3f3;
+    border-top-color: #10ae98;
+    border-radius: 50%;
+    animation: manga-page-spin 1s linear infinite;
+    pointer-events: none;
+}
+@keyframes manga-page-spin {
+    to { transform: rotate(360deg); }
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

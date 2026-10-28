@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.36
+Stable tag: 2.37
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,11 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.37 =
+* NEW: Bulk Upload lets you upload many comic pages and schedule, backdate, or save them as drafts in one go, with undo.
+* FIX: Manga readers now show a spinner while a page loads and preload the next pages for faster page turns.
+* FIX: The 2 pages button now works when the default is set to 1 page.
 
 = 2.36 =
 * FIX: Manga chapter and volume readers now load pages as you read, preventing crashes on long chapters.

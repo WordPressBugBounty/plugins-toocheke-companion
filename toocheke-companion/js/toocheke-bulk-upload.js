@@ -343,6 +343,7 @@
     function syncMode() {
         var m = mode();
         $('#toocheke-bulk-dates').prop('hidden', m === 'draft');
+        $('#toocheke-bulk-protect-notice').prop('hidden', m !== 'schedule');
         $('#toocheke-bulk-direction-wrap').prop('hidden', m !== 'backdate');
         $('#toocheke-bulk-direction-help').prop('hidden', m !== 'backdate');
         syncDateLabel();

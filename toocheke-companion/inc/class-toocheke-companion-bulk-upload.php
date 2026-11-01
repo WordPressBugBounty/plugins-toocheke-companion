@@ -159,7 +159,7 @@ trait Toocheke_Companion_Bulk_Upload
             'date'           => $text('tbu_date'),
             'time'           => $text('tbu_time'),
             'weekdays'       => array_values(array_unique($weekdays)),
-            'per_day'        => max(1, min(10, absint($text('tbu_per_day')))),
+            'per_day'        => max(1, min($this->toocheke_bulk_max_items(), absint($text('tbu_per_day')))),
             'continue'       => '1' === $text('tbu_continue'),
             'pattern'        => $text('tbu_pattern'),
             'first'          => max(0, absint($text('tbu_first'))),
@@ -276,8 +276,12 @@ trait Toocheke_Companion_Bulk_Upload
             if (in_array((int) $day->format('w'), $p['weekdays'], true)) {
                 $day_slots = [];
                 for ($k = 0; $k < $p['per_day'] && count($slots) + count($day_slots) < $count; $k++) {
-                    $dt = $day->setTime($hour, $minute + $k);
-                    if ('schedule' === $p['mode'] && $dt->getTimestamp() <= $now) {
+                    $seconds = $hour * 3600 + $minute * 60 + $k;
+                    if ($seconds >= DAY_IN_SECONDS) {
+                        return new WP_Error('overflow', __('Too many pages for one day at that time. Choose an earlier time or fewer pages per day.', 'toocheke-companion'));
+                    }
+                    $dt = $day->setTime($hour, $minute, $k);
+                    if ('schedule' === $p['mode'] && $dt->getTimestamp() <= $now + 180) {
                         continue;
                     }
                     if ('backdate' === $p['mode'] && $dt->getTimestamp() > $now) {
@@ -841,6 +845,16 @@ trait Toocheke_Companion_Bulk_Upload
                 echo wp_kses(sprintf(__('Upload or select images from your Media Library, then create multiple posts at once — scheduled for later, backdated, or saved as drafts. Nothing will be created until you click %s.', 'toocheke-companion'), '<b id="toocheke-bulk-create-label">' . esc_html__('Create Scheduled Comics', 'toocheke-companion') . '</b>'), ['b' => ['id' => true]]);
             ?></p>
 
+            <?php if (get_option('toocheke-future-post-image-protection')) : ?>
+                <div class="notice notice-warning inline" id="toocheke-bulk-protect-notice">
+                    <p>
+                        <strong><?php esc_html_e('Image protection is on.', 'toocheke-companion'); ?></strong>
+                        <?php esc_html_e('Scheduled comics have their images moved to private storage and removed from the Media Library until they publish. Their images may appear missing or broken in the editor until then, but they\'ll automatically reappear in your post when the comic goes live.', 'toocheke-companion'); ?>
+                        <a href="<?php echo esc_url(admin_url('admin.php?page=toocheke-options-page&tab=comic_images_options')); ?>"><?php esc_html_e('Change this in Toocheke Options', 'toocheke-companion'); ?></a>
+                    </p>
+                </div>
+            <?php endif; ?>
+
             <div class="toocheke-bulk-card">
                 <h3><span class="toocheke-bulk-step">1</span> <?php esc_html_e('Add pages', 'toocheke-companion'); ?></h3>
                 <div id="toocheke-bulk-drop" class="toocheke-bulk-drop" tabindex="0">
@@ -888,9 +902,10 @@ trait Toocheke_Companion_Bulk_Upload
                         </label>
                         <label class="toocheke-bulk-field toocheke-bulk-field--small">
                             <span><?php esc_html_e('Pages per day', 'toocheke-companion'); ?></span>
-                            <input type="number" id="tbu_per_day" min="1" max="10" value="1">
+                            <input type="number" id="tbu_per_day" min="1" max="<?php echo esc_attr((string) $this->toocheke_bulk_max_items()); ?>" value="1">
                         </label>
                     </div>
+                    <p class="description toocheke-bulk-per-day-help"><?php esc_html_e('Pages per day is how many pages go live on each day you pick. To post a whole chapter at once, enter the number of pages you added.', 'toocheke-companion'); ?></p>
                     <p class="description" id="toocheke-bulk-direction-help" hidden><?php esc_html_e('Starting on: the first page gets this date and the rest follow. Ending on: the last page gets this date and earlier pages count back.', 'toocheke-companion'); ?></p>
                     <div class="toocheke-bulk-field">
                         <span><?php esc_html_e('Post on these days', 'toocheke-companion'); ?></span>

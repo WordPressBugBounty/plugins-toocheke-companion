@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.37
+Stable tag: 2.38
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.38 =
+* FIX: Bulk Upload now schedules any number of pages per day instead of stopping at 10.
+* NEW: Bulk Upload shows a notice when image protection is on for scheduled comics.
 
 = 2.37 =
 * NEW: Bulk Upload lets you upload many comic pages and schedule, backdate, or save them as drafts in one go, with undo.

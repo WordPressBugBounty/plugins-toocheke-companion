@@ -118,7 +118,7 @@ trait Toocheke_Companion_Import_Webtoons
 
     public function toocheke_webtoons_render_import_page()
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('edit_others_posts')) {
             wp_die(esc_html__('You do not have permission to access this page.', 'toocheke-companion'));
         }
 
@@ -436,7 +436,7 @@ trait Toocheke_Companion_Import_Webtoons
     // seen even if the creator has navigated away while it's running.
     public function toocheke_webtoons_admin_error_notice()
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('edit_others_posts')) {
             return;
         }
 
@@ -554,15 +554,24 @@ trait Toocheke_Companion_Import_Webtoons
         wp_send_json_success();
     }
 
-    // Stricter than the regular import guard — this deletes real posts
-    // and Media Library files, so it requires delete_posts on top of
-    // the usual nonce/capability check.
+    // Deletes real posts and Media Library files, so it also requires
+    // delete_others_posts; each object is checked individually as well.
     protected function toocheke_webtoons_cleanup_ajax_guard()
     {
         $this->toocheke_webtoons_ajax_guard();
-        if (! current_user_can('delete_posts')) {
+        if (! current_user_can('delete_others_posts')) {
             wp_send_json_error(['message' => __('Unauthorized.', 'toocheke-companion')], 403);
         }
+    }
+
+    protected function toocheke_webtoons_can_delete(array $post_ids)
+    {
+        foreach ($post_ids as $post_id) {
+            if (! current_user_can('delete_post', $post_id)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Series eligible for the "start this series over" tool — any
@@ -583,6 +592,9 @@ trait Toocheke_Companion_Import_Webtoons
 
         $out = [];
         foreach ($posts as $p) {
+            if (! current_user_can('delete_post', $p->ID)) {
+                continue;
+            }
             $out[] = [
                 'post_id' => $p->ID,
                 'title'   => get_the_title($p),
@@ -632,6 +644,10 @@ trait Toocheke_Companion_Import_Webtoons
             'fields'         => 'ids',
         ]);
 
+        if (! $this->toocheke_webtoons_can_delete(array_merge([$series_post_id], $comic_ids))) {
+            wp_send_json_error(['message' => __('You do not have permission to delete this series.', 'toocheke-companion')]);
+        }
+
         $job = [
             'series_post_id'  => $series_post_id,
             'series_title'    => get_the_title($series_post),
@@ -672,6 +688,11 @@ trait Toocheke_Companion_Import_Webtoons
                 'post_parent'    => $comic_id,
                 'fields'         => 'ids',
             ]);
+
+            if (! $this->toocheke_webtoons_can_delete(array_merge([$comic_id], $attachments))) {
+                wp_send_json_error(['message' => __('You do not have permission to delete this series.', 'toocheke-companion')]);
+            }
+
             foreach ($attachments as $attachment_id) {
                 if (wp_delete_attachment($attachment_id, true)) {
                     $job['attachments_deleted']++;
@@ -692,11 +713,6 @@ trait Toocheke_Companion_Import_Webtoons
         // Every comic is gone — remove the series post itself, and any
         // import-job/error state that still points at it, so a fresh
         // "Start Import" for this same URL begins completely clean.
-        $title_no = get_post_meta($job['series_post_id'], '_toocheke_webtoons_series_id', true);
-        if ($title_no) {
-            delete_option($this->toocheke_webtoons_index_option($title_no));
-        }
-
         // The series thumbnail is attached to the series post too.
         $series_attachments = get_posts([
             'post_type'      => 'attachment',
@@ -705,6 +721,15 @@ trait Toocheke_Companion_Import_Webtoons
             'post_parent'    => $job['series_post_id'],
             'fields'         => 'ids',
         ]);
+
+        if (! $this->toocheke_webtoons_can_delete(array_merge([$job['series_post_id']], $series_attachments))) {
+            wp_send_json_error(['message' => __('You do not have permission to delete this series.', 'toocheke-companion')]);
+        }
+
+        $title_no = get_post_meta($job['series_post_id'], '_toocheke_webtoons_series_id', true);
+        if ($title_no) {
+            delete_option($this->toocheke_webtoons_index_option($title_no));
+        }
         foreach ($series_attachments as $attachment_id) {
             if (wp_delete_attachment($attachment_id, true)) {
                 $job['attachments_deleted']++;
@@ -1197,7 +1222,7 @@ trait Toocheke_Companion_Import_Webtoons
 
     protected function toocheke_webtoons_ajax_guard()
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('edit_others_posts')) {
             wp_send_json_error(['message' => __('Unauthorized.', 'toocheke-companion')], 403);
         }
         check_ajax_referer('toocheke_webtoons_import', 'nonce');

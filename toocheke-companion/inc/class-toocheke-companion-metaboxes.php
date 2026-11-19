@@ -13,6 +13,53 @@ if (!defined('ABSPATH')) { exit; }
 
 trait Toocheke_Companion_Metaboxes
 {
+            public function toocheke_register_meta_sanitizers()
+            {
+                $sanitizers = [
+                    'rich'  => function ($value) {
+                        return $this->toocheke_sanitize_rich_text_with_embeds($value);
+                    },
+                    'post'  => 'wp_kses_post',
+                    'text'  => 'sanitize_text_field',
+                    'color' => function ($value) {
+                        return (string) sanitize_hex_color($value);
+                    },
+                ];
+
+                $fields = [
+                    'comic'  => [
+                        'comic_blog_post_editor'              => 'rich',
+                        'comic_2nd_language_blog_post_editor' => 'rich',
+                        'desktop_comic_editor'                => 'post',
+                        'desktop_comic_2nd_language_editor'   => 'post',
+                        'mobile_comic_2nd_language_editor'    => 'post',
+                        'transcript'                          => 'post',
+                        'comic-hovertext'                     => 'text',
+                        'comic-title-2nd-language-display'    => 'text',
+                    ],
+                    'series' => [
+                        'series_sidebar_content' => 'post',
+                        'series_before_comic'    => 'post',
+                        'series_after_comic'     => 'post',
+                        'series_bg_color'        => 'color',
+                    ],
+                ];
+
+                foreach ($fields as $post_type => $keys) {
+                    foreach ($keys as $meta_key => $type) {
+                        $callback = $sanitizers[$type];
+                        register_post_meta($post_type, $meta_key, [
+                            'type'              => 'string',
+                            'single'            => true,
+                            'show_in_rest'      => false,
+                            'sanitize_callback' => function ($value) use ($callback) {
+                                return is_scalar($value) ? call_user_func($callback, (string) $value) : '';
+                            },
+                        ]);
+                    }
+                }
+            }
+
             public function toocheke_age_verification_message()
             {
                 echo 'This determines whether a browser cookie gets saved for 30 days when the user selects the "Yes" button. They will not be able to access the content on your website if they click "No".';

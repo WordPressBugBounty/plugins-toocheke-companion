@@ -113,7 +113,7 @@ trait Toocheke_Companion_Import_Tapas
 
     public function toocheke_tapas_render_import_page()
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('edit_others_posts')) {
             wp_die(esc_html__('You do not have permission to access this page.', 'toocheke-companion'));
         }
 
@@ -434,7 +434,7 @@ trait Toocheke_Companion_Import_Tapas
     // seen even if the creator has navigated away while it's running.
     public function toocheke_tapas_admin_error_notice()
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('edit_others_posts')) {
             return;
         }
 
@@ -552,15 +552,24 @@ trait Toocheke_Companion_Import_Tapas
         wp_send_json_success();
     }
 
-    // Stricter than the regular import guard — this deletes real posts
-    // and Media Library files, so it requires delete_posts on top of
-    // the usual nonce/capability check.
+    // Deletes real posts and Media Library files, so it also requires
+    // delete_others_posts; each object is checked individually as well.
     protected function toocheke_tapas_cleanup_ajax_guard()
     {
         $this->toocheke_tapas_ajax_guard();
-        if (! current_user_can('delete_posts')) {
+        if (! current_user_can('delete_others_posts')) {
             wp_send_json_error(['message' => __('Unauthorized.', 'toocheke-companion')], 403);
         }
+    }
+
+    protected function toocheke_tapas_can_delete(array $post_ids)
+    {
+        foreach ($post_ids as $post_id) {
+            if (! current_user_can('delete_post', $post_id)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Series eligible for the "start this series over" tool — any
@@ -581,6 +590,9 @@ trait Toocheke_Companion_Import_Tapas
 
         $out = [];
         foreach ($posts as $p) {
+            if (! current_user_can('delete_post', $p->ID)) {
+                continue;
+            }
             $out[] = [
                 'post_id' => $p->ID,
                 'title'   => get_the_title($p),
@@ -630,6 +642,10 @@ trait Toocheke_Companion_Import_Tapas
             'fields'         => 'ids',
         ]);
 
+        if (! $this->toocheke_tapas_can_delete(array_merge([$series_post_id], $comic_ids))) {
+            wp_send_json_error(['message' => __('You do not have permission to delete this series.', 'toocheke-companion')]);
+        }
+
         $job = [
             'series_post_id'  => $series_post_id,
             'series_title'    => get_the_title($series_post),
@@ -670,6 +686,11 @@ trait Toocheke_Companion_Import_Tapas
                 'post_parent'    => $comic_id,
                 'fields'         => 'ids',
             ]);
+
+            if (! $this->toocheke_tapas_can_delete(array_merge([$comic_id], $attachments))) {
+                wp_send_json_error(['message' => __('You do not have permission to delete this series.', 'toocheke-companion')]);
+            }
+
             foreach ($attachments as $attachment_id) {
                 if (wp_delete_attachment($attachment_id, true)) {
                     $job['attachments_deleted']++;
@@ -690,6 +711,9 @@ trait Toocheke_Companion_Import_Tapas
         // Every comic is gone — remove the series post itself, and any
         // import-job/error state that still points at it, so a fresh
         // "Start Import" for this same URL begins completely clean.
+        if (! $this->toocheke_tapas_can_delete([$job['series_post_id']])) {
+            wp_send_json_error(['message' => __('You do not have permission to delete this series.', 'toocheke-companion')]);
+        }
         wp_delete_post($job['series_post_id'], true);
 
         $import_job = $this->toocheke_tapas_get_job();
@@ -1149,7 +1173,7 @@ trait Toocheke_Companion_Import_Tapas
 
     protected function toocheke_tapas_ajax_guard()
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('edit_others_posts')) {
             wp_send_json_error(['message' => __('Unauthorized.', 'toocheke-companion')], 403);
         }
         check_ajax_referer('toocheke_tapas_import', 'nonce');

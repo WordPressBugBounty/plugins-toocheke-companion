@@ -38,7 +38,7 @@ trait Toocheke_Companion_RSS_Feeds
                     global $post;
                     $postid = $post->ID;
                     if ($postid) {
-                        $custom_metadata = get_post_meta($postid, 'comic_blog_post_editor', true);
+                        $custom_metadata = $this->toocheke_sanitize_rich_text_with_embeds(get_post_meta($postid, 'comic_blog_post_editor', true));
                         if ($custom_metadata !== '') {
                             // Display custom field data below content
                             $content = $content . "<br /><br /><div>" . $custom_metadata . "</div>";
@@ -258,7 +258,7 @@ trait Toocheke_Companion_RSS_Feeds
                         $content     = apply_filters('the_content', $raw_content);
 
                         // Append comic_blog_post_editor meta, same as toocheke_add_metadata_to_rss does for the main feed
-                        $blog_post_meta = get_post_meta($post_id, 'comic_blog_post_editor', true);
+                        $blog_post_meta = $this->toocheke_sanitize_rich_text_with_embeds(get_post_meta($post_id, 'comic_blog_post_editor', true));
                         if (!empty($blog_post_meta)) {
                             $content .= '<br /><br /><div>' . $blog_post_meta . '</div>';
                         }

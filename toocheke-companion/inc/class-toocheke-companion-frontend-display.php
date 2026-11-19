@@ -1192,7 +1192,7 @@ trait Toocheke_Companion_Frontend_Display
 /**
  * Sanitize rich text content while allowing YouTube embeds
  */
-private function toocheke_sanitize_rich_text_with_embeds($content)
+public function toocheke_sanitize_rich_text_with_embeds($content)
 {
     // Get all allowed tags from wp_kses_post
     $allowed_tags = wp_kses_allowed_html('post');
@@ -1228,8 +1228,9 @@ private function toocheke_sanitize_rich_text_with_embeds($content)
             
             $parsed = wp_parse_url($src);
             if (isset($parsed['host'])) {
+                $host = strtolower($parsed['host']);
                 foreach ($allowed_domains as $domain) {
-                    if (strpos($parsed['host'], $domain) !== false) {
+                    if ($host === $domain || substr($host, -strlen('.' . $domain)) === '.' . $domain) {
                         return '<iframe' . $matches[1] . 'src="' . esc_url($src) . '"' . $matches[3] . '>';
                     }
                 }

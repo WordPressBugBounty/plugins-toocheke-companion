@@ -4,7 +4,7 @@ Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 2.38
+Stable tag: 2.40
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,12 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.40 =
+* SECURITY: Improved sanitization and escaping of comic and series fields.
+
+= 2.39 =
+* SECURITY: Improved permission checks for importers to help prevent unauthorized actions.
 
 = 2.38 =
 * FIX: Bulk Upload now schedules any number of pages per day instead of stopping at 10.

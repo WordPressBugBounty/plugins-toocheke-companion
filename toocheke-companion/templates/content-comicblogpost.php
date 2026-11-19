@@ -38,11 +38,11 @@ $companion->toocheke_posted_by();
 <?php
 echo '<span class="default-lang">';
 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-echo get_post_meta($post->ID, 'comic_blog_post_editor', true);
+echo $companion->toocheke_sanitize_rich_text_with_embeds(get_post_meta($post->ID, 'comic_blog_post_editor', true));
 echo '</span>';
 echo '<span class="alt-lang">';
 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-echo get_post_meta($post->ID, 'comic_2nd_language_blog_post_editor', true);
+echo $companion->toocheke_sanitize_rich_text_with_embeds(get_post_meta($post->ID, 'comic_2nd_language_blog_post_editor', true));
 echo '</span>';
 ?>
 </article>

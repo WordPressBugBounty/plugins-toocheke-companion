@@ -18,7 +18,7 @@ class Toocheke_Companion_Dashboard_Widgets
     const PATREON_MAX    = 10000;
     const DISMISS_META   = 'toocheke_comicscout_widget_dismissed';
     const CACHE_PREFIX   = 'tk_dw_';
-    const CACHE_KEYS     = ['overview', 'top', 'attention', 'series', 'manga', 'manga_table', 'comicscout', 'patreon'];
+    const CACHE_KEYS     = ['overview', 'top', 'attention', 'series', 'manga', 'manga_table', 'analytics', 'comicscout', 'patreon'];
     const WATCHED_TYPES  = ['comic', 'series', 'manga_series', 'manga_volume', 'manga_chapter'];
 
     public function __construct()
@@ -44,6 +44,8 @@ class Toocheke_Companion_Dashboard_Widgets
         if (get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes')) {
             $this->add('toocheke_dw_top', __('Toocheke: Top Comics', 'toocheke-companion'), 'render_top');
         }
+
+        $this->add('toocheke_dw_analytics', __('Toocheke: Analytics at a Glance', 'toocheke-companion'), 'render_analytics');
 
         $this->add('toocheke_dw_attention', __('Toocheke: Needs Attention', 'toocheke-companion'), 'render_attention');
 
@@ -85,6 +87,9 @@ class Toocheke_Companion_Dashboard_Widgets
             . '.tk-dw-stats li{flex:1 1 70px;margin:0;padding:8px;background:#f6f7f7;border-radius:4px;text-align:center}'
             . '.tk-dw-stats strong{display:block;font-size:20px;line-height:1.2}'
             . '.tk-dw-stats a{text-decoration:none}'
+            . '.tk-dw-section{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#646970}'
+            . '.tk-dw-stats .dashicons{width:16px;height:16px;font-size:16px;vertical-align:text-bottom;color:#646970}'
+            . '.tk-dw-muted{margin:0;color:#646970;font-size:12px}'
             . '.tk-dw-warn{margin:0 0 12px;padding:6px 10px;border-left:4px solid #dba617;background:#fcf9e8;color:#1d2327}'
             . '.tk-dw-ok{color:#007017}'
             . '.tk-dw-table{width:100%;border-collapse:collapse}'
@@ -277,6 +282,77 @@ class Toocheke_Companion_Dashboard_Widgets
             __('All Comics', 'toocheke-companion') => $this->list_url('comic'),
             __('Add New', 'toocheke-companion')    => admin_url('post-new.php?post_type=comic'),
         ]);
+    }
+
+    private function analytics_totals()
+    {
+        global $wpdb;
+        $totals = [];
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- result is cached in a transient by the caller.
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT p.post_type, pm.meta_key, SUM(CAST(pm.meta_value AS UNSIGNED)) AS total FROM {$wpdb->posts} p INNER JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID WHERE p.post_status = %s AND p.post_type IN (%s, %s) AND pm.meta_key IN (%s, %s) GROUP BY p.post_type, pm.meta_key",
+            'publish',
+            'comic',
+            'manga_chapter',
+            'post_views_count',
+            '_post_like_count'
+        ));
+        foreach ((array) $rows as $row) {
+            $totals[$row->post_type][$row->meta_key] = (int) $row->total;
+        }
+        return $totals;
+    }
+
+    public function render_analytics()
+    {
+        $data = $this->remember('analytics', function () {
+            return [
+                'totals'  => $this->analytics_totals(),
+                'manga'   => $this->has_posts('manga_chapter'),
+                'updated' => time(),
+            ];
+        });
+
+        $likes_on = (bool) get_option('toocheke-comic-likes') && 1 == get_option('toocheke-comic-likes');
+        $sections = [
+            'comic' => [__('Comics', 'toocheke-companion'), 'views', 'likes'],
+        ];
+        if ($data['manga']) {
+            $sections['manga_chapter'] = [__('Manga Chapters', 'toocheke-companion'), 'manga_chapter_views', 'manga_chapter_likes'];
+        }
+
+        foreach ($sections as $type => $section) {
+            $tiles = [[
+                'icon'  => 'visibility',
+                'label' => __('Total Views', 'toocheke-companion'),
+                'value' => isset($data['totals'][$type]['post_views_count']) ? $data['totals'][$type]['post_views_count'] : 0,
+                'url'   => $this->list_url($type, ['orderby' => $section[1], 'order' => 'desc']),
+            ]];
+            if ($likes_on) {
+                $tiles[] = [
+                    'icon'  => 'heart',
+                    'label' => __('Total Likes', 'toocheke-companion'),
+                    'value' => isset($data['totals'][$type]['_post_like_count']) ? $data['totals'][$type]['_post_like_count'] : 0,
+                    'url'   => $this->list_url($type, ['orderby' => $section[2], 'order' => 'desc']),
+                ];
+            }
+
+            if (count($sections) > 1) {
+                echo '<p class="tk-dw-section">' . esc_html($section[0]) . '</p>';
+            }
+            echo '<ul class="tk-dw-stats">';
+            foreach ($tiles as $tile) {
+                echo '<li><a href="' . esc_url($tile['url']) . '"><strong><span class="dashicons dashicons-' . esc_attr($tile['icon']) . '" aria-hidden="true"></span> '
+                    . esc_html(number_format_i18n($tile['value'])) . '</strong>' . esc_html($tile['label']) . '</a></li>';
+            }
+            echo '</ul>';
+        }
+
+        echo '<p class="tk-dw-muted">' . esc_html(sprintf(
+            /* translators: %s: time difference, e.g. "4 mins" */
+            __('Published only · Updated %s ago', 'toocheke-companion'),
+            human_time_diff($data['updated'])
+        )) . '</p>';
     }
 
     public function render_top()

@@ -1,5 +1,5 @@
 jQuery(function () {
-        jQuery(document).keydown(function(e) {
+        jQuery(document).on('keydown', function(e) {
             var url = false;
     
             if(document.querySelector('#comment:focus,#author:focus,#email:focus,#url:focus,#mcspvalue:focus')) return;

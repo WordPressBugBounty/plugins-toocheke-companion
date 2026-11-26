@@ -71,7 +71,7 @@ jQuery(function ($) {
 
 		function setToggleLabel() {
 			var $active = $nav.find('.nav-tab-active').first();
-			$label.text($active.length ? $.trim($active.text()) : 'Menu');
+			$label.text($active.length ? $active.text().trim() : 'Menu');
 		}
 
 		function checkOverflow() {

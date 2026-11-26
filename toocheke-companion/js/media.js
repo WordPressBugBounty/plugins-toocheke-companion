@@ -16,7 +16,7 @@ jQuery(document).ready(function ($) {
 		$('#toocheke-comic-nav-above-comic-minimal').closest('tr').hide();
 	}
 
-	$('#toocheke-comic-nav-above-comic').click(function () {
+	$('#toocheke-comic-nav-above-comic').on('click', function () {
 		$('#toocheke-comic-nav-above-comic-minimal').closest('tr').animate({ height: 'toggle', opacity: 'toggle' }, 'slow');
 	});
 
@@ -53,7 +53,7 @@ jQuery(document).ready(function ($) {
 
 	});
 
-	$('#toocheke-comics-navigation').click(function () {
+	$('#toocheke-comics-navigation').on('click', function () {
 		if ($(this).is(":checked")) {
 			$(this).closest('tr').siblings().animate({ height: 'toggle', opacity: 'toggle' }, 'slow');
 		}

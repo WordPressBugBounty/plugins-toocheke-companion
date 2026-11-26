@@ -26,7 +26,7 @@ jQuery(function ($) {
 			return;
 		}
 
-		var siteKey = $.trim($siteKeyField.val());
+		var siteKey = ($siteKeyField.val() || '').trim();
 
 		if (widgetId !== null) {
 			turnstile.remove(widgetId);
@@ -82,7 +82,7 @@ jQuery(function ($) {
 	}
 
 	$testButton.on('click', function () {
-		var secretKey = $.trim($secretKeyField.val());
+		var secretKey = ($secretKeyField.val() || '').trim();
 
 		if (!secretKey || !currentToken) {
 			$result.html('<span style="color:#b32d2e; font-weight:bold;">Please enter a Secret Key and solve the widget above first.</span>');

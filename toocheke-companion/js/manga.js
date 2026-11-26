@@ -10,7 +10,7 @@ jQuery(document).ready(function ($) {
     });
 
     // fullscreen event
-    jQuery(document).bind('fscreenchange', function () {
+    jQuery(document).on('fscreenchange', function () {
         if (jQuery.fullscreen.isFullScreen()) {
             jQuery('main .requestfullscreen').hide();
             jQuery('main .exitfullscreen').show();
@@ -194,7 +194,7 @@ jQuery(document).ready(function ($) {
     }
 
     // One page / two page toggle buttons
-    jQuery("#btn-one-page").click(function () {
+    jQuery("#btn-one-page").on("click", function () {
         jQuery('.manga-reader-container').removeClass('two-pages');
         if (swiperEl.swiper) {
             swiperEl.swiper.params.slidesPerView = 1;
@@ -203,7 +203,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    jQuery("#btn-two-pages").click(function () {
+    jQuery("#btn-two-pages").on("click", function () {
         if (isMobile()) {
             return; // two-page mode not applicable on mobile
         }

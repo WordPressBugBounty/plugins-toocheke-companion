@@ -3,8 +3,8 @@ Author: LeeToo
 Contributors: toocheke
 Tags: webcomic, comic, webtoon, manga
 Requires at least: 5.3
-Tested up to: 7.1
-Stable tag: 2.41
+Tested up to: 7.2
+Stable tag: 2.42
 Text Domain: toocheke-companion
 Donate link: https://www.patreon.com/toocheke
 License: GPLv3 or later
@@ -161,6 +161,10 @@ Visit [https://leetoo.net/contact/](https://leetoo.net/contact/) for assistance.
 
 
 == Changelog ==
+
+= 2.42 =
+* TWEAK: Updated scripts for jQuery 4 compatibility.
+* Tested with WordPress 7.2.
 
 = 2.41 =
 * NEW: Added analytics dashboard widget.

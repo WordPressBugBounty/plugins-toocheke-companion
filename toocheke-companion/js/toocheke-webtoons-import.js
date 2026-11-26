@@ -164,7 +164,7 @@ jQuery(document).ready(function ($) {
     function collectUrls() {
         var urls = [];
         $rows.find('.toocheke-webtoons-url-input').each(function () {
-            var v = $.trim($(this).val());
+            var v = ($(this).val() || '').trim();
             if (v) {
                 urls.push(v);
             }

@@ -172,7 +172,7 @@ jQuery(document).ready(function ($) {
     function collectUrls() {
         var urls = [];
         $rows.find('.toocheke-tapas-url-input').each(function () {
-            var v = $.trim($(this).val());
+            var v = ($(this).val() || '').trim();
             if (v) {
                 urls.push(v);
             }
@@ -267,7 +267,7 @@ jQuery(document).ready(function ($) {
 
     $resumeBtn.on('click', function () {
         var slug = $(this).data('slug');
-        var raw  = $.trim($resumeInput.val());
+        var raw  = ($resumeInput.val() || '').trim();
         if (!slug || !raw) {
             appendLog('Enter an episode URL or ID first.');
             return;
